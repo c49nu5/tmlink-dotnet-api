@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".github/workflows/main.yml" />
+    <File Path="LICENSE.txt" />
+    <File Path="README.md" />
+    <File Path="THIRD-PARTY-NOTICES.txt" />
+  </Folder>
+  <Project Path="Cygnus.BLE.API/Cygnus.BLE.API.csproj" />
+  <Project Path="Cygnus.BLE.Protobuf/Cygnus.BLE.Protobuf.csproj" />
+  <Project Path="Cygnus.Models/Cygnus.Models.csproj" />
+  <Project Path="Cygnus.Services/Cygnus.Services.csproj" />
+</Solution>

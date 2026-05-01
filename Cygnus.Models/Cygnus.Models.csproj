@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<Authors>DMG</Authors>
+	<Company>Cygnus Instruments Ltd</Company>
+	<Product>TM-Link</Product>
+	<Description>Models for Cygnus Gauges</Description>
+	<PackageId>Cygnus.Models</PackageId>
+	<Title>Cygnus.Models</Title>
+	<Copyright>© 2026 Cygnus Instruments Ltd</Copyright>
+  </PropertyGroup>
+
+</Project>

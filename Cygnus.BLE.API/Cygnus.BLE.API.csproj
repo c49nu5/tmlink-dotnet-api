@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<Authors>DMG</Authors>
+	<Company>Cygnus Instruments Ltd</Company>
+	<Product>TM-Link</Product>
+	<Description>Instrument API for BLE Connected Cygnus Gauges</Description>
+	<PackageId>Cygnus.BLE.API</PackageId>
+	<Title>Cygnus.BLE.API</Title>
+	<Copyright>© 2026 Cygnus Instruments Ltd</Copyright>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<!--Auto-generate NuGet package-->
+	<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<RepositoryUrl>https://github.com/c49nu5/tmlink-dotnet-api</RepositoryUrl>
+	<!--Auto-generate the AssemblyInfo.cs file-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cygnus.BLE.Protobuf\Cygnus.BLE.Protobuf.csproj" />
+  </ItemGroup>
+
+</Project>

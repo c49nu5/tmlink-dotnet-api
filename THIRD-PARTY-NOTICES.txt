@@ -1,0 +1,144 @@
+﻿License notice for InTheHand.BluetoothLE (v4.0.44)
+------------------------------------
+
+https://github.com/inthehand/32feet at 0f9313e7b158744d614d8e279d398ce44b2e38ef
+
+Copyright (c) 2004-2025 In The Hand Ltd
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for Linux.Bluetooth (v5.67.1)
+------------------------------------
+
+https://github.com/SuessLabs/Linux.Bluetooth at ea701ec825a232df7beffe6e6c8caa327a7bb5d8
+
+Copyright 2024 Xeno Innovations, Inc.
+
+Licensed under Apache-2.0
+
+Available at https://licenses.nuget.org/Apache-2.0
+
+
+License notice for Microsoft.Extensions.DependencyInjection (v10.0.5)
+------------------------------------
+
+https://github.com/dotnet/dotnet at a612c2a1056fe3265387ae3ff7c94eba1505caf9
+
+https://dot.net/
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for Microsoft.Extensions.DependencyInjection.Abstractions (v10.0.5)
+------------------------------------
+
+https://github.com/dotnet/dotnet at a612c2a1056fe3265387ae3ff7c94eba1505caf9
+
+https://dot.net/
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for Microsoft.Extensions.Logging (v10.0.5)
+------------------------------------
+
+https://github.com/dotnet/dotnet at a612c2a1056fe3265387ae3ff7c94eba1505caf9
+
+https://dot.net/
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for Microsoft.Extensions.Logging.Abstractions (v10.0.5)
+------------------------------------
+
+https://github.com/dotnet/dotnet at a612c2a1056fe3265387ae3ff7c94eba1505caf9
+
+https://dot.net/
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for Microsoft.Extensions.Options (v10.0.5)
+------------------------------------
+
+https://github.com/dotnet/dotnet at a612c2a1056fe3265387ae3ff7c94eba1505caf9
+
+https://dot.net/
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for Microsoft.Extensions.Primitives (v10.0.5)
+------------------------------------
+
+https://github.com/dotnet/dotnet at a612c2a1056fe3265387ae3ff7c94eba1505caf9
+
+https://dot.net/
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for protobuf-net (v3.2.56)
+------------------------------------
+
+https://github.com/protobuf-net/protobuf-net at dfdfce61a739cfd76f05fcdacf8a4b3b9e94e684
+
+See https://github.com/protobuf-net/protobuf-net
+
+Licensed under Apache-2.0
+
+Available at https://licenses.nuget.org/Apache-2.0
+
+
+License notice for protobuf-net.Core (v3.2.56)
+------------------------------------
+
+https://github.com/protobuf-net/protobuf-net at dfdfce61a739cfd76f05fcdacf8a4b3b9e94e684
+
+See https://github.com/protobuf-net/protobuf-net
+
+Licensed under Apache-2.0
+
+Available at https://licenses.nuget.org/Apache-2.0
+
+
+License notice for Tmds.DBus (v0.92.0)
+------------------------------------
+
+https://github.com/tmds/Tmds.DBus.git at 282acebca8d4e4e3ba211646ac650911ee94edfd
+
+Tom Deseyn;Alp Toker
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
