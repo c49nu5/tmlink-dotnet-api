@@ -54,5 +54,8 @@ jobs:
     # - name: Test
     #   run: dotnet test -c Release --no-build --verbosity normal
 
+    - name: Connect to Cygnus packages in GitHub
+      run: dotnet nuget add source --username c49nu5 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/c49nu5/index.json"
+
     - name: Publish
       run: dotnet nuget push **/bin/Release/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }}  --source "github"
