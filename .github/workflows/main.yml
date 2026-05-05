@@ -46,7 +46,7 @@ jobs:
       continue-on-error: true
 
     - name: Build
-      run: dotnet build -c Release --no-restore /p:Version=${{ env.fullSemVer }}
+      run: dotnet pack -c Release --no-restore /p:Version=${{ env.fullSemVer }}
 
     - name: Test
       run: dotnet test -c Release --no-build --verbosity normal

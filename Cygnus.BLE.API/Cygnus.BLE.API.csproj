@@ -17,7 +17,7 @@
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<RepositoryUrl>https://github.com/c49nu5/tmlink-dotnet-api</RepositoryUrl>
 	<PackageIcon>icon.png</PackageIcon>
-	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<!--Auto-generate the AssemblyInfo.cs file-->
   </PropertyGroup>
 
@@ -33,7 +33,6 @@
     <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
