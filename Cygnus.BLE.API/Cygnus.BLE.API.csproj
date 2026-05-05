@@ -16,10 +16,20 @@
 	<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<RepositoryUrl>https://github.com/c49nu5/tmlink-dotnet-api</RepositoryUrl>
+	<PackageIcon>icon.png</PackageIcon>
+	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 	<!--Auto-generate the AssemblyInfo.cs file-->
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
