@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Cygnus.Models\Cygnus.Models.csproj" />
+    <ProjectReference Include="..\Cygnus.Interfaces\Cygnus.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

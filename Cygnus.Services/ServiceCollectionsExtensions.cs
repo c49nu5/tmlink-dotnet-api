@@ -1,5 +1,9 @@
-﻿using Cygnus.Services.Interfaces;
+﻿using Cygnus.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Cygnus.Services.Tests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 
 namespace Cygnus.Services;
 public static class ServiceCollectionsExtensions

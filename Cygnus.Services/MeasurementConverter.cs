@@ -1,5 +1,5 @@
-﻿using Cygnus.Models;
-using Cygnus.Services.Interfaces;
+﻿using Cygnus.Interfaces;
+using Cygnus.Models;
 using System.Text.RegularExpressions;
 
 namespace Cygnus.Services;
@@ -374,6 +374,7 @@ internal partial class MeasurementConverter : IMeasurementConverter
 
         return thickness;
     }
+
     public double ConvertThickness(double thickness, MeasurementUnits sourceUnits)
     {
         if (sourceUnits == MeasurementUnits.Metric && _settingsService.Units == MeasurementUnits.Imperial)
@@ -387,6 +388,7 @@ internal partial class MeasurementConverter : IMeasurementConverter
 
         return thickness;
     }
+
     public uint GetTargetVelocityForThicknessTime(double targetThickness, uint calibrationThicknessTime)
     {
         uint velocity = (uint)(targetThickness * GetDivisorForUnits(_settingsService.Units) / calibrationThicknessTime);
@@ -426,7 +428,9 @@ internal partial class MeasurementConverter : IMeasurementConverter
     }
 
     public double GetVelocityIncrement() => _settingsService.Units == MeasurementUnits.Metric ? 1 : 0.0001;
+
     public Regex GetVelocityRegex() => _settingsService.Units == MeasurementUnits.Metric ? new Regex(@"^\d*[1-9]\d*$") : new Regex(@"^[+]?([.]\d+|\d+([.]\d+)?)$");
+
     public double? GetWastage(string displayedThickness, string displayedReference, string displayedMinimum, string? parentReference, string? parentMinimum)
     {
         if (displayedReference == string.Empty) displayedReference = parentReference ?? string.Empty;

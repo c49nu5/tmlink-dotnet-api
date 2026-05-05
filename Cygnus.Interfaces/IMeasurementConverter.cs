@@ -1,7 +1,7 @@
 ﻿using Cygnus.Models;
 using System.Text.RegularExpressions;
 
-namespace Cygnus.Services.Interfaces;
+namespace Cygnus.Interfaces;
 
 public interface IMeasurementConverter
 {

@@ -112,14 +112,12 @@ These conversions can be handled by the `MeasurementConverter` in the Cygnus.Ser
 ``` C#
 services.AddCygnusServices();
 ```
-The `MeasurementConverter` uses the settings from the `IMeasurementDisplaySettingsService` to determine how to convert the raw values for display.
-
-The `IMeasurementDisplaySettingsService` interface is used to manage the 2 settings related to how measurements are displayed, 
+The `MeasurementConverter` uses the settings from an `IMeasurementDisplaySettingsService` to determine how to convert the raw values for display. It is used to manage the 2 settings related to how measurements are displayed, 
 - Units, ie Metric or imperial
 - Resolution, ie Low, Medium, High, 
 which match the settings on the gauge.
 
-Clients should implement this with a class registered in DI, in order to control the results from the MeasurementConverter.
+Clients should implement IMeasurementDisplaySettingsService with a class registered in DI, in order to control the results from the MeasurementConverter.
 
 ``` C#
         public void UpdateLiveMeasurement(LiveMeasurement liveMeasurement)

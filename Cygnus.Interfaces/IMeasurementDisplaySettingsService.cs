@@ -1,6 +1,6 @@
 ﻿using Cygnus.Models;
 
-namespace Cygnus.Services.Interfaces;
+namespace Cygnus.Interfaces;
 
 /// <summary>
 /// Settings that affect the display of the measurements
