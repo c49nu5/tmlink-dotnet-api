@@ -30,7 +30,8 @@ namespace Cygnus.BLE.API.Models
         public IBLEGauge SetDevice(BluetoothDevice device)
         {
             _device = device;
-            Update(device);
+            DeviceIdentifier = device.Id;
+            Name = device.Name;
             _device.GattServerDisconnected += OnGattServerDisconnected;
             return this;
         }
@@ -38,6 +39,7 @@ namespace Cygnus.BLE.API.Models
         public string DeviceIdentifier { get; private set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string SerialNumber { get; set; } = string.Empty;
+        public Version? FirmwareVersion { get; set; }
         public bool IsConnected { get; set; }
 
         public async Task<bool> Connect()
@@ -125,12 +127,6 @@ namespace Cygnus.BLE.API.Models
             await _protobufChannel.CancelRecordTransfer();
         }
 
-        public void Update(BluetoothDevice device)
-        {
-            DeviceIdentifier = device.Id;
-            Name = device.Name;
-        }
-
         public void Disconnect()
         {
             IsConnected = false;
@@ -174,6 +170,16 @@ namespace Cygnus.BLE.API.Models
                     Name = deviceNameCharacteristic != null
                         ? System.Text.Encoding.UTF8.GetString((await deviceNameCharacteristic.ReadValueAsync()) ?? [])
                         : _device.Name;
+
+                    var serialNumberCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.SerialNumberCharacteristicId));
+                    SerialNumber = serialNumberCharacteristic != null
+                        ? System.Text.Encoding.UTF8.GetString((await serialNumberCharacteristic.ReadValueAsync()) ?? [])
+                        : string.Empty;
+
+                    var firmwareCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.FirmwareRevisionCharacteristicId));
+                    FirmwareVersion = firmwareCharacteristic != null
+                        ? Version.TryParse(System.Text.Encoding.UTF8.GetString((await firmwareCharacteristic.ReadValueAsync()) ?? []), out var version) ? version : null
+                        : null;
 
                     _logger.LogInformation("Getting protobuf version for service {ServiceId}", service.Uuid);
                     var characteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.SoftwareVersionCharacteristicId));

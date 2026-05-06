@@ -39,11 +39,6 @@ namespace Cygnus.BLE.Protobuf.Services
             {
                 _logger.LogInformation("Checking service {Uuid}", service.Uuid);
                 var characteristics = await service.GetCharacteristicsAsync();
-                var deviceNameCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.DeviceNameCharacteristicId));
-                gaugePresenter.Name = deviceNameCharacteristic != null
-                    ? System.Text.Encoding.UTF8.GetString((await deviceNameCharacteristic.ReadValueAsync()) ?? [])
-                    : device.Name;
-
                 _commandNotifyCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.TMLinkMessageReadyCharacteristicId));
                 if (_commandNotifyCharacteristic != null)
                 {
