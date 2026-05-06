@@ -38,11 +38,6 @@
 	  <PackagePath>\</PackagePath>
 	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</None>
-	<None Include="..\Protos\*.proto">
-	  <Pack>True</Pack>
-	  <PackagePath>\</PackagePath>
-	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	</None>
   </ItemGroup>
 
   <ItemGroup>
