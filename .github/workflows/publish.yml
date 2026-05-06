@@ -1,6 +1,3 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
 name: Publish
 
 on:
@@ -52,10 +49,13 @@ jobs:
       continue-on-error: true
 
     - name: Build
-      run: dotnet pack -c Release --no-restore /p:Version=${{ env.fullSemVer }}
+      run: dotnet build -c Release --no-restore /p:Version=${{ env.fullSemVer }}
 
     - name: Test
       run: dotnet test -c Release --no-build --verbosity normal
+
+    - name: Pack
+      run: dotnet pack -c Release --no-restore --no-build /p:Version=${{ env.fullSemVer }}
 
     - name: Connect to Cygnus packages in GitHub
       run: dotnet nuget add source --username c49nu5 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/c49nu5/index.json"
