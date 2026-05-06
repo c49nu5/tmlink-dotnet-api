@@ -429,7 +429,7 @@ internal partial class MeasurementConverter : IMeasurementConverter
 
     public double GetVelocityIncrement() => _settingsService.Units == MeasurementUnits.Metric ? 1 : 0.0001;
 
-    public Regex GetVelocityRegex() => _settingsService.Units == MeasurementUnits.Metric ? new Regex(@"^\d*[1-9]\d*$") : new Regex(@"^[+]?([.]\d+|\d+([.]\d+)?)$");
+    public Regex GetVelocityRegex() => _settingsService.Units == MeasurementUnits.Metric ? MetricVelocityParser : ImperialVelocityParser;
 
     public double? GetWastage(string displayedThickness, string displayedReference, string displayedMinimum, string? parentReference, string? parentMinimum)
     {
@@ -472,7 +472,7 @@ internal partial class MeasurementConverter : IMeasurementConverter
     {
         if (displayedThickness != null)
         {
-            Match numericMatch = NumericParser().Match(displayedThickness);
+            Match numericMatch = NumericParser.Match(displayedThickness);
             if (numericMatch.Success)
             {
                 return double.TryParse(numericMatch.Value, out thickness);
@@ -483,12 +483,15 @@ internal partial class MeasurementConverter : IMeasurementConverter
         return false;
     }
 
-    [GeneratedRegex(@"^-?\d+(?:[\,\.]\d+)?")]
-    private static partial Regex NumericParser();
-
     public double GetMaximumThickness => _settingsService.Units == MeasurementUnits.Metric ? Models.Constants.Measurements.MaxMeasurementThicknessMetric : Models.Constants.Measurements.MaxMeasurementThicknessImperial;
 
     public string ThicknessString => _settingsService.Units == MeasurementUnits.Metric ? "mm" : "in";
 
     public string SpeedString => _settingsService.Units == MeasurementUnits.Metric ? "m/s" : "in/µs";
+
+    private static Regex NumericParser => new Regex(@"^-?\d+(?:[\,\.]\d+)?");
+
+    private static Regex MetricVelocityParser => new Regex(@"^\d*[1-9]\d*$");
+
+    private static Regex ImperialVelocityParser => new Regex(@"^[+]?([.]\d+|\d+([.]\d+)?)$");
 }

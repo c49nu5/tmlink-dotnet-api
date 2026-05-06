@@ -1,9 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
+		<TargetFrameworks>netstandard2.1</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<LangVersion>Preview</LangVersion>
+
 		<Authors>DMG</Authors>
 		<Company>Cygnus Instruments Ltd</Company>
 		<Product>TM-Link</Product>
@@ -14,7 +16,6 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<!--Auto-generate NuGet package-->
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/c49nu5/tmlink-dotnet-api</RepositoryUrl>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -26,10 +27,6 @@
 			<PackagePath>\</PackagePath>
 		</None>
 		<None Include="..\LICENSE.txt">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-		<None Include="..\README.md">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>

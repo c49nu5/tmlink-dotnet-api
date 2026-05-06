@@ -6,7 +6,7 @@
 /// <typeparam name="T"></typeparam>
 internal abstract class ObservableService<T> where T : class
 {
-    private static readonly Lock s_notificationLock = new();
+    private static readonly object s_notificationLock = new();
     private readonly List<WeakReference<T>> _observers = [];
 
     public void AddObservers(IEnumerable<T> registeredObservers)

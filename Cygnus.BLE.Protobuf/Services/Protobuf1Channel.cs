@@ -311,19 +311,21 @@ namespace Cygnus.BLE.Protobuf.Services
             for (var i = 0; i < record.MeasurementPoints.Length; i = i + batchSize)
             {
                 Command.AddRecordPoints addRecordPoints = new() { Name = record.Name };
-                foreach (var point in record.MeasurementPoints.Skip(i).Take(batchSize).Index())
+                var p = 0;
+                foreach (var point in record.MeasurementPoints.Skip(i).Take(batchSize))
                 {
                     addRecordPoints.Mpoints.Add(
                         new Command.AddRecordPoints.MPoint
                         {
-                            Key = point.Item.Key,
-                            Name = point.Item.Name,
-                            colNumX = record.Type == Models.RecordType.Linear ? (uint)(i + point.Index) : point.Item.ColNumX,
-                            rowNumY = record.Type == Models.RecordType.Linear ? 0u : point.Item.RowNumY,
-                            Method = (V1.Method)point.Item.Method,
-                            minThickness = point.Item.ThicknessMinLimit,
-                            maxThickness = point.Item.ThicknessMaxLimit
+                            Key = point.Key,
+                            Name = point.Name,
+                            colNumX = record.Type == Models.RecordType.Linear ? (uint)(i + p) : point.ColNumX,
+                            rowNumY = record.Type == Models.RecordType.Linear ? 0u : point.RowNumY,
+                            Method = (V1.Method)point.Method,
+                            minThickness = point.ThicknessMinLimit,
+                            maxThickness = point.ThicknessMaxLimit
                         });
+                    p++;
                 }
 
                 Command pointsCommand = new()

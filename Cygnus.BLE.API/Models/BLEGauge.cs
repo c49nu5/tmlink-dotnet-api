@@ -5,7 +5,6 @@ using Cygnus.BLE.Protobuf.Interfaces;
 using Cygnus.BLE.Protobuf.Services;
 using Cygnus.Models;
 using InTheHand.Bluetooth;
-using Linux.Bluetooth;
 using Microsoft.Extensions.Logging;
 
 namespace Cygnus.BLE.API.Models
