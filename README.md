@@ -2,7 +2,7 @@
 The Cygnus TM-Link dot-net API that uses BLE (Bluetooth Low Energy) to communicate with gauges.
 
 ## TM-Link over BLE
-The latest Cygnus 1Ex gauge firmware supports the TM-Link via BLE communication mode. This allows you to connect to the gauge using a smartphone or computer and read data from it in real-time.
+The latest Cygnus 1Ex gauge firmware (from V1.4.xx) supports the TM-Link via BLE communication mode. This allows you to connect to the gauge using a smartphone or computer and read data from it in real-time.
 
 The characteristics of the BLE TM-Link Service allow writing commands, receiving notifications and reading responses which contain g-zipped, protobuf messages.  The protobuf messages are defined in the `cyg_tml_api_v1.proto` file in this repository.
 
