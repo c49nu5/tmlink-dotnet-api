@@ -40,6 +40,7 @@ namespace Cygnus.BLE.API.Models
         public string Name { get; set; } = string.Empty;
         public string SerialNumber { get; set; } = string.Empty;
         public Version? FirmwareVersion { get; set; }
+        public string Model { get; set; }
         public bool IsConnected { get; set; }
 
         public async Task<bool> Connect()
@@ -156,20 +157,29 @@ namespace Cygnus.BLE.API.Models
             string protobufVersion = "1";
             try
             {
-                var service = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new(Constants.DeviceInformationServiceId)));
-                if (service == null)
+                var genericService = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new(Constants.GenericAccessServiceId)));
+                if (genericService != null)
+                {
+                    var deviceNameCharacteristic = await genericService.GetCharacteristicAsync(Guid.Parse(Constants.DeviceNameCharacteristicId));
+                    Name = deviceNameCharacteristic != null
+                        ? System.Text.Encoding.UTF8.GetString((await deviceNameCharacteristic.ReadValueAsync()) ?? [])
+                        : _device.Name;
+                }
+
+                var deviceInformationService = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new(Constants.DeviceInformationServiceId)));
+                if (deviceInformationService == null)
                 {
                     _logger.LogWarning("Cannot get protobuf version for gauge {DeviceIdentifier} because service is null", DeviceIdentifier);
                     return;
                 }
                 else
                 {
-                    _logger.LogInformation("Checking device service {Uuid}", service.Uuid);
-                    var characteristics = await service.GetCharacteristicsAsync();
-                    var deviceNameCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.DeviceNameCharacteristicId));
-                    Name = deviceNameCharacteristic != null
-                        ? System.Text.Encoding.UTF8.GetString((await deviceNameCharacteristic.ReadValueAsync()) ?? [])
-                        : _device.Name;
+                    _logger.LogInformation("Checking device service {Uuid}", deviceInformationService.Uuid);
+                    var characteristics = await deviceInformationService.GetCharacteristicsAsync();
+                    var deviceModelCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.DeviceModelCharacteristicId));
+                    Model = deviceModelCharacteristic != null
+                        ? System.Text.Encoding.UTF8.GetString((await deviceModelCharacteristic.ReadValueAsync()) ?? [])
+                        : string.Empty;
 
                     var serialNumberCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.SerialNumberCharacteristicId));
                     SerialNumber = serialNumberCharacteristic != null
@@ -181,7 +191,7 @@ namespace Cygnus.BLE.API.Models
                         ? Version.TryParse(System.Text.Encoding.UTF8.GetString((await firmwareCharacteristic.ReadValueAsync()) ?? []), out var version) ? version : null
                         : null;
 
-                    _logger.LogInformation("Getting protobuf version for service {ServiceId}", service.Uuid);
+                    _logger.LogInformation("Getting protobuf version for gauge {DeviceIdentifier}", DeviceIdentifier);
                     var characteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.SoftwareVersionCharacteristicId));
                     if (characteristic != null)
                     {

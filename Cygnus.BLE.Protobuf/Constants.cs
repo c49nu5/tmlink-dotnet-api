@@ -11,8 +11,11 @@
         public const string TMLinkLiveCharacteristicId = "de670906-8025-4c69-a40e-eccd60563713";
         public const string TMLinkFrozenCharacteristicId = "de670907-8025-4c69-a40e-eccd60563713";
 
+        public const string GenericAccessServiceId = "00001800-0000-1000-8000-00805f9b34fb";
+        public const string DeviceNameCharacteristicId = "00002a00-0000-1000-8000-00805f9b34fb";
+
         public const string DeviceInformationServiceId = "0000180a-0000-1000-8000-00805f9b34fb";
-        public const string DeviceNameCharacteristicId = "00002a24-0000-1000-8000-00805f9b34fb";
+        public const string DeviceModelCharacteristicId = "00002a24-0000-1000-8000-00805f9b34fb";
         public const string SerialNumberCharacteristicId = "00002a25-0000-1000-8000-00805f9b34fb";
         public const string FirmwareRevisionCharacteristicId = "00002a26-0000-1000-8000-00805f9b34fb";
         public const string SoftwareVersionCharacteristicId = "00002a28-0000-1000-8000-00805f9b34fb";
