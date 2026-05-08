@@ -18,10 +18,12 @@ namespace Cygnus.BLE.Protobuf.Services
         protected BluetoothDevice? _device;
         protected CancellationTokenSource? _recordTransferCts;
         protected IBLEGaugePresenter? _gaugePresenter;
+        protected IProtobufMessageConverter _protobufMessageConverter;
 
-        public ProtobufChannel(ILogger logger)
+        public ProtobufChannel(ILogger logger, IProtobufMessageConverter protobufMessageConverter)
         {
             _logger = logger;
+            _protobufMessageConverter = protobufMessageConverter;
         }
 
         public bool IsInitialized => true;
@@ -203,7 +205,7 @@ namespace Cygnus.BLE.Protobuf.Services
                         Task<NotifyReady> commandTask = requestCompletionSource.Task;
 
                         // Write command
-                        byte[] data = gaugeCommand.ToZippedProtobuf();
+                        byte[] data = _protobufMessageConverter.ToZippedProtobuf(gaugeCommand);
                         await commandCharacteristic.WriteValueWithResponseAsync(data);
 
                         // Wait for notification that message is ready
@@ -218,7 +220,7 @@ namespace Cygnus.BLE.Protobuf.Services
                             var value = await ReadData(characteristics, new(Constants.TMLinkReadMessageCharacteristicId));
                             if (value.Length > 0)
                             {
-                                var message = value.FromZippedProtoBuf<M>();
+                                var message = _protobufMessageConverter.FromZippedProtoBuf<M>(value);
                                 _logger.LogInformation("Received message from gauge {DeviceIdentifier}: {Command}", _device.Id, message.CommandType);
                                 if (message.CommandType == gaugeCommand.CommandType)
                                 {
@@ -268,7 +270,7 @@ namespace Cygnus.BLE.Protobuf.Services
                     Task<NotifyReady> commandTask = requestCompletionSource.Task;
 
                     // Write command
-                    await commandCharacteristic.WriteValueWithResponseAsync(gaugeCommand.ToZippedProtobuf());
+                    await commandCharacteristic.WriteValueWithResponseAsync(_protobufMessageConverter.ToZippedProtobuf(gaugeCommand));
 
                     // Wait for notification that command was sent
                     _logger.LogInformation("Waiting for notification on characteristic {Uuid}", _commandNotifyCharacteristic?.Uuid);
@@ -307,7 +309,7 @@ namespace Cygnus.BLE.Protobuf.Services
                     var value = await ReadData(characteristics, readCharacteristicId);
                     if (value.Length > 0)
                     {
-                        var message = value.FromZippedProtoBuf<M>();
+                        var message = _protobufMessageConverter.FromZippedProtoBuf<M>(value);
                         _logger.LogInformation("Received message from gauge {DeviceIdentifier}: {MessageType}", _device.Id, message.GetType());
                         return getGaugeInfo(message);
                     }
@@ -332,7 +334,7 @@ namespace Cygnus.BLE.Protobuf.Services
             {
                 try
                 {
-                    var notifyReady = e.Value.FromProtobuf<NotifyReady>();
+                    var notifyReady = _protobufMessageConverter.FromProtobuf<NotifyReady>(e.Value);
                     _logger.LogInformation("Notification characteristic received command {Command}", notifyReady.CommandType);
                     _requestCompletionSource?.TrySetResult(notifyReady);
                     return;

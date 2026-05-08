@@ -1,10 +1,11 @@
-﻿using System.IO.Compression;
+﻿using Cygnus.BLE.Protobuf.Interfaces;
+using System.IO.Compression;
 
-namespace Cygnus.BLE.Protobuf
+namespace Cygnus.BLE.Protobuf.Services
 {
-    public static class MessageExtensions
+    public class ProtobufMessageConverter : IProtobufMessageConverter
     {
-        public static T FromZippedProtoBuf<T>(this byte[] data)
+        public T FromZippedProtoBuf<T>(byte[] data)
         {
             using MemoryStream unzippedStream = new();
             using (MemoryStream compressedData = new(data))
@@ -15,17 +16,17 @@ namespace Cygnus.BLE.Protobuf
 
             unzippedStream.Seek(0, SeekOrigin.Begin);
             byte[] protobufData = unzippedStream.ToArray();
-            return protobufData.FromProtobuf<T>();
+            return FromProtobuf<T>(protobufData);
         }
 
-        public static T FromProtobuf<T>(this byte[] protobufData)
+        public T FromProtobuf<T>(byte[] protobufData)
         {
             return ProtoBuf.Serializer.Deserialize<T>(protobufData);
         }
 
-        public static byte[] ToZippedProtobuf<T>(this T gaugeRecord)
+        public byte[] ToZippedProtobuf<T>(T message)
         {
-            byte[] protobufData = gaugeRecord.ToProtobuf();
+            byte[] protobufData = ToProtobuf(message);
             using MemoryStream recordZip = new MemoryStream();
             using (GZipStream compressor = new GZipStream(recordZip, CompressionMode.Compress))
             {
@@ -35,10 +36,10 @@ namespace Cygnus.BLE.Protobuf
             return recordZip.ToArray();
         }
 
-        public static byte[] ToProtobuf<T>(this T gaugeRecord)
+        public byte[] ToProtobuf<T>(T message)
         {
             using MemoryStream data = new MemoryStream();
-            ProtoBuf.Serializer.Serialize(data, gaugeRecord);
+            ProtoBuf.Serializer.Serialize(data, message);
             data.Seek(0, SeekOrigin.Begin);
             return data.ToArray();
         }

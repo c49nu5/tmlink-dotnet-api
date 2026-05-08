@@ -8,7 +8,8 @@ namespace Cygnus.BLE.Protobuf.Services
 {
     internal class Protobuf1Channel : ProtobufChannel<NotifyMessage>
     {
-        public Protobuf1Channel(ILogger<Protobuf1Channel> logger) : base(logger)
+        public Protobuf1Channel(ILogger<Protobuf1Channel> logger, IProtobufMessageConverter protobufMessageConverter) 
+            : base(logger, protobufMessageConverter)
         {
         }
 
@@ -370,7 +371,7 @@ namespace Cygnus.BLE.Protobuf.Services
 
         protected override void UpdateLiveMeasurement(byte[] value)
         {
-            NotifyLiveMeasurement liveMeasurement = value.FromProtobuf<NotifyLiveMeasurement>();
+            NotifyLiveMeasurement liveMeasurement = _protobufMessageConverter.FromProtobuf<NotifyLiveMeasurement>(value);
             if (liveMeasurement != null)
             {
                 _gaugePresenter?.UpdateLiveMeasurement(new LiveMeasurement

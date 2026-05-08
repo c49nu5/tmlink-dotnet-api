@@ -38,6 +38,11 @@
 	  <PackagePath>\</PackagePath>
 	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</None>
+	<None Include="..\THIRD-PARTY-NOTICES.txt">
+		<Pack>True</Pack>
+		<PackagePath>\</PackagePath>
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
   </ItemGroup>
 
   <ItemGroup>

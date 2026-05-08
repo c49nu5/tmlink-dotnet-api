@@ -12,14 +12,14 @@ namespace Cygnus.BLE.API.Models
     internal class BLEGauge : ObservableService<IGaugeMonitor>, IBLEGauge
     {
         private readonly ILogger _logger;
-        private readonly Func<byte, IProtobufChannel?> _protobufChannelFactory;
+        private readonly Func<string, IProtobufChannel?> _protobufChannelFactory;
         private readonly IConnectionService _connectionService;
         private IProtobufChannel _protobufChannel = new ProtobufNullChannel();
         private BluetoothDevice? _device;
         private bool _isDisposed;
 
         public BLEGauge(ILogger<BLEGauge> logger,
-                        Func<byte, IProtobufChannel?> protobufChannelFactory,
+                        Func<string, IProtobufChannel?> protobufChannelFactory,
                         IConnectionService connectionService)
         {
             _logger = logger;
@@ -153,7 +153,7 @@ namespace Cygnus.BLE.API.Models
                 return;
             }
 
-            byte protobufVersion = 1;
+            string protobufVersion = "1";
             try
             {
                 var service = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new(Constants.DeviceInformationServiceId)));
@@ -188,7 +188,7 @@ namespace Cygnus.BLE.API.Models
                         var value = await characteristic.ReadValueAsync();
                         if (value.Length > 0)
                         {
-                            protobufVersion = byte.Parse(System.Text.Encoding.UTF8.GetString(value));
+                            protobufVersion = System.Text.Encoding.UTF8.GetString(value);
                             _logger.LogInformation("Received protobuf version {Version} from gauge {DeviceIdentifier}", protobufVersion, DeviceIdentifier);
                         }
                         else
@@ -207,7 +207,7 @@ namespace Cygnus.BLE.API.Models
                 _logger.LogError(ex, "Problem loading protobuf version");
             }
 
-            var protobufChannel = _protobufChannelFactory(protobufVersion) ?? _protobufChannelFactory(1);
+            var protobufChannel = _protobufChannelFactory(protobufVersion) ?? _protobufChannelFactory("1");
             if (protobufChannel != null)
             {
                 _protobufChannel = protobufChannel;
