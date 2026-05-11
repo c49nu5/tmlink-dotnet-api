@@ -35,7 +35,7 @@ internal class GaugeDiscoverer : IGaugeDiscoverer
                 _logger.LogInformation("BLE TM Link device found: {DeviceId}", ad.Device.Id);
                 ad.Device.Gatt.AutoConnect = true;
                 gauges[ad.Device.Id] = _gaugeFactory().SetDevice(ad.Device);
-                _scanCancellationTokenSource.Cancel();
+                _scanCancellationTokenSource?.Cancel();
             }
         };
 
@@ -59,10 +59,10 @@ internal class GaugeDiscoverer : IGaugeDiscoverer
         }
         finally
         {
+            Bluetooth.AdvertisementReceived -= onAdvertisementReceived;
             _logger.LogInformation("BLE scan complete.");
             bleScan?.Stop();
             bleScan = null;
-            Bluetooth.AdvertisementReceived -= onAdvertisementReceived;
             _scanCancellationTokenSource?.Dispose();
             _scanCancellationTokenSource = null;
         }
