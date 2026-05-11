@@ -259,6 +259,8 @@ namespace Cygnus.BLE.Protobuf.Services
 
         public override async Task DeleteRecord(IDeleteRequest deleteRequest)
         {
+            await CancelRecordTransfer();
+
             Command command = new()
             {
                 commandType = deleteRequest.RecordType == Models.RecordType.BScan ? V1.CommandType.DeleteBScan : V1.CommandType.DeleteRecord,
@@ -270,6 +272,8 @@ namespace Cygnus.BLE.Protobuf.Services
 
         public override async Task DeleteAllRecords()
         {
+            await CancelRecordTransfer();
+
             Command command = new()
             {
                 commandType = V1.CommandType.DeleteAllRecords,

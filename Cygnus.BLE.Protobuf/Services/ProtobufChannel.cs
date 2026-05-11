@@ -105,7 +105,7 @@ namespace Cygnus.BLE.Protobuf.Services
 
         public async Task<GaugeRecord?> GetRecord(ITransferRequest transferRequest, bool withAScans)
         {
-            _recordTransferCts?.Cancel();
+            await CancelRecordTransfer();
             var recordTransferCts =  _recordTransferCts = new(TimeSpan.FromMinutes(45)); // Allow time for 5000 measurements with A-Scans to transfer
             transferRequest.PercentageTransferred = 0;
             transferRequest.Status = TransferStatus.Requested;
