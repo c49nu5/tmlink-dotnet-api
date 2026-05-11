@@ -212,7 +212,8 @@ namespace Cygnus.BLE.Protobuf.Services
                         _logger.LogInformation("Waiting for notification on characteristic {Uuid}", _commandNotifyCharacteristic?.Uuid);
                         await Task.WhenAny([commandTask, Task.Delay(TimeSpan.FromSeconds(20))]);
 
-                        if (commandTask.IsCompleted &&
+                        if (!requestCompletionSource.Task.IsCanceled &&
+                            commandTask.IsCompleted &&
                             commandTask.Result.CommandType == gaugeCommand.CommandType &&
                             commandTask.Result.ReadDataAvailable)
                         {
@@ -230,10 +231,8 @@ namespace Cygnus.BLE.Protobuf.Services
                         }
                         else
                         {
-                            _logger.LogInformation("Notification did not arrive {Command} {Completion}", gaugeCommand.CommandType, _requestCompletionSource.Task.IsCompleted);
+                            _logger.LogInformation("Notification did not arrive {Command} {Completion}", gaugeCommand.CommandType, requestCompletionSource.Task.IsCompleted);
                         }
-
-                        _requestCompletionSource = null;
                     }
                 }
             }
@@ -276,7 +275,8 @@ namespace Cygnus.BLE.Protobuf.Services
                     _logger.LogInformation("Waiting for notification on characteristic {Uuid}", _commandNotifyCharacteristic?.Uuid);
                     await Task.WhenAny([commandTask, Task.Delay(TimeSpan.FromSeconds(20))]);
 
-                    if (!ignoreErrors && 
+                    if (!ignoreErrors &&
+                        !requestCompletionSource.Task.IsCanceled &&
                         (!commandTask.IsCompleted ||
                         commandTask.Result.CommandType != gaugeCommand.CommandType ||
                         commandTask.Result.ErrorCode != ErrorCodes.Success))
