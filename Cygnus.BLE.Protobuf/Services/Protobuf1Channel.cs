@@ -238,7 +238,6 @@ namespace Cygnus.BLE.Protobuf.Services
             return null;
         }
 
-
         private Models.AScan? GetAScan(V1.AScan ascan)
         {
             if (ascan == null)

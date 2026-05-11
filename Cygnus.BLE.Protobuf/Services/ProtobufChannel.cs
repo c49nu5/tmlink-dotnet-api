@@ -106,7 +106,7 @@ namespace Cygnus.BLE.Protobuf.Services
         public async Task<GaugeRecord?> GetRecord(ITransferRequest transferRequest, bool withAScans)
         {
             _recordTransferCts?.Cancel();
-            _recordTransferCts = new(TimeSpan.FromMinutes(45)); // Allow time for 5000 measurements with A-Scans to transfer
+            var recordTransferCts =  _recordTransferCts = new(TimeSpan.FromMinutes(45)); // Allow time for 5000 measurements with A-Scans to transfer
             transferRequest.PercentageTransferred = 0;
             transferRequest.Status = TransferStatus.Requested;
             GaugeRecord? gaugeRecord = transferRequest.RecordType == RecordType.BScan
@@ -117,7 +117,7 @@ namespace Cygnus.BLE.Protobuf.Services
                 transferRequest.Status = TransferStatus.InProgress;
                 for (int i = 0; i < gaugeRecord.NumberOfPointsTaken; i++)
                 {
-                    if (!_recordTransferCts.Token.IsCancellationRequested)
+                    if (!recordTransferCts.Token.IsCancellationRequested)
                     {
                         _logger.LogInformation("Transferring point {PointIndex} of {TotalPoints} for record {RecordName}", i + 1, gaugeRecord.NumberOfPointsTaken, gaugeRecord.Name);
                         MeasurementPoint? measurement = transferRequest.RecordType == RecordType.BScan
@@ -136,7 +136,7 @@ namespace Cygnus.BLE.Protobuf.Services
                     }
                 }
 
-                if (!_recordTransferCts.Token.IsCancellationRequested && transferRequest.Status != TransferStatus.Failed)
+                if (!recordTransferCts.Token.IsCancellationRequested && transferRequest.Status != TransferStatus.Failed)
                 {
                     transferRequest.Status = TransferStatus.Completed;
                     return gaugeRecord;
