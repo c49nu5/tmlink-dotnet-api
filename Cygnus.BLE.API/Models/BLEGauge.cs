@@ -12,14 +12,14 @@ namespace Cygnus.BLE.API.Models
     internal class BLEGauge : ObservableService<IGaugeMonitor>, IBLEGauge
     {
         private readonly ILogger _logger;
-        private readonly Func<string, IProtobufChannel?> _protobufChannelFactory;
+        private readonly Func<byte, IProtobufChannel?> _protobufChannelFactory;
         private readonly IConnectionService _connectionService;
         private IProtobufChannel _protobufChannel = new ProtobufNullChannel();
         private BluetoothDevice? _device;
         private bool _isDisposed;
 
         public BLEGauge(ILogger<BLEGauge> logger,
-                        Func<string, IProtobufChannel?> protobufChannelFactory,
+                        Func<byte, IProtobufChannel?> protobufChannelFactory,
                         IConnectionService connectionService)
         {
             _logger = logger;
@@ -38,9 +38,9 @@ namespace Cygnus.BLE.API.Models
 
         public string DeviceIdentifier { get; private set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
+        public string Model { get; set; } = string.Empty;
         public string SerialNumber { get; set; } = string.Empty;
         public Version? FirmwareVersion { get; set; }
-        public string Model { get; set; }
         public bool IsConnected { get; set; }
 
         public async Task<bool> Connect()
@@ -154,7 +154,7 @@ namespace Cygnus.BLE.API.Models
                 return;
             }
 
-            string protobufVersion = "1";
+            byte protobufVersion = 1;
             try
             {
                 var genericService = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new(Constants.GenericAccessServiceId)));
@@ -198,7 +198,7 @@ namespace Cygnus.BLE.API.Models
                         var value = await characteristic.ReadValueAsync();
                         if (value.Length > 0)
                         {
-                            protobufVersion = System.Text.Encoding.UTF8.GetString(value);
+                            protobufVersion = byte.Parse(System.Text.Encoding.UTF8.GetString(value));
                             _logger.LogInformation("Received protobuf version {Version} from gauge {DeviceIdentifier}", protobufVersion, DeviceIdentifier);
                         }
                         else
@@ -217,7 +217,7 @@ namespace Cygnus.BLE.API.Models
                 _logger.LogError(ex, "Problem loading protobuf version");
             }
 
-            var protobufChannel = _protobufChannelFactory(protobufVersion) ?? _protobufChannelFactory("1");
+            IProtobufChannel? protobufChannel = _protobufChannelFactory(protobufVersion);
             if (protobufChannel != null)
             {
                 _protobufChannel = protobufChannel;
