@@ -6,6 +6,7 @@
     <File Path="README.md" />
     <File Path="THIRD-PARTY-NOTICES.txt" />
   </Folder>
+  <Project Path="Cygnus.BLE.API.Tests/Cygnus.BLE.API.Tests.csproj" Id="fcf116db-1577-44c3-9586-f5fddada2325" />
   <Project Path="Cygnus.BLE.API/Cygnus.BLE.API.csproj" />
   <Project Path="Cygnus.BLE.Protobuf/Cygnus.BLE.Protobuf.csproj" />
   <Project Path="Cygnus.Interfaces/Cygnus.Interfaces.csproj" Id="3fcfd7f1-cb87-465e-b4f2-622e84899088" />

@@ -15,9 +15,9 @@ internal class ConnectionService : ObservableService<IConnectionMonitor>, IConne
         IPlatformService platformService,
         IGaugeDiscoverer gaugeDiscoverer)
     {
-        _logger = logger;
-        _platformService = platformService;
-        _gaugeDiscoverer = gaugeDiscoverer;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _platformService = platformService ?? throw new ArgumentNullException(nameof(platformService));
+        _gaugeDiscoverer = gaugeDiscoverer ?? throw new ArgumentNullException(nameof(gaugeDiscoverer));
     }
 
     public IBLEGauge? ConnectedGauge
@@ -40,19 +40,15 @@ internal class ConnectionService : ObservableService<IConnectionMonitor>, IConne
 
             ConnectedGauge?.Disconnect();
 
-            if (gauge.IsConnected != true)
-            {
-                if (!await gauge.Connect())
-                {
-                    _logger.LogInformation("Connected to gauge {Name} failed", gauge.Name);
-                }
-            }
-
-            if (gauge.IsConnected == true)
+            if (gauge.IsConnected == true || await gauge.Connect())
             {
                 ConnectedGauge = gauge;
 
                 _logger.LogInformation("Connected to gauge {Name}", gauge.Name);
+            }
+            else
+            {
+                _logger.LogInformation("Connect to gauge {Name} failed", gauge.Name);
             }
         }
         catch (OperationCanceledException)
@@ -74,26 +70,26 @@ internal class ConnectionService : ObservableService<IConnectionMonitor>, IConne
         {
             _logger.LogInformation("Aborting scan attempt");
             await _platformService.ShowMessage("Please enable bluetooth and give the app the required permissions");
-            NotifyObservers(o => o.IsScanning = false);
-            return;
         }
-        try
+        else
         {
-            var discoveredGauges = await _gaugeDiscoverer.FindGauges();
-            foreach (var gauge in discoveredGauges)
+            try
             {
-                _logger.LogInformation("Found device: {Name} ({DeviceIdentifier})", gauge.Name, gauge.DeviceIdentifier);
-                await gauge.Connect();
-                if (!string.IsNullOrWhiteSpace(gauge.SerialNumber))
+                var discoveredGauges = await _gaugeDiscoverer.FindGauges();
+                foreach (var gauge in discoveredGauges)
                 {
-                    NotifyObservers(o => o.GaugeDiscovered(gauge));
+                    _logger.LogInformation("Found device: {Name} ({DeviceIdentifier})", gauge.Name, gauge.DeviceIdentifier);
+                    if (await gauge.Connect() && !string.IsNullOrWhiteSpace(gauge.SerialNumber))
+                    {
+                        NotifyObservers(o => o.GaugeDiscovered(gauge));
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Problem discovering devices");
-            await _platformService.ShowMessage($"An error occurred while scanning for devices. Please try again. ({ex.Message})");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Problem discovering devices");
+                await _platformService.ShowMessage($"An error occurred while scanning for devices. Please try again. ({ex.Message})");
+            }
         }
 
         NotifyObservers(o => o.IsScanning = false);
@@ -105,9 +101,9 @@ internal class ConnectionService : ObservableService<IConnectionMonitor>, IConne
         NotifyObservers(o => o.IsScanning = false);
     }
 
-    public void GaugeIsConnectedChanged(string deviceIdentifier)
+    public void GaugeIsDisconnected(string deviceIdentifier)
     {
-        if (ConnectedGauge?.DeviceIdentifier == deviceIdentifier && ConnectedGauge.IsConnected != true)
+        if (ConnectedGauge != null && ConnectedGauge.DeviceIdentifier == deviceIdentifier)
         {
             _logger.LogInformation("Device {Name} disconnected", ConnectedGauge.Name);
             ConnectedGauge = null;

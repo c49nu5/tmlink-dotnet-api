@@ -62,8 +62,6 @@ namespace Cygnus.BLE.API.Models
                 {
                     IsConnected = true;
 
-                    _connectionService.GaugeIsConnectedChanged(DeviceIdentifier);
-
                     if (!_protobufChannel.IsInitialized)
                     {
                         await InitializeProtobufChannel();
@@ -132,7 +130,7 @@ namespace Cygnus.BLE.API.Models
         {
             IsConnected = false;
             _protobufChannel.Disconnect();
-            _connectionService.GaugeIsConnectedChanged(DeviceIdentifier);
+            _connectionService.GaugeIsDisconnected(DeviceIdentifier);
         }
 
         public void UpdateLiveMeasurement(LiveMeasurement liveMeasurement)

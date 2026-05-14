@@ -3,6 +3,10 @@ using Cygnus.BLE.API.Models;
 using Cygnus.BLE.API.Services;
 using Cygnus.BLE.Protobuf;
 using Microsoft.Extensions.DependencyInjection;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Cygnus.BLE.API.Tests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 
 namespace Cygnus.BLE.API;
 public static class ServiceCollectionsExtensions
