@@ -1,4 +1,4 @@
-﻿using Cygnus.BLE.API.Interfaces;
+﻿using Cygnus.BLE.Interfaces;
 using Moq;
 
 namespace Cygnus.BLE.API.Tests.Services.ConnectionServiceTests;
@@ -53,14 +53,14 @@ internal class WhenDiscoverGaugesIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        testBed.GaugeDiscoverer.Setup(g => g.FindGauges()).ReturnsAsync([]);
+        testBed.GaugeDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync([]);
         var sut = testBed.CreateSUT(bluetoothEnabled: true);
 
         // Act
         await sut.DiscoverGauges();
 
         // Assert
-        testBed.GaugeDiscoverer.Verify(g => g.FindGauges(), Times.Once);
+        testBed.GaugeDiscoverer.Verify(g => g.FindDevices(), Times.Once);
     }
 
     [Test]
@@ -68,21 +68,15 @@ internal class WhenDiscoverGaugesIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        var gauges = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(_ =>
-        {
-            Mock<IBLEGauge> gauge = new();
-            gauge.Setup(g => g.Connect()).ReturnsAsync(false);
-            gauge.Setup(g => g.SerialNumber).Returns(Guid.NewGuid().ToString());
-            return gauge;
-        }).ToList();
-        testBed.GaugeDiscoverer.Setup(g => g.FindGauges()).ReturnsAsync(gauges.Select(g => g.Object));
+        var devices = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(i => Mock.Of<IBLEDevice>()).ToList();
+        testBed.GaugeDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
         var sut = testBed.CreateSUT(bluetoothEnabled: true);
 
         // Act
         await sut.DiscoverGauges();
 
         // Assert
-        foreach (var gauge in gauges)
+        foreach (var gauge in testBed.Gauges)
         { 
             gauge.Verify(g => g.Connect(), Times.Once); 
         }
@@ -93,15 +87,9 @@ internal class WhenDiscoverGaugesIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        var gauges = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(_ =>
-        {
-            Mock<IBLEGauge> gauge = new();
-            gauge.Setup(g => g.Connect()).ReturnsAsync(false);
-            gauge.Setup(g => g.SerialNumber).Returns(Guid.NewGuid().ToString());
-            return gauge;
-        }).ToList();
-        testBed.GaugeDiscoverer.Setup(g => g.FindGauges()).ReturnsAsync(gauges.Select(g => g.Object));
-        var sut = testBed.CreateSUT(true, true);
+        var devices = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(i => Mock.Of<IBLEDevice>()).ToList();
+        testBed.GaugeDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
+        var sut = testBed.CreateSUT(true, true, false);
         testBed.Observer.SetupSet(o => o.IsScanning = It.IsAny<bool>());
 
         // Act
@@ -116,14 +104,9 @@ internal class WhenDiscoverGaugesIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        var gauges = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(_ =>
-        {
-            Mock<IBLEGauge> gauge = new();
-            gauge.Setup(g => g.Connect()).ReturnsAsync(true);
-            return gauge;
-        }).ToList();
-        testBed.GaugeDiscoverer.Setup(g => g.FindGauges()).ReturnsAsync(gauges.Select(g => g.Object));
-        var sut = testBed.CreateSUT(true, true);
+        var devices = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(i => Mock.Of<IBLEDevice>()).ToList();
+        testBed.GaugeDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
+        var sut = testBed.CreateSUT(true, true, true, false);
         testBed.Observer.SetupSet(o => o.IsScanning = It.IsAny<bool>());
 
         // Act
@@ -138,14 +121,8 @@ internal class WhenDiscoverGaugesIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        var gauges = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(_ =>
-        {
-            Mock<IBLEGauge> gauge = new();
-            gauge.Setup(g => g.Connect()).ReturnsAsync(true);
-            gauge.Setup(g => g.SerialNumber).Returns(Guid.NewGuid().ToString());
-            return gauge;
-        }).ToList();
-        testBed.GaugeDiscoverer.Setup(g => g.FindGauges()).ReturnsAsync(gauges.Select(g => g.Object));
+        var devices = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(i => Mock.Of<IBLEDevice>()).ToList();
+        testBed.GaugeDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
         var sut = testBed.CreateSUT(true, true);
         testBed.Observer.SetupSet(o => o.IsScanning = It.IsAny<bool>());
         testBed.Observer.Setup(o => o.GaugeDiscovered(It.IsAny<IBLEGauge>()));
@@ -154,7 +131,7 @@ internal class WhenDiscoverGaugesIsCalled
         await sut.DiscoverGauges();
 
         // Assert
-        foreach (var gauge in gauges)
+        foreach (var gauge in testBed.Gauges)
         {
             testBed.Observer.Verify(o => o.GaugeDiscovered(gauge.Object), Times.Once);
         }

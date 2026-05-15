@@ -46,6 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Cygnus.BLE.InTheHand\Cygnus.BLE.InTheHand.csproj" />
     <ProjectReference Include="..\Cygnus.BLE.Protobuf\Cygnus.BLE.Protobuf.csproj" />
   </ItemGroup>
 

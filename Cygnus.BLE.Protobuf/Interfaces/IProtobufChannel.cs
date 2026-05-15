@@ -1,5 +1,6 @@
-﻿using Cygnus.Models;
-using InTheHand.Bluetooth;
+﻿using Cygnus.BLE.Interfaces;
+using Cygnus.Interfaces;
+using Cygnus.Models;
 
 namespace Cygnus.BLE.Protobuf.Interfaces
 {
@@ -8,7 +9,7 @@ namespace Cygnus.BLE.Protobuf.Interfaces
         bool IsInitialized { get; }
 
         Task CancelRecordTransfer();
-        Task Connect(BluetoothDevice device, IBLEGaugePresenter gaugeInformation);
+        Task Connect(IBLEDevice device, IBLEGaugePresenter gaugeInformation);
         Task DeleteAllRecords();
         Task DeleteRecord(IDeleteRequest deleteRequest);
         void Disconnect();

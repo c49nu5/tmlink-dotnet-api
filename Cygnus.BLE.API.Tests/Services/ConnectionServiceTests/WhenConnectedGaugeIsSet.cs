@@ -1,4 +1,4 @@
-﻿using Cygnus.BLE.API.Interfaces;
+﻿using Cygnus.BLE.Interfaces;
 using Moq;
 using Shouldly;
 

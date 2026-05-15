@@ -1,4 +1,4 @@
-﻿namespace Cygnus.BLE.Protobuf
+﻿namespace Cygnus.BLE.Interfaces
 {
     public class Constants
     {

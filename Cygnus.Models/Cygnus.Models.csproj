@@ -18,7 +18,7 @@
 	<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 	<RepositoryUrl>https://github.com/c49nu5/tmlink-dotnet-api</RepositoryUrl>
 	<PackageIcon>icon.png</PackageIcon>
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>	  
   </PropertyGroup>
 
   <ItemGroup>

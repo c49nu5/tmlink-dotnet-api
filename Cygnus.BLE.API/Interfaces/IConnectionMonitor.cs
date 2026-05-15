@@ -1,4 +1,6 @@
-﻿namespace Cygnus.BLE.API.Interfaces
+﻿using Cygnus.BLE.Interfaces;
+
+namespace Cygnus.BLE.API.Interfaces
 {
     public interface IConnectionMonitor
     {

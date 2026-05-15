@@ -63,4 +63,20 @@ internal class WhenConstructed
         // Assert
         getSut.ShouldThrow<ArgumentNullException>();
     }
+
+    [Test]
+    public void ShouldThrowIfGaugeFactoryIsNull()
+    {
+        // Arrange
+        var testBed = new TestBed
+        {
+            GaugeFactory = null
+        };
+
+        // Act
+        var getSut = () => testBed.CreateSUT();
+
+        // Assert
+        getSut.ShouldThrow<ArgumentNullException>();
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using Cygnus.BLE.API.Interfaces;
+using Cygnus.BLE.Interfaces;
 using Moq;
 using Shouldly;
 
@@ -27,7 +28,7 @@ internal class WhenConnectToGaugeIsCalled
         // Arrange
         var testBed = new TestBed();
         testBed.GaugeDiscoverer.Setup(g => g.Cancel());
-        var gauge = new Mock<IBLEGauge>();
+        var gauge = new Mock<IBLEGaugeInternal>();
         gauge.Setup(g => g.Connect()).ReturnsAsync(true);
         var sut = testBed.CreateSUT();
 
@@ -44,7 +45,7 @@ internal class WhenConnectToGaugeIsCalled
         // Arrange
         var testBed = new TestBed();
         testBed.GaugeDiscoverer.Setup(g => g.Cancel());
-        var gauge = new Mock<IBLEGauge>();
+        var gauge = new Mock<IBLEGaugeInternal>();
         gauge.Setup(g => g.Connect()).ReturnsAsync(true);
         var sut = testBed.CreateSUT();
 
@@ -61,7 +62,7 @@ internal class WhenConnectToGaugeIsCalled
         // Arrange
         var testBed = new TestBed();
         testBed.GaugeDiscoverer.Setup(g => g.Cancel());
-        var gauge = new Mock<IBLEGauge>();
+        var gauge = new Mock<IBLEGaugeInternal>();
         gauge.Setup(g => g.Connect()).ReturnsAsync(false);
         var sut = testBed.CreateSUT();
 
@@ -77,7 +78,7 @@ internal class WhenConnectToGaugeIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        var gauge = Mock.Of<IBLEGauge>(g => g.IsConnected == true);
+        var gauge = Mock.Of<IBLEGaugeInternal>(g => g.IsConnected == true);
         testBed.GaugeDiscoverer.Setup(g => g.Cancel());
         var sut = testBed.CreateSUT();
 

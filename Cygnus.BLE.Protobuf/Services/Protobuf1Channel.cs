@@ -1,5 +1,6 @@
 ﻿using Cygnus.BLE.Protobuf.Interfaces;
 using Cygnus.BLE.Protobuf.V1;
+using Cygnus.Interfaces;
 using Cygnus.Models;
 using Microsoft.Extensions.Logging;
 using static Cygnus.BLE.Protobuf.V1.Constants;
@@ -418,7 +419,7 @@ namespace Cygnus.BLE.Protobuf.Services
                         return frozenMeasurement;
                     }
 
-                    GetResponse<FrozenLiveMeasurement, FrozenLiveMeasurement>(Guid.Parse(Constants.TMLinkFrozenCharacteristicId), getFrozenLiveMeasurement).ConfigureAwait(false);
+                    GetResponse<FrozenLiveMeasurement, FrozenLiveMeasurement>(BLE.Interfaces.Constants.TMLinkFrozenCharacteristicId, getFrozenLiveMeasurement).ConfigureAwait(false);
                 }
             }
         }

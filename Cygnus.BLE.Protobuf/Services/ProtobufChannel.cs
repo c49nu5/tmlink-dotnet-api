@@ -1,6 +1,7 @@
-﻿using Cygnus.BLE.Protobuf.Interfaces;
+﻿using Cygnus.BLE.Interfaces;
+using Cygnus.BLE.Protobuf.Interfaces;
+using Cygnus.Interfaces;
 using Cygnus.Models;
-using InTheHand.Bluetooth;
 using Microsoft.Extensions.Logging;
 
 namespace Cygnus.BLE.Protobuf.Services
@@ -11,41 +12,40 @@ namespace Cygnus.BLE.Protobuf.Services
         private bool _isDisposed;
 
         private TaskCompletionSource<NotifyReady>? _requestCompletionSource;
-        private GattCharacteristic? _commandNotifyCharacteristic;
-        private GattCharacteristic? _liveMeasurementNotifyCharacteristic;
+        private IBLECharacteristic? _commandNotifyCharacteristic;
+        private IBLECharacteristic? _liveMeasurementNotifyCharacteristic;
 
         protected ILogger _logger;
-        protected BluetoothDevice? _device;
+        protected IBLEDevice? _device;
         protected CancellationTokenSource? _recordTransferCts;
         protected IBLEGaugePresenter? _gaugePresenter;
         protected IProtobufMessageConverter _protobufMessageConverter;
 
         public ProtobufChannel(ILogger logger, IProtobufMessageConverter protobufMessageConverter)
         {
-            _logger = logger;
-            _protobufMessageConverter = protobufMessageConverter;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _protobufMessageConverter = protobufMessageConverter ?? throw new ArgumentNullException(nameof(protobufMessageConverter));
         }
 
         public bool IsInitialized => true;
 
-        public virtual async Task Connect(BluetoothDevice device, IBLEGaugePresenter gaugePresenter)
+        public virtual async Task Connect(IBLEDevice device, IBLEGaugePresenter gaugePresenter)
         {
             _device = device;
 
             _gaugePresenter = gaugePresenter;
 
-            await _device.Gatt.RequestMtuAsync(500);
+            await _device.RequestMtuAsync(500);
 
-            var service = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new(Constants.TMLinkServiceId)));
-            if (service != null)
+            var characteristics = await _device.GetCharacteristics(Constants.TMLinkServiceId);
+            if (characteristics != null)
             {
-                _logger.LogInformation("Checking service {Uuid}", service.Uuid);
-                var characteristics = await service.GetCharacteristicsAsync();
-                _commandNotifyCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.TMLinkMessageReadyCharacteristicId));
-                if (_commandNotifyCharacteristic != null)
+                _logger.LogInformation("Checking TM-Link service");
+                if (characteristics.TryGetValue(Constants.TMLinkMessageReadyCharacteristicId, out var characteristic))
                 {
+                    _commandNotifyCharacteristic = characteristic;
                     _commandNotifyCharacteristic.CharacteristicValueChanged += OnNotificationReceived;
-                    await _commandNotifyCharacteristic.StartNotificationsAsync();
+                    await _commandNotifyCharacteristic.StartNotifications();
                 }
                 else
                 {
@@ -64,16 +64,15 @@ namespace Cygnus.BLE.Protobuf.Services
         {
             if (_device != null)
             {
-                var service = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new(Constants.TMLinkServiceId)));
-                if (service != null)
+                var characteristics = await _device.GetCharacteristics(Constants.TMLinkServiceId);
+                if (characteristics != null)
                 {
-                    _logger.LogInformation("Checking service {Uuid}", service.Uuid);
-                    var characteristics = await service.GetCharacteristicsAsync();
-                    _liveMeasurementNotifyCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.TMLinkLiveCharacteristicId));
-                    if (_liveMeasurementNotifyCharacteristic != null)
+                    _logger.LogInformation("Checking TM Link service");
+                    if (characteristics.TryGetValue(Constants.TMLinkLiveCharacteristicId, out var characteristic))
                     {
+                        _liveMeasurementNotifyCharacteristic = characteristic;
                         _liveMeasurementNotifyCharacteristic.CharacteristicValueChanged += OnLiveMeasurementReceived;
-                        await _liveMeasurementNotifyCharacteristic.StartNotificationsAsync();
+                        await _liveMeasurementNotifyCharacteristic.StartNotifications();
                     }
                     else
                     {
@@ -192,13 +191,11 @@ namespace Cygnus.BLE.Protobuf.Services
 
             try
             {
-                var service = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new(Constants.TMLinkServiceId)));
-                if (service != null)
+                var characteristics = await _device.GetCharacteristics(Constants.TMLinkServiceId);
+                if (characteristics != null)
                 {
-                    _logger.LogInformation("Checking service {Name}", service.Uuid);
-                    var characteristics = await service.GetCharacteristicsAsync();
-                    var commandCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.TMLinkWriteCommandCharacteristicId));
-                    if (commandCharacteristic != null)
+                    _logger.LogInformation("Checking TM Link service");
+                    if (characteristics.TryGetValue(Constants.TMLinkWriteCommandCharacteristicId, out var commandCharacteristic))
                     {
                         _requestCompletionSource?.TrySetCanceled();
                         var requestCompletionSource = _requestCompletionSource = new TaskCompletionSource<NotifyReady>();
@@ -206,7 +203,7 @@ namespace Cygnus.BLE.Protobuf.Services
 
                         // Write command
                         byte[] data = _protobufMessageConverter.ToZippedProtobuf(gaugeCommand);
-                        await commandCharacteristic.WriteValueWithResponseAsync(data);
+                        await commandCharacteristic.WriteValueWithResponse(data);
 
                         // Wait for notification that message is ready
                         _logger.LogInformation("Waiting for notification on characteristic {Uuid}", _commandNotifyCharacteristic?.Uuid);
@@ -256,12 +253,10 @@ namespace Cygnus.BLE.Protobuf.Services
                 return;
             }
 
-            var service = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new(Constants.TMLinkServiceId)));
-            if (service != null)
+            var characteristics = await _device.GetCharacteristics(Constants.TMLinkServiceId);
+            if (characteristics != null)
             {
-                var characteristics = await service.GetCharacteristicsAsync();
-                var commandCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.TMLinkWriteCommandCharacteristicId));
-                if (commandCharacteristic != null)
+                if (characteristics.TryGetValue(Constants.TMLinkWriteCommandCharacteristicId, out var commandCharacteristic))
                 {
                     _logger.LogWarning("Sending command {Command} to gauge {DeviceIdentifier}", gaugeCommand.CommandType, _device.Id);
                     _requestCompletionSource?.TrySetCanceled();
@@ -269,7 +264,7 @@ namespace Cygnus.BLE.Protobuf.Services
                     Task<NotifyReady> commandTask = requestCompletionSource.Task;
 
                     // Write command
-                    await commandCharacteristic.WriteValueWithResponseAsync(_protobufMessageConverter.ToZippedProtobuf(gaugeCommand));
+                    await commandCharacteristic.WriteValueWithResponse(_protobufMessageConverter.ToZippedProtobuf(gaugeCommand));
 
                     // Wait for notification that command was sent
                     _logger.LogInformation("Waiting for notification on characteristic {Uuid}", _commandNotifyCharacteristic?.Uuid);
@@ -285,9 +280,13 @@ namespace Cygnus.BLE.Protobuf.Services
                     }
                 }
             }
+            else
+            {
+                throw new InvalidOperationException($"Could not find TM Link service for device {_device.Name}");
+            }    
         }
 
-        protected async Task<T?> GetResponse<T, M>(Guid readCharacteristicId, Func<M, T> getGaugeInfo)
+        protected async Task<T?> GetResponse<T, M>(string readCharacteristicId, Func<M, T> getGaugeInfo)
             where T : class
             where M : class
         {
@@ -299,11 +298,10 @@ namespace Cygnus.BLE.Protobuf.Services
 
             try
             {
-                var service = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new(Constants.TMLinkServiceId)));
-                if (service != null)
+                var characteristics = await _device.GetCharacteristics(Constants.TMLinkServiceId);
+                if (characteristics != null)
                 {
-                    _logger.LogInformation("Checking service {Name}", service.Uuid);
-                    var characteristics = await service.GetCharacteristicsAsync();
+                    _logger.LogInformation("Checking TM Link service");
 
                     // Read the message
                     var value = await ReadData(characteristics, readCharacteristicId);
@@ -313,6 +311,10 @@ namespace Cygnus.BLE.Protobuf.Services
                         _logger.LogInformation("Received message from gauge {DeviceIdentifier}: {MessageType}", _device.Id, message.GetType());
                         return getGaugeInfo(message);
                     }
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Could not find TM Link service for device {_device.Name}");
                 }
             }
             catch (TaskCanceledException tex)
@@ -327,7 +329,7 @@ namespace Cygnus.BLE.Protobuf.Services
             return null;
         }
 
-        private void OnNotificationReceived(object? sender, GattCharacteristicValueChangedEventArgs e)
+        private void OnNotificationReceived(object? sender, BLECharacteristicValueChangedEventArgs e)
         {
             _logger.LogInformation("Notification characteristic received {Time}", DateTime.Now);
             if (e.Value != null)
@@ -348,7 +350,7 @@ namespace Cygnus.BLE.Protobuf.Services
             _requestCompletionSource?.TrySetResult(new NotifyReady());
         }
 
-        private void OnLiveMeasurementReceived(object? sender, GattCharacteristicValueChangedEventArgs e)
+        private void OnLiveMeasurementReceived(object? sender, BLECharacteristicValueChangedEventArgs e)
         {
             _logger.LogInformation("Live measurement characteristic received {Time}", DateTime.Now);
             if (e.Value != null)
@@ -364,21 +366,24 @@ namespace Cygnus.BLE.Protobuf.Services
             }
         }
 
-        private async Task<byte[]> ReadData(IReadOnlyList<GattCharacteristic> characteristics, Guid characteristicId)
+        private async Task<byte[]> ReadData(IDictionary<string, IBLECharacteristic> characteristics, string characteristicId)
         {
-            var characteristic = characteristics.FirstOrDefault(c => c.Uuid == characteristicId);
-            return await ReadData(characteristic);
+            if (characteristics.TryGetValue(characteristicId, out var characteristic))
+            {
+                return await ReadData(characteristic);
+            }
+
+            throw new InvalidOperationException($"Could not find characteristic {characteristicId} for device {_device?.Name}");
         }
 
-        private async Task<byte[]> ReadData(GattCharacteristic? characteristic)
+        private async Task<byte[]> ReadData(IBLECharacteristic? characteristic)
         {
             byte[] data = [];
             try
             {
-                if (characteristic?.Properties.HasFlag(GattCharacteristicProperties.Read) == true)
+                if (characteristic != null)
                 {
-                    using var queryCts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-                    var value = await characteristic.ReadValueAsync();
+                    var value = await characteristic.ReadValue();
                     if (value != null)
                     {
                         data = value;

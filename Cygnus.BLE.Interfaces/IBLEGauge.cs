@@ -1,16 +1,10 @@
-﻿using Cygnus.BLE.Protobuf.Interfaces;
+﻿using Cygnus.Interfaces;
 using Cygnus.Models;
-using InTheHand.Bluetooth;
 
-namespace Cygnus.BLE.API.Interfaces
+namespace Cygnus.BLE.Interfaces
 {
     public interface IBLEGauge : IBLEGaugePresenter, IDisposable
     {
-        internal string DeviceIdentifier { get; }
-
-        internal Task<bool> Connect();
-        internal IBLEGauge SetDevice(BluetoothDevice device);
-
         bool IsConnected { get; }
 
         void AddObserver(IGaugeMonitor observer);

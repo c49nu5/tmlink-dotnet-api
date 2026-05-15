@@ -43,9 +43,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.5" />
-    <PackageReference Include="InTheHand.BluetoothLE" Version="4.0.44" />
-    <PackageReference Include="Tmds.DBus" Version="0.92.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.8" />
+    <PackageReference Include="Tmds.DBus" Version="0.93.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,7 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Cygnus.Models\Cygnus.Models.csproj" />
+    <ProjectReference Include="..\Cygnus.BLE.Interfaces\Cygnus.BLE.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

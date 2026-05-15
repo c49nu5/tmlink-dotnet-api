@@ -1,39 +1,38 @@
 ﻿using Cygnus.BLE.API.Interfaces;
 using Cygnus.BLE.API.Services;
-using Cygnus.BLE.Protobuf;
+using Cygnus.BLE.Interfaces;
 using Cygnus.BLE.Protobuf.Interfaces;
 using Cygnus.BLE.Protobuf.Services;
+using Cygnus.Interfaces;
 using Cygnus.Models;
-using InTheHand.Bluetooth;
 using Microsoft.Extensions.Logging;
 
 namespace Cygnus.BLE.API.Models
 {
-    internal class BLEGauge : ObservableService<IGaugeMonitor>, IBLEGauge
+    internal class BLEGauge : ObservableModel<IGaugeMonitor>, IBLEGaugeInternal, IBLEDeviceMonitor
     {
         private readonly ILogger _logger;
         private readonly Func<byte, IProtobufChannel?> _protobufChannelFactory;
         private readonly IConnectionService _connectionService;
         private IProtobufChannel _protobufChannel = new ProtobufNullChannel();
-        private BluetoothDevice? _device;
+        private IBLEDevice? _device;
         private bool _isDisposed;
 
         public BLEGauge(ILogger<BLEGauge> logger,
                         Func<byte, IProtobufChannel?> protobufChannelFactory,
                         IConnectionService connectionService)
         {
-            _logger = logger;
-            _protobufChannelFactory = protobufChannelFactory;
-            _connectionService = connectionService;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _protobufChannelFactory = protobufChannelFactory ?? throw new ArgumentNullException(nameof(protobufChannelFactory));
+            _connectionService = connectionService ?? throw new ArgumentNullException(nameof(connectionService));
         }
 
-        public IBLEGauge SetDevice(BluetoothDevice device)
+        public void SetDevice(IBLEDevice device)
         {
             _device = device;
             DeviceIdentifier = device.Id;
             Name = device.Name;
-            _device.GattServerDisconnected += OnGattServerDisconnected;
-            return this;
+            _device.AddObserver(this);
         }
 
         public string DeviceIdentifier { get; private set; } = string.Empty;
@@ -53,15 +52,13 @@ namespace Cygnus.BLE.API.Models
                     return false;
                 }
 
-                if (!_device.Gatt.IsConnected)
+                if (!_device.IsConnected)
                 {
-                    await _device.Gatt.ConnectAsync();
+                    await _device.Connect();
                 }
 
-                if (_device.Gatt.IsConnected)
+                if (_device.IsConnected)
                 {
-                    IsConnected = true;
-
                     if (!_protobufChannel.IsInitialized)
                     {
                         await InitializeProtobufChannel();
@@ -69,6 +66,8 @@ namespace Cygnus.BLE.API.Models
 
                     if (_protobufChannel.IsInitialized)
                     {
+                        IsConnected = true;
+
                         await _protobufChannel.Connect(_device, this);
                     }
                 }
@@ -86,24 +85,24 @@ namespace Cygnus.BLE.API.Models
             }
         }
 
-        public Task<GaugeRecord?> GetRecord(ITransferRequest transferRequest, bool withAScans)
+        public async Task<GaugeRecord?> GetRecord(ITransferRequest transferRequest, bool withAScans)
         {
-            return _protobufChannel.GetRecord(transferRequest, withAScans);
+            return await _protobufChannel.GetRecord(transferRequest, withAScans);
         }
 
-        public Task DeleteAllRecords()
+        public async Task DeleteAllRecords()
         {
-            return _protobufChannel.DeleteAllRecords();
+            await _protobufChannel.DeleteAllRecords();
         }
 
-        public Task DeleteRecord(IDeleteRequest deleteRequest)
+        public async Task DeleteRecord(IDeleteRequest deleteRequest)
         {
-            return _protobufChannel.DeleteRecord(deleteRequest);
+            await _protobufChannel.DeleteRecord(deleteRequest);
         }
 
-        public Task NewRecord(BlankRecord record)
+        public async Task NewRecord(BlankRecord record)
         {
-            return _protobufChannel.NewRecord(record);
+            await _protobufChannel.NewRecord(record);
         }
 
         public async Task<List<GaugeRecordSummary>?> GetRecordList()
@@ -111,9 +110,9 @@ namespace Cygnus.BLE.API.Models
             return await _protobufChannel.GetRecordList();
         }
 
-        public Task SubscribeToLiveUpdates()
+        public async Task SubscribeToLiveUpdates()
         {
-            return _protobufChannel.SubscribeToLiveUpdates();
+            await _protobufChannel.SubscribeToLiveUpdates();
         }
 
         public void UnsubscribeFromLiveUpdates()
@@ -138,9 +137,9 @@ namespace Cygnus.BLE.API.Models
             NotifyObservers(o => o.UpdateLiveMeasurement(liveMeasurement));
         }
 
-        private void OnGattServerDisconnected(object? sender, EventArgs e)
+        public void DeviceDisconnected(string deviceId)
         {
-            _logger.LogInformation("Device {DeviceIdentifier} disconnected", DeviceIdentifier);
+            _logger.LogInformation("Device {DeviceIdentifier} disconnected", deviceId);
             Disconnect();
         }
 
@@ -152,49 +151,48 @@ namespace Cygnus.BLE.API.Models
                 return;
             }
 
-            byte protobufVersion = 1;
+            byte protobufVersion = 0;
             try
             {
-                var genericService = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new(Constants.GenericAccessServiceId)));
-                if (genericService != null)
+                var genericCharacteristics = await _device.GetCharacteristics(Constants.GenericAccessServiceId);
+                if (genericCharacteristics != null)
                 {
-                    var deviceNameCharacteristic = await genericService.GetCharacteristicAsync(Guid.Parse(Constants.DeviceNameCharacteristicId));
+                    genericCharacteristics.TryGetValue(Constants.DeviceNameCharacteristicId, out var deviceNameCharacteristic);
                     Name = deviceNameCharacteristic != null
-                        ? System.Text.Encoding.UTF8.GetString((await deviceNameCharacteristic.ReadValueAsync()) ?? [])
+                        ? System.Text.Encoding.UTF8.GetString((await deviceNameCharacteristic.ReadValue()) ?? [])
                         : _device.Name;
                 }
 
-                var deviceInformationService = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new(Constants.DeviceInformationServiceId)));
-                if (deviceInformationService == null)
+                var characteristics = await _device.GetCharacteristics(Constants.DeviceInformationServiceId);
+                if (characteristics == null)
                 {
                     _logger.LogWarning("Cannot get protobuf version for gauge {DeviceIdentifier} because service is null", DeviceIdentifier);
                     return;
                 }
                 else
                 {
-                    _logger.LogInformation("Checking device service {Uuid}", deviceInformationService.Uuid);
-                    var characteristics = await deviceInformationService.GetCharacteristicsAsync();
-                    var deviceModelCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.DeviceModelCharacteristicId));
+                    _logger.LogInformation("Checking device information service");
+                    characteristics.TryGetValue(Constants.DeviceModelCharacteristicId, out var deviceModelCharacteristic);
                     Model = deviceModelCharacteristic != null
-                        ? System.Text.Encoding.UTF8.GetString((await deviceModelCharacteristic.ReadValueAsync()) ?? [])
+                        ? System.Text.Encoding.UTF8.GetString((await deviceModelCharacteristic.ReadValue()) ?? [])
                         : string.Empty;
 
-                    var serialNumberCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.SerialNumberCharacteristicId));
+                    characteristics.TryGetValue(Constants.SerialNumberCharacteristicId, out var serialNumberCharacteristic);
                     SerialNumber = serialNumberCharacteristic != null
-                        ? System.Text.Encoding.UTF8.GetString((await serialNumberCharacteristic.ReadValueAsync()) ?? [])
+                        ? System.Text.Encoding.UTF8.GetString((await serialNumberCharacteristic.ReadValue()) ?? [])
                         : string.Empty;
 
-                    var firmwareCharacteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.FirmwareRevisionCharacteristicId));
+                    characteristics.TryGetValue(Constants.FirmwareRevisionCharacteristicId, out var firmwareCharacteristic);
                     FirmwareVersion = firmwareCharacteristic != null
-                        ? Version.TryParse(System.Text.Encoding.UTF8.GetString((await firmwareCharacteristic.ReadValueAsync()) ?? []), out var version) ? version : null
+                        ? Version.TryParse(System.Text.Encoding.UTF8.GetString((await firmwareCharacteristic.ReadValue()) ?? []), out var version) ? version : null
                         : null;
 
                     _logger.LogInformation("Getting protobuf version for gauge {DeviceIdentifier}", DeviceIdentifier);
-                    var characteristic = characteristics.FirstOrDefault(c => c.Uuid == Guid.Parse(Constants.SoftwareVersionCharacteristicId));
+                    characteristics.TryGetValue(Constants.SoftwareVersionCharacteristicId, out var characteristic);
                     if (characteristic != null)
                     {
-                        var value = await characteristic.ReadValueAsync();
-                        if (value.Length > 0)
+                        var value = await characteristic.ReadValue();
+                        if (value?.Length > 0)
                         {
                             protobufVersion = byte.Parse(System.Text.Encoding.UTF8.GetString(value));
                             _logger.LogInformation("Received protobuf version {Version} from gauge {DeviceIdentifier}", protobufVersion, DeviceIdentifier);
@@ -236,9 +234,7 @@ namespace Cygnus.BLE.API.Models
                 {
                     if (_device != null)
                     {
-                        _device.GattServerDisconnected -= OnGattServerDisconnected;
-                        _device.Gatt.Disconnect();
-                        _protobufChannel?.Dispose();
+                        _protobufChannel.Dispose();
                         _device.Dispose();
                         _device = null;
                     }

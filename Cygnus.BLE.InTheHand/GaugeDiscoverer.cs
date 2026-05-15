@@ -1,5 +1,4 @@
-﻿using Cygnus.BLE.API.Interfaces;
-using Cygnus.BLE.Protobuf;
+﻿using Cygnus.BLE.Interfaces;
 using InTheHand.Bluetooth;
 using Microsoft.Extensions.Logging;
 
@@ -9,13 +8,11 @@ internal class GaugeDiscoverer : IGaugeDiscoverer
 {
     private readonly BluetoothUuid TMLinkServiceUuid = new Guid(Constants.TMLinkServiceId);
     private readonly ILogger<GaugeDiscoverer> _logger;
-    private readonly Func<IBLEGauge> _gaugeFactory;
     private CancellationTokenSource? _scanCancellationTokenSource = null;
 
-    public GaugeDiscoverer(ILogger<GaugeDiscoverer> logger, Func<IBLEGauge> gaugeFactory)
+    public GaugeDiscoverer(ILogger<GaugeDiscoverer> logger)
     {
         _logger = logger;
-        _gaugeFactory = gaugeFactory;
     }
 
     public void Cancel()
@@ -23,9 +20,9 @@ internal class GaugeDiscoverer : IGaugeDiscoverer
         _scanCancellationTokenSource?.Cancel();
     }
 
-    public async Task<IEnumerable<IBLEGauge>> FindGauges()
+    public async Task<IEnumerable<IBLEDevice>> FindDevices()
     {
-        Dictionary<string, IBLEGauge> gauges = [];
+        Dictionary<string, IBLEDevice> gauges = [];
         _scanCancellationTokenSource = new(TimeSpan.FromSeconds(20));
         EventHandler<BluetoothAdvertisingEvent> onAdvertisementReceived = (object? s, BluetoothAdvertisingEvent ad) =>
         {
@@ -34,7 +31,7 @@ internal class GaugeDiscoverer : IGaugeDiscoverer
             {
                 _logger.LogInformation("BLE TM Link device found: {DeviceId}", ad.Device.Id);
                 ad.Device.Gatt.AutoConnect = true;
-                gauges[ad.Device.Id] = _gaugeFactory().SetDevice(ad.Device);
+                gauges[ad.Device.Id] = new BLEDevice(ad.Device);
             }
         };
         

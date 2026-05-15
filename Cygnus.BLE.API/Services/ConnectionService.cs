@@ -1,23 +1,28 @@
 ﻿using Cygnus.BLE.API.Interfaces;
+using Cygnus.BLE.API.Models;
+using Cygnus.BLE.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Cygnus.BLE.API.Services;
 
-internal class ConnectionService : ObservableService<IConnectionMonitor>, IConnectionService
+internal class ConnectionService : ObservableModel<IConnectionMonitor>, IConnectionService
 {
     private readonly ILogger<IConnectionService> _logger;
     private readonly IPlatformService _platformService;
     private readonly IGaugeDiscoverer _gaugeDiscoverer;
+    private readonly Func<IBLEGaugeInternal> _gaugeFactory;
     private IBLEGauge? _connectedGauge;
 
     public ConnectionService(
         ILogger<IConnectionService> logger,
         IPlatformService platformService,
-        IGaugeDiscoverer gaugeDiscoverer)
+        IGaugeDiscoverer gaugeDiscoverer,
+        Func<IBLEGaugeInternal> gaugeFactory)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _platformService = platformService ?? throw new ArgumentNullException(nameof(platformService));
         _gaugeDiscoverer = gaugeDiscoverer ?? throw new ArgumentNullException(nameof(gaugeDiscoverer));
+        _gaugeFactory = gaugeFactory ?? throw new ArgumentNullException(nameof(gaugeFactory));
     }
 
     public IBLEGauge? ConnectedGauge
@@ -32,7 +37,7 @@ internal class ConnectionService : ObservableService<IConnectionMonitor>, IConne
 
     public async Task ConnectToGauge(IBLEGauge gauge)
     {
-        _logger.LogInformation("Connecting to device {Name}", gauge.DeviceIdentifier);
+        _logger.LogInformation("Connecting to device {Name}", gauge.Name);
 
         try
         {
@@ -40,7 +45,8 @@ internal class ConnectionService : ObservableService<IConnectionMonitor>, IConne
 
             ConnectedGauge?.Disconnect();
 
-            if (gauge.IsConnected == true || await gauge.Connect())
+            var bleGauge = gauge as IBLEGaugeInternal;
+            if (bleGauge != null && (bleGauge.IsConnected == true || await bleGauge.Connect()))
             {
                 ConnectedGauge = gauge;
 
@@ -75,13 +81,15 @@ internal class ConnectionService : ObservableService<IConnectionMonitor>, IConne
         {
             try
             {
-                var discoveredGauges = await _gaugeDiscoverer.FindGauges();
-                foreach (var gauge in discoveredGauges)
+                var discoveredDevices = await _gaugeDiscoverer.FindDevices();
+                foreach (var device in discoveredDevices)
                 {
-                    _logger.LogInformation("Found device: {Name} ({DeviceIdentifier})", gauge.Name, gauge.DeviceIdentifier);
-                    if (await gauge.Connect() && !string.IsNullOrWhiteSpace(gauge.SerialNumber))
+                    var bleGauge = _gaugeFactory();
+                    bleGauge.SetDevice(device);
+                    _logger.LogInformation("Found device: {Name} ({DeviceIdentifier})", bleGauge.Name, bleGauge.DeviceIdentifier);
+                    if (await bleGauge.Connect() && !string.IsNullOrWhiteSpace(bleGauge.SerialNumber))
                     {
-                        NotifyObservers(o => o.GaugeDiscovered(gauge));
+                        NotifyObservers(o => o.GaugeDiscovered(bleGauge));
                     }
                 }
             }
@@ -103,9 +111,10 @@ internal class ConnectionService : ObservableService<IConnectionMonitor>, IConne
 
     public void GaugeIsDisconnected(string deviceIdentifier)
     {
-        if (ConnectedGauge != null && ConnectedGauge.DeviceIdentifier == deviceIdentifier)
+        var connectedGauge = ConnectedGauge as IBLEGaugeInternal;
+        if (connectedGauge != null && connectedGauge.DeviceIdentifier == deviceIdentifier)
         {
-            _logger.LogInformation("Device {Name} disconnected", ConnectedGauge.Name);
+            _logger.LogInformation("Device {Name} disconnected", connectedGauge.Name);
             ConnectedGauge = null;
         }
     }

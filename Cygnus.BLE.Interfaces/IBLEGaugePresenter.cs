@@ -1,6 +1,6 @@
 ﻿using Cygnus.Models;
 
-namespace Cygnus.BLE.Protobuf.Interfaces
+namespace Cygnus.BLE.Interfaces
 {
     public interface IBLEGaugePresenter
     {

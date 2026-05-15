@@ -1,4 +1,5 @@
 ﻿using Cygnus.BLE.API.Interfaces;
+using Cygnus.BLE.Interfaces;
 using Moq;
 using Shouldly;
 
@@ -27,7 +28,7 @@ internal class WhenGaugeIsDisconnectedIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        var gauge = Mock.Of<IBLEGauge>(g=> g.DeviceIdentifier == "TestGauge");        
+        var gauge = Mock.Of<IBLEGaugeInternal>(g=> g.DeviceIdentifier == "TestGauge");        
         var sut = testBed.CreateSUT();
         sut.ConnectedGauge = gauge;
 
@@ -43,7 +44,7 @@ internal class WhenGaugeIsDisconnectedIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        var gauge = Mock.Of<IBLEGauge>(g => g.DeviceIdentifier == "TestGauge" && g.IsConnected == true);
+        var gauge = Mock.Of<IBLEGaugeInternal>(g => g.DeviceIdentifier == "TestGauge" && g.IsConnected == true);
         var sut = testBed.CreateSUT();
         sut.ConnectedGauge = gauge;
 
