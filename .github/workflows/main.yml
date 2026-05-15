@@ -3,6 +3,8 @@ name: CI Build
 on:
   push:
     branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
   build:
@@ -72,10 +74,13 @@ jobs:
         path: code-coverage-results.md
 
     - name: Pack
+      if: github.event_name != 'pull_request'
       run: dotnet pack -c Release --no-restore --no-build /p:Version=${{ env.fullSemVer }}
 
     - name: Connect to Cygnus packages in GitHub
+      if: github.event_name != 'pull_request'
       run: dotnet nuget add source --username c49nu5 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/c49nu5/index.json"
 
     - name: Publish
+      if: github.event_name != 'pull_request'
       run: dotnet nuget push **/bin/Release/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }}  --source "github"
