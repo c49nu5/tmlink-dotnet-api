@@ -165,6 +165,7 @@ namespace Cygnus.BLE.API.Models
                     Name = deviceNameCharacteristic != null
                         ? System.Text.Encoding.UTF8.GetString((await deviceNameCharacteristic.ReadValue()) ?? [])
                         : _device.Name;
+                    _logger.LogInformation("Device name {Name}", Name);
                 }
 
                 var characteristics = await _device.GetCharacteristics(Constants.DeviceInformationServiceId);
@@ -180,16 +181,19 @@ namespace Cygnus.BLE.API.Models
                     Model = deviceModelCharacteristic != null
                         ? System.Text.Encoding.UTF8.GetString((await deviceModelCharacteristic.ReadValue()) ?? [])
                         : string.Empty;
+                    _logger.LogInformation("Device model {Model}", Model);
 
                     characteristics.TryGetValue(Constants.SerialNumberCharacteristicId, out var serialNumberCharacteristic);
                     SerialNumber = serialNumberCharacteristic != null
                         ? System.Text.Encoding.UTF8.GetString((await serialNumberCharacteristic.ReadValue()) ?? [])
                         : string.Empty;
+                    _logger.LogInformation("Device serial number {SerialNumber}", SerialNumber);
 
                     characteristics.TryGetValue(Constants.FirmwareRevisionCharacteristicId, out var firmwareCharacteristic);
                     FirmwareVersion = firmwareCharacteristic != null
                         ? Version.TryParse(System.Text.Encoding.UTF8.GetString((await firmwareCharacteristic.ReadValue()) ?? []), out var version) ? version : null
                         : null;
+                    _logger.LogInformation("Device firmware version {FirmwareVersion}", FirmwareVersion);
 
                     _logger.LogInformation("Getting protobuf version for gauge {DeviceIdentifier}", DeviceIdentifier);
                     characteristics.TryGetValue(Constants.SoftwareVersionCharacteristicId, out var characteristic);
