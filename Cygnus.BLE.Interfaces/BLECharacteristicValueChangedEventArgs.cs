@@ -2,6 +2,6 @@
 {
     public class BLECharacteristicValueChangedEventArgs
     {
-        public byte[] Value { get; set; } = [];
+        public byte[]? Value { get; set; } = [];
     }
 }

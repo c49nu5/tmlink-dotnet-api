@@ -5,30 +5,31 @@ namespace Cygnus.BLE.API.Services
 {
     internal class BLECharacteristic : IBLECharacteristic
     {
-        private GattCharacteristic c;
+        private GattCharacteristic _c;
 
         public BLECharacteristic(GattCharacteristic c)
         {
-            this.c = c;
+            _c = c;
+            c.CharacteristicValueChanged += (s, e) => CharacteristicValueChanged?.Invoke(this, new BLECharacteristicValueChangedEventArgs{ Value = e.Value });
         }
 
         public event EventHandler<BLECharacteristicValueChangedEventArgs>? CharacteristicValueChanged;
 
-        public string? Uuid => c.Uuid.Value.ToString();
+        public string? Uuid => _c.Uuid.Value.ToString();
 
         public async Task<byte[]?> ReadValue()
         {
-            return await c.ReadValueAsync();
+            return await _c.ReadValueAsync();
         }
 
         public async Task StartNotifications()
         {
-            await c.StartNotificationsAsync();
+            await _c.StartNotificationsAsync();
         }
 
         public async Task WriteValueWithResponse(byte[] bytes)
         {
-            await c.WriteValueWithResponseAsync(bytes);
+            await _c.WriteValueWithResponseAsync(bytes);
         }
     }
 }
