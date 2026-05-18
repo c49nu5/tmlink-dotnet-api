@@ -12,19 +12,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@6.0.2
       with:
         fetch-depth: 0
         persist-credentials: true
 
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v3.2.1
+      uses: gittools/actions/gitversion/setup@v4.5.0
       with:
-        versionSpec: '6.3.x'
-              
+        versionSpec: '6.7.x'
+      
     - name: Determine Version
       id: version_step # step id used as a reference for output values
-      uses: gittools/actions/gitversion/execute@v3.2.1
+      uses: gittools/actions/gitversion/execute@v4.5.0
 
     - name: Display GitVersion variables
       run: |
@@ -32,7 +32,7 @@ jobs:
         echo "SemVer (env.semVer)            : ${{ env.semVer }}"
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 10.0.x
 
@@ -59,19 +59,15 @@ jobs:
         reportgenerator -reports:coverage/*/coverage.cobertura.xml -targetdir:CodeCoverage -reporttypes:'MarkdownSummaryGithub,Cobertura'
 
     - name: Write to Job Summary
-      if: github.event_name == 'pull_request'
       run: |
         echo "### Coverage results :rocket:" >> $GITHUB_STEP_SUMMARY
         cat CodeCoverage/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
 
     - name: Pack
-      if: github.event_name != 'pull_request'
       run: dotnet pack -c Release --no-restore --no-build /p:Version=${{ env.fullSemVer }}
 
     - name: Connect to Cygnus packages in GitHub
-      if: github.event_name != 'pull_request'
       run: dotnet nuget add source --username c49nu5 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/c49nu5/index.json"
 
     - name: Publish
-      if: github.event_name != 'pull_request'
       run: dotnet nuget push **/bin/Release/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }}  --source "github"
