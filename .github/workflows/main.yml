@@ -60,7 +60,9 @@ jobs:
 
     - name: Write to Job Summary
       if: github.event_name == 'pull_request'
-      run: cat CodeCoverage/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+      run: |
+        echo "### Coverage results :rocket:" >> $GITHUB_STEP_SUMMARY
+        cat CodeCoverage/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
 
     - name: Pack
       if: github.event_name != 'pull_request'
