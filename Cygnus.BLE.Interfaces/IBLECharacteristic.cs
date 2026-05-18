@@ -2,7 +2,8 @@
 {
     public interface IBLECharacteristic
     {
-        EventHandler<BLECharacteristicValueChangedEventArgs> CharacteristicValueChanged { get; set; }
+        event EventHandler<BLECharacteristicValueChangedEventArgs>? CharacteristicValueChanged;
+
         string? Uuid { get; }
 
         Task<byte[]?> ReadValue();

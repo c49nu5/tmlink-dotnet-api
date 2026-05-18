@@ -12,23 +12,23 @@ namespace Cygnus.BLE.API.Services
             this.c = c;
         }
 
-        public EventHandler<BLECharacteristicValueChangedEventArgs> CharacteristicValueChanged { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public event EventHandler<BLECharacteristicValueChangedEventArgs>? CharacteristicValueChanged;
 
-        public string? Uuid => throw new NotImplementedException();
+        public string? Uuid => c.Uuid.Value.ToString();
 
-        public Task<byte[]?> ReadValue()
+        public async Task<byte[]?> ReadValue()
         {
-            throw new NotImplementedException();
+            return await c.ReadValueAsync();
         }
 
-        public Task StartNotifications()
+        public async Task StartNotifications()
         {
-            throw new NotImplementedException();
+            await c.StartNotificationsAsync();
         }
 
-        public Task WriteValueWithResponse(byte[] bytes)
+        public async Task WriteValueWithResponse(byte[] bytes)
         {
-            throw new NotImplementedException();
+            await c.WriteValueWithResponseAsync(bytes);
         }
     }
 }
