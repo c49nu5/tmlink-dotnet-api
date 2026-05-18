@@ -16,7 +16,7 @@ namespace Cygnus.BLE.Protobuf.Services
             throw new NotImplementedException();
         }
 
-        public Task Connect(IBLEDevice device, IBLEGaugePresenter gaugeInformation)
+        public Task<GaugeInformation?> Connect(IBLEDevice device)
         {
             throw new NotImplementedException();
         }
@@ -52,6 +52,11 @@ namespace Cygnus.BLE.Protobuf.Services
         }
 
         public void UnsubscribeFromLiveUpdates()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddObserver(ILiveMeasurementObserver observer)
         {
             throw new NotImplementedException();
         }

@@ -8,8 +8,9 @@ namespace Cygnus.BLE.Protobuf.Interfaces
     {
         bool IsInitialized { get; }
 
+        void AddObserver(ILiveMeasurementObserver observer);
         Task CancelRecordTransfer();
-        Task Connect(IBLEDevice device, IBLEGaugePresenter gaugeInformation);
+        Task<GaugeInformation?> Connect(IBLEDevice device);
         Task DeleteAllRecords();
         Task DeleteRecord(IDeleteRequest deleteRequest);
         void Disconnect();

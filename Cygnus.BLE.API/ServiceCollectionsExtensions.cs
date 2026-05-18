@@ -18,7 +18,7 @@ public static class ServiceCollectionsExtensions
     public static void AddBleServices(this IServiceCollection services, bool withInTheHand = true)
     {
         services.AddSingleton<IConnectionService, ConnectionService>();
-        services.AddTransient<IBLEGauge, BLEGauge>();
+        services.AddTransient<IBLEGaugeInternal, BLEGauge>();
         services.AddSingleton<Func<IBLEGaugeInternal>>(s => s.GetRequiredService<IBLEGaugeInternal>);
         services.AddProtobufServices();
         if (withInTheHand)

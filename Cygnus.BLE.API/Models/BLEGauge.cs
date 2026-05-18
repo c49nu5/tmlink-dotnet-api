@@ -68,7 +68,11 @@ namespace Cygnus.BLE.API.Models
                     {
                         IsConnected = true;
 
-                        await _protobufChannel.Connect(_device, this);
+                        var gaugeInformation = await _protobufChannel.Connect(_device);
+                        if (gaugeInformation != null)
+                        {
+                            SerialNumber = gaugeInformation.SerialNumber.ToString();
+                        }
                     }
                 }
                 else
@@ -216,7 +220,8 @@ namespace Cygnus.BLE.API.Models
             IProtobufChannel? protobufChannel = _protobufChannelFactory(protobufVersion);
             if (protobufChannel != null)
             {
-                _protobufChannel = protobufChannel;
+                protobufChannel.AddObserver(this);
+                _protobufChannel = protobufChannel;                
             }
             else
             {

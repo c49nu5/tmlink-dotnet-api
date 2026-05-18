@@ -1,4 +1,5 @@
-﻿using Cygnus.BLE.Interfaces;
+﻿using Cygnus.BLE.API.Services;
+using Cygnus.BLE.Interfaces;
 using Cygnus.BLE.Protobuf.Interfaces;
 using Cygnus.Interfaces;
 using Cygnus.Models;
@@ -6,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Cygnus.BLE.Protobuf.Services
 {
-    internal abstract class ProtobufChannel<NotifyReady> : IProtobufChannel
+    internal abstract class ProtobufChannel<NotifyReady> : ObservableModel<ILiveMeasurementObserver>,  IProtobufChannel
         where NotifyReady : INotifyMessage, new()
     {
         private bool _isDisposed;
@@ -18,7 +19,6 @@ namespace Cygnus.BLE.Protobuf.Services
         protected ILogger _logger;
         protected IBLEDevice? _device;
         protected CancellationTokenSource? _recordTransferCts;
-        protected IBLEGaugePresenter? _gaugePresenter;
         protected IProtobufMessageConverter _protobufMessageConverter;
 
         public ProtobufChannel(ILogger logger, IProtobufMessageConverter protobufMessageConverter)
@@ -29,11 +29,9 @@ namespace Cygnus.BLE.Protobuf.Services
 
         public bool IsInitialized => true;
 
-        public virtual async Task Connect(IBLEDevice device, IBLEGaugePresenter gaugePresenter)
+        public virtual async Task<GaugeInformation?> Connect(IBLEDevice device)
         {
             _device = device;
-
-            _gaugePresenter = gaugePresenter;
 
             await _device.RequestMtuAsync(500);
 
@@ -49,15 +47,17 @@ namespace Cygnus.BLE.Protobuf.Services
                 }
                 else
                 {
-                    _logger.LogError("Could not find notify characteristic for {Device}", gaugePresenter.Name);
+                    _logger.LogError("Could not find notify characteristic for {Device}", _device.Name);
                 }
 
-                await UpdateGaugeInformation();
+                return await GetGaugeInformation();
             }
             else
             {
-                _logger.LogError("Could not find TM Link service for {Device}", gaugePresenter.Name);
+                _logger.LogError("Could not find TM Link service for {Device}", _device.Name);
             }
+
+            return null;
         }
 
         public async Task SubscribeToLiveUpdates()
@@ -163,7 +163,7 @@ namespace Cygnus.BLE.Protobuf.Services
 
         protected abstract Task<MeasurementPoint?> GetBScanPoint(string name, bool withAScans);
 
-        protected abstract Task UpdateGaugeInformation();
+        protected abstract Task<GaugeInformation> GetGaugeInformation();
 
         public void Disconnect()
         {
@@ -219,7 +219,7 @@ namespace Cygnus.BLE.Protobuf.Services
                             if (value.Length > 0)
                             {
                                 var message = _protobufMessageConverter.FromZippedProtoBuf<M>(value);
-                                _logger.LogInformation("Received message from gauge {DeviceIdentifier}: {Command}", _device.Id, message.CommandType);
+                                _logger.LogInformation("Received message from gauge {Device}: {Command}", _device.Name, message.CommandType);
                                 if (message.CommandType == gaugeCommand.CommandType)
                                 {
                                     return responseHandler(message);
@@ -230,6 +230,10 @@ namespace Cygnus.BLE.Protobuf.Services
                         {
                             _logger.LogInformation("Notification did not arrive {Command} {Completion}", gaugeCommand.CommandType, requestCompletionSource.Task.IsCompleted);
                         }
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Could not find command characteristic for device {_device.Name}");
                     }
                 }
             }
@@ -258,7 +262,7 @@ namespace Cygnus.BLE.Protobuf.Services
             {
                 if (characteristics.TryGetValue(Constants.TMLinkWriteCommandCharacteristicId, out var commandCharacteristic))
                 {
-                    _logger.LogWarning("Sending command {Command} to gauge {DeviceIdentifier}", gaugeCommand.CommandType, _device.Id);
+                    _logger.LogWarning("Sending command {Command} to gauge {Device}", gaugeCommand.CommandType, _device.Name);
                     _requestCompletionSource?.TrySetCanceled();
                     var requestCompletionSource = _requestCompletionSource = new TaskCompletionSource<NotifyReady>();
                     Task<NotifyReady> commandTask = requestCompletionSource.Task;
@@ -278,6 +282,10 @@ namespace Cygnus.BLE.Protobuf.Services
                     {
                         throw new InvalidDataException($"Expected notification did not arrive {gaugeCommand.CommandType}");
                     }
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Could not find command characteristic for device {_device.Name}");
                 }
             }
             else
@@ -308,7 +316,7 @@ namespace Cygnus.BLE.Protobuf.Services
                     if (value.Length > 0)
                     {
                         var message = _protobufMessageConverter.FromZippedProtoBuf<M>(value);
-                        _logger.LogInformation("Received message from gauge {DeviceIdentifier}: {MessageType}", _device.Id, message.GetType());
+                        _logger.LogInformation("Received message from gauge {Device}: {MessageType}", _device.Name, message.GetType());
                         return getGaugeInfo(message);
                     }
                 }

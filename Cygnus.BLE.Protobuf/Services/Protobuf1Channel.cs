@@ -30,7 +30,7 @@ namespace Cygnus.BLE.Protobuf.Services
             Message.BScanList getRecordList(Message message)
             {
                 var recordList = message.bscanList;
-                _logger.LogInformation("Received bscan list from gauge {DeviceIdentifier}: {RecordCount}", _device?.Id, recordList.Items.Count);
+                _logger.LogInformation("Received bscan list from gauge {Device}: {RecordCount}", _device?.Name, recordList.Items.Count);
                 foreach (var record in recordList.Items)
                 {
                     _logger.LogInformation("Record {Index}: {Points}", record.Name, record.numScanPoints);
@@ -64,7 +64,7 @@ namespace Cygnus.BLE.Protobuf.Services
             Message.RecordList getRecordList(Message message)
             {
                 var recordList = message.recordList;
-                _logger.LogInformation("Received record list from gauge {DeviceIdentifier}: {RecordCount}", _device?.Id, recordList.Items.Count);
+                _logger.LogInformation("Received record list from gauge {Device}: {RecordCount}", _device?.Name, recordList.Items.Count);
                 foreach (var record in recordList.Items)
                 {
                     _logger.LogInformation("Record {Index}: {Points}", record.Name, record.numPointsRequired);
@@ -354,31 +354,12 @@ namespace Cygnus.BLE.Protobuf.Services
             await SendCommand(command, true);
         }
 
-        private async Task<Message.GaugeInfo?> GetGaugeInfo()
-        {
-            Command command = new()
-            {
-                commandType = V1.CommandType.GetGaugeInfo,
-                Timestamp = DateTime.Now
-            };
-
-            Message.GaugeInfo getGaugeInfo(Message message)
-            {
-                var gaugeInfo = message.gaugeInfo;
-                _logger.LogInformation("Received information from gauge {DeviceIdentifier}: {serialNumber}", _device?.Id, gaugeInfo.serialNumber);
-
-                return gaugeInfo;
-            }
-
-            return await SendCommandWithResponse<Message.GaugeInfo, Message>(command, getGaugeInfo);
-        }
-
         protected override void UpdateLiveMeasurement(byte[] value)
         {
             NotifyLiveMeasurement liveMeasurement = _protobufMessageConverter.FromProtobuf<NotifyLiveMeasurement>(value);
             if (liveMeasurement != null)
             {
-                _gaugePresenter?.UpdateLiveMeasurement(new LiveMeasurement
+                NotifyObservers(o => o.UpdateLiveMeasurement(new LiveMeasurement
                 {
                     BatteryLevel = liveMeasurement.batteryLevel,
                     GaindB = liveMeasurement.gaindB,
@@ -392,14 +373,14 @@ namespace Cygnus.BLE.Protobuf.Services
                     IsFrozen = (liveMeasurement.statusBits & IsFrozenFlag) == IsFrozenFlag,
                     IsStable = (liveMeasurement.statusBits & IsStableFlag) == IsStableFlag,
                     IsValid = (liveMeasurement.statusBits & IsValidFlag) == IsValidFlag,
-                });
+                }));
 
                 if (liveMeasurement.liveMeasurementType == LiveMeasurementType.Frozen)
                 {
                     FrozenLiveMeasurement getFrozenLiveMeasurement(FrozenLiveMeasurement frozenMeasurement)
                     {
-                        _logger.LogInformation("Received frozen measurement from gauge {DeviceIdentifier}: {serialNumber}", _device?.Id, frozenMeasurement.Index);
-                        _gaugePresenter?.UpdateLiveMeasurement(new LiveMeasurement
+                        _logger.LogInformation("Received frozen measurement from gauge {DeviceIdentifier}: {serialNumber}", _device?.Name, frozenMeasurement.Index);
+                        NotifyObservers(o => o.UpdateLiveMeasurement(new LiveMeasurement
                         {
                             BatteryLevel = frozenMeasurement.batteryLevel,
                             GaindB = frozenMeasurement.gaindB,
@@ -414,7 +395,7 @@ namespace Cygnus.BLE.Protobuf.Services
                             IsStable = frozenMeasurement.stableMeasurement,
                             IsValid = frozenMeasurement.validMeasurement,
                             AScan = GetAScan(frozenMeasurement.Ascan)
-                        });
+                        }));
 
                         return frozenMeasurement;
                     }
@@ -424,18 +405,40 @@ namespace Cygnus.BLE.Protobuf.Services
             }
         }
 
-        protected override async Task UpdateGaugeInformation()
+        protected override async Task<GaugeInformation> GetGaugeInformation()
         {
-            var gaugeInfo = await GetGaugeInfo();
+            Command command = new()
+            {
+                commandType = V1.CommandType.GetGaugeInfo,
+                Timestamp = DateTime.Now
+            };
+
+            Message.GaugeInfo getGaugeInfo(Message message)
+            {
+                var gaugeInfo = message.gaugeInfo;
+                _logger.LogInformation("Received information from gauge {Device}: {serialNumber}", _device?.Name, gaugeInfo.serialNumber);
+
+                return gaugeInfo;
+            }
+
+            var gaugeInfo = await SendCommandWithResponse<Message.GaugeInfo, Message>(command, getGaugeInfo);
             if (gaugeInfo != null)
             {
-                _gaugePresenter?.SerialNumber = gaugeInfo.serialNumber.ToString();
-                _logger.LogInformation("Updated gauge info for {DeviceIdentifier}: Serial Number {SerialNumber}", _device?.Id, _gaugePresenter?.SerialNumber);
+                _logger.LogInformation("Updated gauge info for {Device}: Serial Number {SerialNumber}", _device?.Name, gaugeInfo.serialNumber);
             }
             else
             {
-                _logger.LogError("No gauge info returned for device {DeviceIdentifier}", _device?.Id);
+                _logger.LogError("No gauge info returned for device {Device}", _device?.Name);
             }
+
+            return new GaugeInformation
+            {
+                SerialNumber = gaugeInfo?.serialNumber ?? 0,
+                GaugeUD = gaugeInfo?.gaugeUD ?? 0,
+                VersionNumber = gaugeInfo?.versionNumber ?? 0,
+                BatteryLevel = gaugeInfo?.batteryLevel ?? 0,
+                GaugeVariant = (Models.GaugeVariant)(gaugeInfo?.gaugeVariant ?? V1.GaugeVariant.Test)
+            };
         }
     }
 }

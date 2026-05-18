@@ -12,6 +12,7 @@ internal class WhenDisposeIsCalled
         var device = testBed.CreateDevice(true);
         device.Setup(d => d.IsConnected).Returns(true);
         sut.SetDevice(device.Object);
+        testBed.Protobuf1Channel.Setup(p => p.AddObserver(sut));
         await sut.Connect();
         testBed.Protobuf1Channel.Setup(p => p.Dispose());
         device.Setup(d => d.Dispose());
