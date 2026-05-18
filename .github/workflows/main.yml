@@ -51,7 +51,7 @@ jobs:
       run: dotnet build -c Release --no-restore /p:Version=${{ env.fullSemVer }}
 
     - name: Test
-      run: dotnet test -c Release --no-build --verbosity normal --logger trx --collect:"XPlat Code Coverage"
+      run: dotnet test -c Release --no-build --verbosity normal --logger trx --collect:"XPlat Code Coverage" --results-directory coverage
       
     - name: Create code coverage report
       run: |
