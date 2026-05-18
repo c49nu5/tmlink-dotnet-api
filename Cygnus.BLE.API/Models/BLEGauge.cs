@@ -176,7 +176,7 @@ namespace Cygnus.BLE.API.Models
                 }
                 else
                 {
-                    _logger.LogInformation("Checking device information service");
+                    _logger.LogInformation("Checking device information service characteristics {Count} {Id1}", characteristics.Count, characteristics.Keys.FirstOrDefault());
                     characteristics.TryGetValue(Constants.DeviceModelCharacteristicId, out var deviceModelCharacteristic);
                     Model = deviceModelCharacteristic != null
                         ? System.Text.Encoding.UTF8.GetString((await deviceModelCharacteristic.ReadValue()) ?? [])

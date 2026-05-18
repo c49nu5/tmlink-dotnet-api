@@ -29,7 +29,7 @@ namespace Cygnus.BLE.API.Services
         {
             var service = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new Guid(serviceId)));
             var characteristics = await service.GetCharacteristicsAsync();
-            return characteristics?.ToDictionary(c => c.Uuid.ToString(), c => (IBLECharacteristic)new BLECharacteristic(c), StringComparer.InvariantCultureIgnoreCase);
+            return characteristics?.ToDictionary(c => c.Uuid.Value.ToString(), c => (IBLECharacteristic)new BLECharacteristic(c), StringComparer.InvariantCultureIgnoreCase);
         }
 
         public Task RequestMtuAsync(int mtu)
