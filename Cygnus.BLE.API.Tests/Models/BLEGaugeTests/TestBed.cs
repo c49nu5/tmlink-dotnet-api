@@ -64,12 +64,8 @@ namespace Cygnus.BLE.API.Tests.Models.BLEGaugeTests
             mock.SetupGet(d => d.Name).Returns(Guid.NewGuid().ToString());
             if (isConnectable)
             {
-                mock.Setup(d => d.GetCharacteristics(Constants.GenericAccessServiceId)).ReturnsAsync(new Dictionary<string, IBLECharacteristic>());
-                var deviceCharacteristics = new Dictionary<string, IBLECharacteristic>
-                {
-                    { Constants.SoftwareVersionCharacteristicId, CreateSoftwareVersionCharacteristic(protobufVersion) }
-                };
-                mock.Setup(d => d.GetCharacteristics(Constants.DeviceInformationServiceId)).ReturnsAsync(deviceCharacteristics);                
+                mock.Setup(d => d.GetCharacteristics(Constants.GenericAccessServiceId)).ReturnsAsync([]);
+                mock.Setup(d => d.GetCharacteristics(Constants.DeviceInformationServiceId)).ReturnsAsync([CreateSoftwareVersionCharacteristic(protobufVersion)]);                
                 mock.Setup(d => d.Connect()).Returns(Task.CompletedTask);
             }
 
@@ -79,6 +75,7 @@ namespace Cygnus.BLE.API.Tests.Models.BLEGaugeTests
         private IBLECharacteristic CreateSoftwareVersionCharacteristic(byte protobufVersion)
         {
             var characteristic = new Mock<IBLECharacteristic>(MockBehavior.Strict);
+            characteristic.SetupGet(c => c.Uuid).Returns(Constants.SoftwareVersionCharacteristicId);
             characteristic.Setup(c => c.ReadValue()).ReturnsAsync(Encoding.UTF8.GetBytes(protobufVersion.ToString()));
             return characteristic.Object;
         }

@@ -1,6 +1,6 @@
 ﻿using Shouldly;
 
-namespace Cygnus.BLE.Protobuf.Tests.Services.Protobuf1ChannelTests;
+namespace Cygnus.BLE.Protobuf.Tests.Services.Protobuf1CommandHandlerTests;
 internal class WhenConstructed
 {
     [Test]
@@ -39,22 +39,6 @@ internal class WhenConstructed
         var testBed = new TestBed
         {
             ProtobufMessageConverter = null
-        };
-
-        // Act
-        var getSut = () => testBed.CreateSUT();
-
-        // Assert
-        getSut.ShouldThrow<ArgumentNullException>();
-    }
-
-    [Test]
-    public void ShouldThrowIfProtobufCommandHandlerIsNull()
-    {
-        // Arrange
-        var testBed = new TestBed
-        {
-            ProtobufCommandHandler = null
         };
 
         // Act

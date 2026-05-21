@@ -4,9 +4,9 @@
     {
         event EventHandler<BLECharacteristicValueChangedEventArgs>? CharacteristicValueChanged;
 
-        string? Uuid { get; }
+        string Uuid { get; }
 
-        Task<byte[]?> ReadValue();
+        Task<byte[]> ReadValue();
         Task StartNotifications();
         Task WriteValueWithResponse(byte[] bytes);
     }

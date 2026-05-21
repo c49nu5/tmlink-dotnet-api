@@ -15,6 +15,7 @@ public static class ServiceCollectionsExtensions
     public static void AddProtobufServices(this IServiceCollection services)
     {
         services.AddSingleton<IProtobufMessageConverter, ProtobufMessageConverter>();
+        services.AddTransient<Protobuf1CommandHandler>();
         services.AddTransient<Protobuf1Channel>();
         services.AddKeyedTransient<IProtobufChannel, Protobuf1Channel>((byte)1);
         services.AddSingleton((s) =>

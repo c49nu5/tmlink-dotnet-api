@@ -1,11 +1,13 @@
 ﻿using Cygnus.BLE.Protobuf.Interfaces;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Cygnus.BLE.Protobuf.V1
 {
+    [ExcludeFromCodeCoverage]
     public partial class NotifyMessage : INotifyMessage
     {
-        Interfaces.CommandType INotifyMessage.CommandType => (Interfaces.CommandType)commandType;
-        Interfaces.ErrorCodes INotifyMessage.ErrorCode => (Interfaces.ErrorCodes)errorCode;
-        bool INotifyMessage.ReadDataAvailable => readDataAvailable;
+        public Interfaces.CommandType CommandType => (Interfaces.CommandType)commandType;
+        public Interfaces.ErrorCodes ErrorCode => (Interfaces.ErrorCodes)errorCode;
+        public bool ReadDataAvailable => readDataAvailable;
     }
 }

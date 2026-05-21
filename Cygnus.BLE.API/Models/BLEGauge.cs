@@ -161,7 +161,7 @@ namespace Cygnus.BLE.API.Models
                 var genericCharacteristics = await _device.GetCharacteristics(Constants.GenericAccessServiceId);
                 if (genericCharacteristics != null)
                 {
-                    genericCharacteristics.TryGetValue(Constants.DeviceNameCharacteristicId, out var deviceNameCharacteristic);
+                    var deviceNameCharacteristic = genericCharacteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.DeviceNameCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
                     Name = deviceNameCharacteristic != null
                         ? System.Text.Encoding.UTF8.GetString((await deviceNameCharacteristic.ReadValue()) ?? [])
                         : _device.Name;
@@ -176,27 +176,27 @@ namespace Cygnus.BLE.API.Models
                 }
                 else
                 {
-                    _logger.LogInformation("Checking device information service characteristics {Count} {Id1}", characteristics.Count, characteristics.Keys.FirstOrDefault());
-                    characteristics.TryGetValue(Constants.DeviceModelCharacteristicId, out var deviceModelCharacteristic);
+                    _logger.LogInformation("Checking device information service characteristics {Count} {Id1}", characteristics.Count(), characteristics.FirstOrDefault()?.Uuid);
+                    var deviceModelCharacteristic = characteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.DeviceModelCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
                     Model = deviceModelCharacteristic != null
                         ? System.Text.Encoding.UTF8.GetString((await deviceModelCharacteristic.ReadValue()) ?? [])
                         : string.Empty;
                     _logger.LogInformation("Device model {Model}", Model);
 
-                    characteristics.TryGetValue(Constants.SerialNumberCharacteristicId, out var serialNumberCharacteristic);
+                    var serialNumberCharacteristic = characteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.SerialNumberCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
                     SerialNumber = serialNumberCharacteristic != null
                         ? System.Text.Encoding.UTF8.GetString((await serialNumberCharacteristic.ReadValue()) ?? [])
                         : string.Empty;
                     _logger.LogInformation("Device serial number {SerialNumber}", SerialNumber);
 
-                    characteristics.TryGetValue(Constants.FirmwareRevisionCharacteristicId, out var firmwareCharacteristic);
+                    var firmwareCharacteristic = characteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.FirmwareRevisionCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
                     FirmwareVersion = firmwareCharacteristic != null
                         ? Version.TryParse(System.Text.Encoding.UTF8.GetString((await firmwareCharacteristic.ReadValue()) ?? []), out var version) ? version : null
                         : null;
                     _logger.LogInformation("Device firmware version {FirmwareVersion}", FirmwareVersion);
 
                     _logger.LogInformation("Getting protobuf version for gauge {DeviceIdentifier}", DeviceIdentifier);
-                    characteristics.TryGetValue(Constants.SoftwareVersionCharacteristicId, out var characteristic);
+                    var characteristic = characteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.SoftwareVersionCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
                     if (characteristic != null)
                     {
                         var value = await characteristic.ReadValue();

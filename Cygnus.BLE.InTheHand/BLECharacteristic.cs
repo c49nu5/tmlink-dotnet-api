@@ -5,7 +5,7 @@ namespace Cygnus.BLE.API.Services
 {
     internal class BLECharacteristic : IBLECharacteristic
     {
-        private GattCharacteristic _c;
+        private readonly GattCharacteristic _c;
 
         public BLECharacteristic(GattCharacteristic c)
         {
@@ -15,11 +15,25 @@ namespace Cygnus.BLE.API.Services
 
         public event EventHandler<BLECharacteristicValueChangedEventArgs>? CharacteristicValueChanged;
 
-        public string? Uuid => _c.Uuid.Value.ToString();
+        public string Uuid => _c.Uuid.Value.ToString();
 
-        public async Task<byte[]?> ReadValue()
+        public async Task<byte[]> ReadValue()
         {
-            return await _c.ReadValueAsync();
+            byte[] data = [];
+            try
+            {
+                var value = await _c.ReadValueAsync();
+                if (value != null)
+                {
+                    data = value;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error reading characteristic {Id} {ex}", Uuid, ex.Message);
+            }
+
+            return data;
         }
 
         public async Task StartNotifications()

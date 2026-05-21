@@ -7,7 +7,7 @@
         bool IsConnected { get; }
 
         Task Connect();
-        Task<IDictionary<string, IBLECharacteristic>?> GetCharacteristics(string serviceId);
+        Task<IEnumerable<IBLECharacteristic>?> GetCharacteristics(string serviceId);
         Task RequestMtuAsync(int mtu);
         void AddObserver(IBLEDeviceMonitor observer);
     }
