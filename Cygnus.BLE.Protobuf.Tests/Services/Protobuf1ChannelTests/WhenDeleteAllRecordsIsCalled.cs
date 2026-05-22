@@ -11,8 +11,8 @@ internal class WhenDeleteAllRecordsIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
-        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.DeleteAllRecords), false)).Returns(Task.CompletedTask);
-        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.DeleteAllBScans), false)).Returns(Task.CompletedTask);
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.DeleteAllRecords), false)).ReturnsAsync(true);
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.DeleteAllBScans), false)).ReturnsAsync(true);
 
         // Act
         await sut.DeleteAllRecords();
@@ -27,8 +27,8 @@ internal class WhenDeleteAllRecordsIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
-        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.DeleteAllRecords), false)).Returns(Task.CompletedTask);
-        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.DeleteAllBScans), false)).Returns(Task.CompletedTask);
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.DeleteAllRecords), false)).ReturnsAsync(true);
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.DeleteAllBScans), false)).ReturnsAsync(true);
 
         // Act
         await sut.DeleteAllRecords();

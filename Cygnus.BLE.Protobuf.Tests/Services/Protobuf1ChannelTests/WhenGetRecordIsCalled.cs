@@ -22,7 +22,7 @@ internal class WhenGetRecordIsCalled
         await sut.GetRecord(transferRequestMock, false);
 
         // Assert
-        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == CommandType.GetRecord), It.IsAny<Func<V1.Message, V1.Message.Record>>()), Times.Once());
+        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == CommandType.GetRecord), It.IsAny<Func<V1.Message, V1.Message.Record>>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Test]
@@ -57,7 +57,7 @@ internal class WhenGetRecordIsCalled
         await sut.GetRecord(transferRequestMock, withAScans);
 
         // Assert
-        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == (withAScans ? CommandType.GetRecordPointAScan : CommandType.GetRecordPoint)), It.IsAny<Func<V1.Message, V1.Message.RecordPoint>>()), Times.Exactly(measurementCount));
+        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == (withAScans ? CommandType.GetRecordPointAScan : CommandType.GetRecordPoint)), It.IsAny<Func<V1.Message, V1.Message.RecordPoint>>(), It.IsAny<CancellationToken>()), Times.Exactly(measurementCount));
     }
 
     [Test]
@@ -73,7 +73,7 @@ internal class WhenGetRecordIsCalled
         await sut.GetRecord(transferRequestMock, withAScans);
 
         // Assert
-        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == (withAScans ? CommandType.GetRecordPointAScan : CommandType.GetRecordPoint)), It.IsAny<Func<V1.Message, V1.Message.RecordPoint>>()), Times.Exactly(measurementCount));
+        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == (withAScans ? CommandType.GetRecordPointAScan : CommandType.GetRecordPoint)), It.IsAny<Func<V1.Message, V1.Message.RecordPoint>>(), It.IsAny<CancellationToken>()), Times.Exactly(measurementCount));
     }
 
     [Test]
@@ -89,7 +89,7 @@ internal class WhenGetRecordIsCalled
         await sut.GetRecord(transferRequestMock, false);
 
         // Assert
-        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == CommandType.GetBScan), It.IsAny<Func<V1.Message, V1.Message.BScan>>()), Times.Once());
+        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == CommandType.GetBScan), It.IsAny<Func<V1.Message, V1.Message.BScan>>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Test]
@@ -122,7 +122,7 @@ internal class WhenGetRecordIsCalled
         await sut.GetRecord(transferRequestMock, withAScans);
 
         // Assert
-        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == (withAScans ? CommandType.GetBScanPointAScan : CommandType.GetBScanPoint)), It.IsAny<Func<V1.Message, V1.Message.BScanPoint>>()), Times.Exactly(measurementCount));
+        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == (withAScans ? CommandType.GetBScanPointAScan : CommandType.GetBScanPoint)), It.IsAny<Func<V1.Message, V1.Message.BScanPoint>>(), It.IsAny<CancellationToken>()), Times.Exactly(measurementCount));
     }
 
     private static ITransferRequest ConfigureTransfer(Models.RecordType recordType, TestBed testBed, string recordName, CommandType command, int measurementCount, bool withAScans)
@@ -131,15 +131,14 @@ internal class WhenGetRecordIsCalled
         if (recordType == RecordType.BScan)
         {
             var measurementCommand = withAScans ? CommandType.GetBScanPointAScan : CommandType.GetBScanPoint;
-            testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == measurementCommand), It.IsAny<Func<V1.Message, V1.Message.BScanPoint>>())).ReturnsAsync(new V1.Message.BScanPoint { scanPointNum = pointIndex });
+            testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == measurementCommand), It.IsAny<Func<V1.Message, V1.Message.BScanPoint>>(), It.IsAny<CancellationToken>())).ReturnsAsync(new V1.Message.BScanPoint { scanPointNum = pointIndex });
         }
         else
         {
             var measurementCommand = withAScans ? CommandType.GetRecordPointAScan : CommandType.GetRecordPoint;
-            testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == measurementCommand), It.IsAny<Func<V1.Message, V1.Message.RecordPoint>>())).ReturnsAsync(new V1.Message.RecordPoint { Name = recordName + pointIndex++, Key = 23121u + pointIndex });
+            testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == measurementCommand), It.IsAny<Func<V1.Message, V1.Message.RecordPoint>>(), It.IsAny<CancellationToken>())).ReturnsAsync(new V1.Message.RecordPoint { Name = recordName + pointIndex++, Key = 23121u + pointIndex });
         }
 
-        testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == command), It.IsAny<Func<V1.Message, V1.Message.BScan>>())).ReturnsAsync(new V1.Message.BScan { Name = recordName, numScanPoints = (uint)measurementCount });
         return ConfigureTransfer(recordType, testBed, recordName, command, measurementCount);
     }
 
@@ -147,11 +146,11 @@ internal class WhenGetRecordIsCalled
     {
         if (recordType == Models.RecordType.BScan)
         {
-            testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == command), It.IsAny<Func<V1.Message, V1.Message.BScan>>())).ReturnsAsync(new V1.Message.BScan{ Name = recordName, numScanPoints = (uint)measurementCount });
+            testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == command), It.IsAny<Func<V1.Message, V1.Message.BScan>>(), It.IsAny<CancellationToken>())).ReturnsAsync(new V1.Message.BScan{ Name = recordName, numScanPoints = (uint)measurementCount });
         }
         else
         {
-            testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == command), It.IsAny<Func<V1.Message, V1.Message.Record>>())).ReturnsAsync(new V1.Message.Record { Name = recordName, recordType = (V1.RecordType)recordType, numPointsTaken = (uint)measurementCount });
+            testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == command), It.IsAny<Func<V1.Message, V1.Message.Record>>(), It.IsAny<CancellationToken>())).ReturnsAsync(new V1.Message.Record { Name = recordName, recordType = (V1.RecordType)recordType, numPointsTaken = (uint)measurementCount });
         }
 
         var transferRequestMock = Mock.Of<ITransferRequest>(t => t.Name == recordName && t.RecordType == recordType);

@@ -11,7 +11,8 @@ namespace Cygnus.BLE.Protobuf.Services
     {
         private bool _isDisposed;
 
-        private IBLECharacteristic? _liveMeasurementNotifyCharacteristic;
+        private IBLECharacteristic? _liveCharacteristic;
+        protected IBLECharacteristic? _frozenCharacteristic;
 
         protected ILogger _logger;
         protected IBLEDevice? _device;
@@ -39,6 +40,26 @@ namespace Cygnus.BLE.Protobuf.Services
             }
             else if (await _protobufCommandHandler.Connect(characteristics))
             {
+                var liveCharacteristic = characteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.TMLinkLiveCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
+                if (liveCharacteristic != null)
+                {
+                    _liveCharacteristic = liveCharacteristic;
+                }
+                else
+                {
+                    _logger.LogError("Could not find notify live characteristic for {Device}", _device.Name);
+                }
+
+                var frozenCharacteristic = characteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.TMLinkFrozenCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
+                if (frozenCharacteristic != null)
+                {
+                    _frozenCharacteristic = frozenCharacteristic;
+                }
+                else
+                {
+                    _logger.LogError("Could not find notify live characteristic for {Device}", _device.Name);
+                }
+
                 return await GetGaugeInformation();
             }
 
@@ -47,31 +68,16 @@ namespace Cygnus.BLE.Protobuf.Services
 
         public async Task SubscribeToLiveUpdates()
         {
-            if (_device != null)
-            {
-                var characteristics = await _device.GetCharacteristics(Constants.TMLinkServiceId);
-                if (characteristics != null)
-                {
-                    _logger.LogInformation("Checking TM Link service");
-                    var characteristic = characteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.TMLinkLiveCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
-                    if (characteristic != null)
-                    {
-                        _liveMeasurementNotifyCharacteristic = characteristic;
-                        _liveMeasurementNotifyCharacteristic.CharacteristicValueChanged += OnLiveMeasurementReceived;
-                        await _liveMeasurementNotifyCharacteristic.StartNotifications();
-                    }
-                    else
-                    {
-                        _logger.LogError("Could not find notify characteristic for {Device}", _device.Name);
-                    }
-                }
+            if (_liveCharacteristic != null)
+            { 
+                _liveCharacteristic.CharacteristicValueChanged += OnLiveMeasurementReceived;
+                await _liveCharacteristic.StartNotifications();
             }
         }
 
         public void UnsubscribeFromLiveUpdates()
         {
-            _liveMeasurementNotifyCharacteristic?.CharacteristicValueChanged -= OnLiveMeasurementReceived;
-            _liveMeasurementNotifyCharacteristic = null;
+            _liveCharacteristic?.CharacteristicValueChanged -= OnLiveMeasurementReceived;
         }
 
         public abstract Task DeleteAllRecords();
@@ -160,8 +166,7 @@ namespace Cygnus.BLE.Protobuf.Services
         public void Disconnect()
         {
             UnsubscribeFromLiveUpdates();
-            _recordTransferCts?.Cancel();
-            _recordTransferCts = null;
+            CancelRecordTransfer();
             _protobufCommandHandler.Disconnect();
         }
 

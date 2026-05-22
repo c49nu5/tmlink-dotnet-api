@@ -18,7 +18,7 @@ internal class TestBed
     public Mock<IBLECharacteristic> ReadMessageCharacteristic { get; set; } = new Mock<IBLECharacteristic>(MockBehavior.Strict);
     public Mock<IBLECharacteristic> LiveCharacteristic { get; set; } = new Mock<IBLECharacteristic>(MockBehavior.Strict);
     public Mock<IBLECharacteristic> FrozenCharacteristic { get; set; } = new Mock<IBLECharacteristic>(MockBehavior.Strict);
-    public IEnumerable<IBLECharacteristic> Characteristics { get; private set; }
+    public IEnumerable<IBLECharacteristic> Characteristics { get; set; }
 
     public byte[] CommandBytes = [0x01, 0x02, 0x03, 0x04];
     public byte[] ReadBytes = [0x05, 0x06, 0x07];
@@ -31,10 +31,26 @@ internal class TestBed
         ReadMessageCharacteristic.Setup(c => c.Uuid).Returns(Constants.TMLinkReadMessageCharacteristicId);
         LiveCharacteristic.Setup(c => c.Uuid).Returns(Constants.TMLinkLiveCharacteristicId);
         FrozenCharacteristic.Setup(c => c.Uuid).Returns(Constants.TMLinkFrozenCharacteristicId);
+        Characteristics = CreateTMLinkCharacteristics();
         return new Protobuf1Channel(ProtobufCommandHandler?.Object, Logger, ProtobufMessageConverter?.Object);
     }
 
     internal async Task<Protobuf1Channel> CreateConnectedSUT(bool expectCancelRecordTransfer = false)
+    {
+        if (expectCancelRecordTransfer)
+        {
+            ProtobufCommandHandler.Setup(c => c.CancelCommand());
+            ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.CancelRecordTransfer), true)).ReturnsAsync(true);
+        }
+
+        var sut = CreateSUT();
+
+        PrepareForConnect();
+        await sut.Connect(Device.Object);
+        return sut;
+    }
+
+    public V1.Message.GaugeInfo PrepareForConnect()
     {
         V1.Message.GaugeInfo gaugeInfo = new()
         {
@@ -45,22 +61,12 @@ internal class TestBed
 
         ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo), It.IsAny<Func<V1.Message, V1.Message.GaugeInfo>>())).ReturnsAsync(gaugeInfo);
 
-        if (expectCancelRecordTransfer)
-        {
-            ProtobufCommandHandler.Setup(c => c.CancelCommand());
-            ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.CancelRecordTransfer), true)).Returns(Task.CompletedTask);
-        }
-
-        var sut = CreateSUT();
         Device.Setup(d => d.RequestMtuAsync(500)).Returns(Task.CompletedTask);
         Device.SetupGet(g => g.Name).Returns("Test Gauge");
 
-        Characteristics = CreateTMLinkCharacteristics();
         Device.Setup(d => d.GetCharacteristics(Constants.TMLinkServiceId)).ReturnsAsync(Characteristics);
         ProtobufCommandHandler.Setup(h => h.Connect(Characteristics)).ReturnsAsync(true);
-        
-        await sut.Connect(Device.Object);
-        return sut;
+        return gaugeInfo;
     }
 
     private IEnumerable<IBLECharacteristic> CreateTMLinkCharacteristics()
@@ -74,13 +80,10 @@ internal class TestBed
         };
     }
 
-    public void SendDelayedNotification(CommandType command)
+    internal void PrepareForDisconnect()
     {
-        Task.Delay(100).ContinueWith(
-            task =>
-            {
-                ProtobufMessageConverter.Setup(c => c.FromProtobuf<V1.NotifyMessage>(NotifyBytes)).Returns(new V1.NotifyMessage { commandType = (V1.CommandType)command });
-                NotifyMessageCharacteristic.Raise(m => m.CharacteristicValueChanged += null, new BLECharacteristicValueChangedEventArgs { Value = NotifyBytes });
-            });
+        LiveCharacteristic.SetupRemove(c => c.CharacteristicValueChanged -= null);
+        ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.CancelRecordTransfer), true)).ReturnsAsync(true);
+        ProtobufCommandHandler.Setup(c => c.Disconnect());
     }
 }

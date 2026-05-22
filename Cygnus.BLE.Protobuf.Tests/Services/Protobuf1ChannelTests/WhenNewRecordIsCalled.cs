@@ -12,8 +12,8 @@ internal class WhenNewRecordIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
-        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.NewRecord), false)).Returns(Task.CompletedTask);
-        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordPoints), false)).Returns(Task.CompletedTask);
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.NewRecord), false)).ReturnsAsync(true);
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordPoints), false)).ReturnsAsync(true);
         var blankRecord = CreateBlankRecord(recordType, measurementCount);
 
         // Act
@@ -29,8 +29,8 @@ internal class WhenNewRecordIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
-        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.NewRecord), false)).Returns(Task.CompletedTask);
-        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordPoints), false)).Returns(Task.CompletedTask);
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.NewRecord), false)).ReturnsAsync(true);
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordPoints), false)).ReturnsAsync(true);
         var blankRecord = CreateBlankRecord(recordType, measurementCount);
 
         // Act
@@ -46,8 +46,8 @@ internal class WhenNewRecordIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
-        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.NewRecord), false)).Returns(Task.CompletedTask);
-        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordPoints), false)).Returns(Task.CompletedTask);
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.NewRecord), false)).ReturnsAsync(true);
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordPoints), false)).ReturnsAsync(true);
         var blankRecord = CreateBlankRecord(recordType, measurementCount);
 
         // Act
