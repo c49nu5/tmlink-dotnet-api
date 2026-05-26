@@ -130,10 +130,6 @@ namespace Cygnus.BLE.Protobuf.Services
                         else
                         {
                             _logger.LogInformation("Notification did not arrive {Command} {CancelRequested} {CompletedSuccessfully}", gaugeCommand.CommandType, cancellationToken.IsCancellationRequested, requestCompletionSource.Task.IsCompletedSuccessfully);
-                            if (commandTask.IsCompletedSuccessfully)
-                            {
-                                _logger.LogInformation("Notification that did arrive {CommandType} {ReadDataAvailable}", commandTask.Result.CommandType, commandTask.Result.ReadDataAvailable);
-                            }
                         }
                     }
                 }

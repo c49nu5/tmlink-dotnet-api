@@ -66,12 +66,17 @@ namespace Cygnus.BLE.API.Models
 
                     if (_protobufChannel.IsInitialized)
                     {
-                        IsConnected = true;
-
                         var gaugeInformation = await _protobufChannel.Connect(_device);
                         if (gaugeInformation != null)
                         {
+                            IsConnected = true;
                             SerialNumber = gaugeInformation.SerialNumber.ToString();
+                        }
+                        else
+                        {
+                            _logger.LogError("Failed to retrieve gauge information for {Name}", Name);
+                            _protobufChannel.Dispose();
+                            _protobufChannel = new ProtobufNullChannel();
                         }
                     }
                 }
