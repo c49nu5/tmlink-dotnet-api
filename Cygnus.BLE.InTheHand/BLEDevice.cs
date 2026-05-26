@@ -7,11 +7,11 @@ namespace Cygnus.BLE.API.Services
     {
         private BluetoothDevice _device;
         private bool disposedValue;
+        private bool initialized = false;
 
         public BLEDevice(BluetoothDevice device)
         {
             _device = device;
-            _device.GattServerDisconnected += OnDisconnected;
         }
 
         public string Id => _device.Id;
@@ -20,9 +20,14 @@ namespace Cygnus.BLE.API.Services
 
         public bool IsConnected => _device.Gatt.IsConnected;
 
-        public Task Connect()
+        public async Task Connect()
         {
-            return _device.Gatt.ConnectAsync();
+            await _device.Gatt.ConnectAsync();
+            if (_device.Gatt.IsConnected && !initialized)
+            {
+                _device.GattServerDisconnected += OnDisconnected;
+                initialized = true;
+            }
         }
 
         public async Task<IEnumerable<IBLECharacteristic>?> GetCharacteristics(string serviceId)
@@ -48,7 +53,11 @@ namespace Cygnus.BLE.API.Services
             {
                 if (disposing)
                 {
-                    _device.GattServerDisconnected -= OnDisconnected;
+                    if (initialized)
+                    {
+                        _device.GattServerDisconnected -= OnDisconnected;
+                    }
+
                     _device.Dispose();
                 }
 

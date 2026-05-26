@@ -1,6 +1,5 @@
 ﻿using Cygnus.BLE.Interfaces;
 using Cygnus.BLE.Protobuf.Interfaces;
-//using Cygnus.BLE.Protobuf.V1;
 using Microsoft.Extensions.Logging;
 using Constants = Cygnus.BLE.Interfaces.Constants;
 
@@ -9,7 +8,6 @@ namespace Cygnus.BLE.Protobuf.Services
     internal abstract class ProtobufCommandHandler<NotifyMessage> : IProtobufCommandHandler
         where NotifyMessage : INotifyMessage, new()
     {
-
         private TaskCompletionSource<NotifyMessage>? _requestCompletionSource;
         private IBLECharacteristic? _notifyMessageCharacteristic;
         private IBLECharacteristic? _writeCommandCharacteristic;
@@ -190,7 +188,7 @@ namespace Cygnus.BLE.Protobuf.Services
 
         private void OnNotificationReceived(object? sender, BLECharacteristicValueChangedEventArgs e)
         {
-            _logger.LogInformation("Notification characteristic received {Time}", DateTime.Now);
+            _logger.LogInformation("Notification characteristic received {Time:yyyy-MM-dd HH:mm:ss:fff}", DateTime.Now);
             try
             {
                 var notifyReady = _protobufMessageConverter.FromProtobuf<NotifyMessage>(e.Value);

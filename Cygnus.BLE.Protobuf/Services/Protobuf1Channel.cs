@@ -3,7 +3,6 @@ using Cygnus.BLE.Protobuf.V1;
 using Cygnus.Interfaces;
 using Cygnus.Models;
 using Microsoft.Extensions.Logging;
-using System.Drawing;
 using static Cygnus.BLE.Protobuf.V1.Constants;
 
 namespace Cygnus.BLE.Protobuf.Services
