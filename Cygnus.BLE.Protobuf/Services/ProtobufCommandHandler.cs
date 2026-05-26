@@ -37,6 +37,7 @@ namespace Cygnus.BLE.Protobuf.Services
                 return false;
             }
 
+            _notifyMessageCharacteristic?.CharacteristicValueChanged -= OnNotificationReceived;
             var notifyMessageCharacteristic = characteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.TMLinkNotifyMessageCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
             if (notifyMessageCharacteristic != null)
             {
