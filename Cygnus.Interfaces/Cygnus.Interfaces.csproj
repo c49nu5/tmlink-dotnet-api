@@ -19,9 +19,14 @@
 		<RepositoryUrl>https://github.com/c49nu5/tmlink-dotnet-api</RepositoryUrl>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<None Include="..\Cygnus.Models\README.md">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+		</None>
 		<None Include="..\icon.png">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
@@ -34,6 +39,13 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Cygnus.Models\Cygnus.Models.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="README.md">
+	    <PackagePath>\</PackagePath>
+	    <Pack>True</Pack>
+	  </None>
 	</ItemGroup>
 
 </Project>

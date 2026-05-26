@@ -3,26 +3,28 @@ name: CI Build
 on:
   push:
     branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
   build:
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
         persist-credentials: true
 
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v3.2.1
+      uses: gittools/actions/gitversion/setup@v4.5.0
       with:
-        versionSpec: '6.3.x'
-              
+        versionSpec: '6.7.x'
+      
     - name: Determine Version
       id: version_step # step id used as a reference for output values
-      uses: gittools/actions/gitversion/execute@v3.2.1
+      uses: gittools/actions/gitversion/execute@v4.5.0
 
     - name: Display GitVersion variables
       run: |
@@ -30,7 +32,7 @@ jobs:
         echo "SemVer (env.semVer)            : ${{ env.semVer }}"
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 10.0.x
 
@@ -49,7 +51,17 @@ jobs:
       run: dotnet build -c Release --no-restore /p:Version=${{ env.fullSemVer }}
 
     - name: Test
-      run: dotnet test -c Release --no-build --verbosity normal
+      run: dotnet test -c Release --no-build --verbosity normal --logger trx --collect:"XPlat Code Coverage" --results-directory coverage
+      
+    - name: Create code coverage report
+      run: |
+        dotnet tool install -g dotnet-reportgenerator-globaltool
+        reportgenerator -reports:coverage/*/coverage.cobertura.xml -targetdir:CodeCoverage -reporttypes:'MarkdownSummaryGithub,Cobertura'
+
+    - name: Write to Job Summary
+      run: |
+        echo "### Coverage results :rocket:" >> $GITHUB_STEP_SUMMARY
+        cat CodeCoverage/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
 
     - name: Pack
       run: dotnet pack -c Release --no-restore --no-build /p:Version=${{ env.fullSemVer }}

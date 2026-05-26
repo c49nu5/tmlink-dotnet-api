@@ -1,4 +1,4 @@
-﻿namespace Cygnus.BLE.Protobuf
+﻿namespace Cygnus.BLE.Interfaces
 {
     public class Constants
     {
@@ -6,7 +6,7 @@
 
         public const string TMLinkServiceId = "de670901-8025-4c69-a40e-eccd60563713";
         public const string TMLinkWriteCommandCharacteristicId = "de670902-8025-4c69-a40e-eccd60563713";
-        public const string TMLinkMessageReadyCharacteristicId = "de670903-8025-4c69-a40e-eccd60563713";
+        public const string TMLinkNotifyMessageCharacteristicId = "de670903-8025-4c69-a40e-eccd60563713";
         public const string TMLinkReadMessageCharacteristicId = "de670904-8025-4c69-a40e-eccd60563713";
         public const string TMLinkLiveCharacteristicId = "de670906-8025-4c69-a40e-eccd60563713";
         public const string TMLinkFrozenCharacteristicId = "de670907-8025-4c69-a40e-eccd60563713";

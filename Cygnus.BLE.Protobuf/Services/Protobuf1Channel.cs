@@ -1,18 +1,28 @@
 ﻿using Cygnus.BLE.Protobuf.Interfaces;
 using Cygnus.BLE.Protobuf.V1;
+using Cygnus.Interfaces;
 using Cygnus.Models;
 using Microsoft.Extensions.Logging;
+using System.Drawing;
 using static Cygnus.BLE.Protobuf.V1.Constants;
 
 namespace Cygnus.BLE.Protobuf.Services
 {
-    internal class Protobuf1Channel : ProtobufChannel<NotifyMessage>
+    internal class Protobuf1Channel : ProtobufChannel
     {
-        public Protobuf1Channel(ILogger<Protobuf1Channel> logger, IProtobufMessageConverter protobufMessageConverter) 
-            : base(logger, protobufMessageConverter)
+        protected IProtobufMessageConverter _protobufMessageConverter;
+
+        public Protobuf1Channel(ILogger<Protobuf1Channel> logger, IProtobufMessageConverter protobufMessageConverter, Protobuf1CommandHandler protobuf1CommandHandler) 
+            : this(protobuf1CommandHandler, logger, protobufMessageConverter)
         {
         }
 
+        internal Protobuf1Channel(IProtobufCommandHandler protobuf1CommandHandler, ILogger<Protobuf1Channel> logger, IProtobufMessageConverter protobufMessageConverter)
+            : base(logger, protobuf1CommandHandler)
+        {
+            _protobufMessageConverter = protobufMessageConverter ?? throw new ArgumentNullException(nameof(protobufMessageConverter));
+        }
+     
         public override async Task<List<GaugeRecordSummary>?> GetRecordList()
         {
             return (await DoGetRecordList()).Union(await DoGetBScanList()).ToList();
@@ -26,21 +36,10 @@ namespace Cygnus.BLE.Protobuf.Services
                 Timestamp = DateTime.Now
             };
 
-            Message.BScanList getRecordList(Message message)
-            {
-                var recordList = message.bscanList;
-                _logger.LogInformation("Received bscan list from gauge {DeviceIdentifier}: {RecordCount}", _device?.Id, recordList.Items.Count);
-                foreach (var record in recordList.Items)
-                {
-                    _logger.LogInformation("Record {Index}: {Points}", record.Name, record.numScanPoints);
-                }
+            var bScanList = await _protobufCommandHandler.SendCommandWithResponse<Message.BScanList, Message>(command, m => m.bscanList);
+            _logger.LogInformation("Received bscan list from gauge {Device}: {RecordCount}", _device?.Name, bScanList?.Items.Count);
 
-                return recordList;
-            }
-
-            var recordList = await SendCommandWithResponse<Message.BScanList, Message>(command, getRecordList);
-
-            return recordList?.Items.Select(i => new GaugeRecordSummary
+            return bScanList?.Items.Select(i => new GaugeRecordSummary
             {
                 FileSize = i.fileSize,
                 Name = i.Name,
@@ -60,19 +59,8 @@ namespace Cygnus.BLE.Protobuf.Services
                 Timestamp = DateTime.Now,                
             };
 
-            Message.RecordList getRecordList(Message message)
-            {
-                var recordList = message.recordList;
-                _logger.LogInformation("Received record list from gauge {DeviceIdentifier}: {RecordCount}", _device?.Id, recordList.Items.Count);
-                foreach (var record in recordList.Items)
-                {
-                    _logger.LogInformation("Record {Index}: {Points}", record.Name, record.numPointsRequired);
-                }
-
-                return recordList;
-            }
-
-            var recordList = await SendCommandWithResponse<Message.RecordList, Message>(command, getRecordList);
+            var recordList = await _protobufCommandHandler.SendCommandWithResponse<Message.RecordList, Message>(command, m => m.recordList);
+            _logger.LogInformation("Received record list from gauge {Device}: {RecordCount}", _device?.Name, recordList?.Items.Count);
 
             return recordList?.Items.Select(i => new GaugeRecordSummary
             {
@@ -96,17 +84,11 @@ namespace Cygnus.BLE.Protobuf.Services
                 Timestamp = DateTime.Now
             };
 
-            Message.Record getRecord(Message message)
-            {
-                var record = message.record;
-                _logger.LogInformation("Received record from gauge {RecordName}: {RequiredPoints} {PointsTaken}", record.Name, record.numPointsRequired, record.numPointsTaken);
+            Message.Record? record = await _protobufCommandHandler.SendCommandWithResponse<Message.Record, Message>(command, m => m.record, _recordTransferCts?.Token);
 
-                return record;
-            }
-
-            Message.Record? record = await SendCommandWithResponse<Message.Record, Message>(command, getRecord);
             if (record != null)
             {
+                _logger.LogInformation("Received record from gauge {RecordName}: {RequiredPoints} {PointsTaken}", record.Name, record.numPointsRequired, record.numPointsTaken);
                 GaugeRecord gaugeRecord = new()
                 {
                     Name = record.Name,
@@ -120,9 +102,11 @@ namespace Cygnus.BLE.Protobuf.Services
                     NumberPointsRequired = record.numPointsRequired,
                     NumberOfPointsTaken = record.numPointsTaken
                 };
+
                 return gaugeRecord;
             }
 
+            _logger.LogWarning("Did not receive record from gauge {RecordName}", transferRequest.Name);
             return null;
         }
 
@@ -134,17 +118,10 @@ namespace Cygnus.BLE.Protobuf.Services
                 Name = recordName
             };
 
-            Message.RecordPoint getPoint(Message message)
-            {
-                var point = message.recordPoint;
-                _logger.LogInformation("Received record point from gauge {RecordId}: {PointName}", point.recordID, point.Name);
-
-                return point;
-            }
-
-            var measurement = await SendCommandWithResponse<Message.RecordPoint, Message>(command, getPoint);
+            var measurement = await _protobufCommandHandler.SendCommandWithResponse<Message.RecordPoint, Message>(command, m => m.recordPoint, _recordTransferCts?.Token);
             if (measurement != null)
             {
+                _logger.LogInformation("Received record point from gauge {RecordId}: {PointName}", measurement.recordID, measurement.Name);
                 return new()
                 {
                     Name = measurement.Name,
@@ -163,6 +140,7 @@ namespace Cygnus.BLE.Protobuf.Services
                 };
             }
 
+            _logger.LogWarning("Did not receive record point from gauge {RecordName}", recordName);
             return null;
         }
 
@@ -175,30 +153,24 @@ namespace Cygnus.BLE.Protobuf.Services
                 Timestamp = DateTime.Now
             };
 
-            Message.BScan getRecord(Message message)
+            Message.BScan? bScan = await _protobufCommandHandler.SendCommandWithResponse<Message.BScan, Message>(command, m => m.Bscan, _recordTransferCts?.Token);
+            if (bScan != null)
             {
-                var record = message.Bscan;
-                _logger.LogInformation("Received record from gauge {RecordName}: {PointsTaken}", record.Name, record.numScanPoints);
-
-                return record;
-            }
-
-            Message.BScan? record = await SendCommandWithResponse<Message.BScan, Message>(command, getRecord);
-            if (record != null)
-            {
+                _logger.LogInformation("Received b-scan from gauge {BScanName}: {PointsTaken}", bScan.Name, bScan.numScanPoints);
                 GaugeRecord gaugeRecord = new()
                 {
-                    Name = record.Name,
-                    Key = record.Key,
-                    RecordID = record.BScanID,
+                    Name = bScan.Name,
+                    Key = bScan.Key,
+                    RecordID = bScan.BScanID,
                     RecordType = Models.RecordType.BScan,
-                    Updated = record.Updated,
-                    NumberPointsRequired = record.numScanPoints,
-                    NumberOfPointsTaken = record.numScanPoints
+                    Updated = bScan.Updated,
+                    NumberPointsRequired = bScan.numScanPoints,
+                    NumberOfPointsTaken = bScan.numScanPoints
                 };
                 return gaugeRecord;
             }
 
+            _logger.LogWarning("Did not receive b-scan from gauge {BScanName}", transferRequest.Name);
             return null;
         }
 
@@ -210,17 +182,10 @@ namespace Cygnus.BLE.Protobuf.Services
                 Name = recordName
             };
 
-            Message.BScanPoint getPoint(Message message)
-            {
-                var point = message.bscanPoint;
-                _logger.LogInformation("Received record point from gauge {RecordId}", point.BScanID);
-
-                return point;
-            }
-
-            var measurement = await SendCommandWithResponse<Message.BScanPoint, Message>(command, getPoint);
+            var measurement = await _protobufCommandHandler.SendCommandWithResponse<Message.BScanPoint, Message>(command, m => m.bscanPoint, _recordTransferCts?.Token);
             if (measurement != null)
             {
+                _logger.LogInformation("Received record point from gauge {RecordId}", measurement.BScanID);
                 return new()
                 {
                     Name = measurement.scanPointNum.ToString(),
@@ -235,6 +200,7 @@ namespace Cygnus.BLE.Protobuf.Services
                 };
             }
 
+            _logger.LogWarning("Did not receive b-scan point from gauge {BScanName}", recordName);
             return null;
         }
 
@@ -267,7 +233,7 @@ namespace Cygnus.BLE.Protobuf.Services
                 Name = deleteRequest.Name
             };
 
-            await SendCommand(command);
+            await _protobufCommandHandler.SendCommand(command);
         }
 
         public override async Task DeleteAllRecords()
@@ -279,14 +245,14 @@ namespace Cygnus.BLE.Protobuf.Services
                 commandType = V1.CommandType.DeleteAllRecords,
             };
 
-            await SendCommand(command);
+            await _protobufCommandHandler.SendCommand(command);
 
             command = new()
             {
                 commandType = V1.CommandType.DeleteAllBScans,
             };
 
-            await SendCommand(command);
+            await _protobufCommandHandler.SendCommand(command);
         }
 
         public override async Task NewRecord(BlankRecord record)
@@ -297,9 +263,9 @@ namespace Cygnus.BLE.Protobuf.Services
                 Name = record.Name,
                 recordType = (V1.RecordType)record.Type,
                 Uom = (Uom)record.Units,
-                numColsX = record.Type == Models.RecordType.Linear ? (uint)record.MeasurementPoints.Length : record.ColumnCount,
-                numRowsY = record.Type == Models.RecordType.Linear ? 1 : record.RowCount,
-                gridPattern = GridPattern.Dldl                
+                numColsX = record.Type == Models.RecordType.Grid ? record.ColumnCount : (uint)record.MeasurementPoints.Length,
+                numRowsY = record.Type == Models.RecordType.Grid ? record.RowCount : 1,
+                gridPattern = (V1.GridPattern)record.GridPattern                
             };
 
             Command command = new()
@@ -309,7 +275,7 @@ namespace Cygnus.BLE.Protobuf.Services
                 Timestamp = DateTime.Now,                
             };
 
-            await SendCommand(command);
+            await _protobufCommandHandler.SendCommand(command);
 
             const int batchSize = 10;
             for (var i = 0; i < record.MeasurementPoints.Length; i = i + batchSize)
@@ -338,7 +304,7 @@ namespace Cygnus.BLE.Protobuf.Services
                     addRecordPoints = addRecordPoints
                 };
 
-                await SendCommand(pointsCommand);
+                await _protobufCommandHandler.SendCommand(pointsCommand);
             }
         }
         
@@ -350,26 +316,7 @@ namespace Cygnus.BLE.Protobuf.Services
                 commandType = V1.CommandType.CancelRecordTransfer,
             };
 
-            await SendCommand(command, true);
-        }
-
-        private async Task<Message.GaugeInfo?> GetGaugeInfo()
-        {
-            Command command = new()
-            {
-                commandType = V1.CommandType.GetGaugeInfo,
-                Timestamp = DateTime.Now
-            };
-
-            Message.GaugeInfo getGaugeInfo(Message message)
-            {
-                var gaugeInfo = message.gaugeInfo;
-                _logger.LogInformation("Received information from gauge {DeviceIdentifier}: {serialNumber}", _device?.Id, gaugeInfo.serialNumber);
-
-                return gaugeInfo;
-            }
-
-            return await SendCommandWithResponse<Message.GaugeInfo, Message>(command, getGaugeInfo);
+            await _protobufCommandHandler.SendCommand(command, true);
         }
 
         protected override void UpdateLiveMeasurement(byte[] value)
@@ -377,64 +324,92 @@ namespace Cygnus.BLE.Protobuf.Services
             NotifyLiveMeasurement liveMeasurement = _protobufMessageConverter.FromProtobuf<NotifyLiveMeasurement>(value);
             if (liveMeasurement != null)
             {
-                _gaugePresenter?.UpdateLiveMeasurement(new LiveMeasurement
-                {
-                    BatteryLevel = liveMeasurement.batteryLevel,
-                    GaindB = liveMeasurement.gaindB,
-                    Index = liveMeasurement.Index,
-                    Units = (liveMeasurement.statusBits & IsImperialUnits) == IsImperialUnits ? MeasurementUnits.Imperial : MeasurementUnits.Metric,
-                    SurfaceTemp = liveMeasurement.surfaceTemp,
-                    Thickness = liveMeasurement.Thickness,
-                    Mode = (Models.UTMode)liveMeasurement.UTMode,
-                    Velocity = liveMeasurement.Velocity,
-                    IsDeepcoat = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
-                    IsFrozen = (liveMeasurement.statusBits & IsFrozenFlag) == IsFrozenFlag,
-                    IsStable = (liveMeasurement.statusBits & IsStableFlag) == IsStableFlag,
-                    IsValid = (liveMeasurement.statusBits & IsValidFlag) == IsValidFlag,
-                });
-
                 if (liveMeasurement.liveMeasurementType == LiveMeasurementType.Frozen)
                 {
-                    FrozenLiveMeasurement getFrozenLiveMeasurement(FrozenLiveMeasurement frozenMeasurement)
+                    var frozenCharacteristic = _frozenCharacteristic;
+                    if (frozenCharacteristic == null)
                     {
-                        _logger.LogInformation("Received frozen measurement from gauge {DeviceIdentifier}: {serialNumber}", _device?.Id, frozenMeasurement.Index);
-                        _gaugePresenter?.UpdateLiveMeasurement(new LiveMeasurement
-                        {
-                            BatteryLevel = frozenMeasurement.batteryLevel,
-                            GaindB = frozenMeasurement.gaindB,
-                            Index = frozenMeasurement.Index,
-                            Units = (MeasurementUnits)frozenMeasurement.Uom,
-                            SurfaceTemp = frozenMeasurement.surfaceTemp,
-                            Thickness = frozenMeasurement.Thickness,
-                            Mode = (Models.UTMode)frozenMeasurement.UTMode,
-                            Velocity = frozenMeasurement.Velocity,
-                            IsDeepcoat = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
-                            IsFrozen = true,
-                            IsStable = frozenMeasurement.stableMeasurement,
-                            IsValid = frozenMeasurement.validMeasurement,
-                            AScan = GetAScan(frozenMeasurement.Ascan)
-                        });
-
-                        return frozenMeasurement;
+                        _logger.LogError("Frozen characteristic not found");
                     }
-
-                    GetResponse<FrozenLiveMeasurement, FrozenLiveMeasurement>(Guid.Parse(Constants.TMLinkFrozenCharacteristicId), getFrozenLiveMeasurement).ConfigureAwait(false);
+                    else
+                    {
+                        frozenCharacteristic.ReadValue().ContinueWith(task =>
+                        {
+                            if (task.IsCompletedSuccessfully && task.Result.Length > 0)
+                            {
+                                var frozenMeasurement = _protobufMessageConverter.FromZippedProtobuf<FrozenLiveMeasurement>(task.Result);
+                                _logger.LogInformation("Received frozen measurement from gauge {DeviceIdentifier}: {serialNumber}", _device?.Name, frozenMeasurement.Index);
+                                NotifyObservers(o => o.OnLiveMeasurementReceived(new LiveMeasurement
+                                {
+                                    BatteryLevel = frozenMeasurement.batteryLevel,
+                                    GaindB = frozenMeasurement.gaindB,
+                                    Index = frozenMeasurement.Index,
+                                    Units = (MeasurementUnits)frozenMeasurement.Uom,
+                                    SurfaceTemp = frozenMeasurement.surfaceTemp,
+                                    Thickness = frozenMeasurement.Thickness,
+                                    Mode = (Models.UTMode)frozenMeasurement.UTMode,
+                                    Velocity = frozenMeasurement.Velocity,
+                                    IsDeepcoat = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
+                                    IsFrozen = true,
+                                    IsStable = frozenMeasurement.stableMeasurement,
+                                    IsValid = frozenMeasurement.validMeasurement,
+                                    AScan = GetAScan(frozenMeasurement.Ascan)
+                                }));
+                            }
+                            else
+                            {
+                                _logger.LogError(task.Exception, "Error retrieving frozen measurement for gauge {DeviceIdentifier}", _device?.Name);
+                            }
+                        });
+                    }
+                }
+                else
+                {
+                    NotifyObservers(o => o.OnLiveMeasurementReceived(new LiveMeasurement
+                    {
+                        BatteryLevel = liveMeasurement.batteryLevel,
+                        GaindB = liveMeasurement.gaindB,
+                        Index = liveMeasurement.Index,
+                        Units = (liveMeasurement.statusBits & IsImperialUnits) == IsImperialUnits ? MeasurementUnits.Imperial : MeasurementUnits.Metric,
+                        SurfaceTemp = liveMeasurement.surfaceTemp,
+                        Thickness = liveMeasurement.Thickness,
+                        Mode = (Models.UTMode)liveMeasurement.UTMode,
+                        Velocity = liveMeasurement.Velocity,
+                        IsDeepcoat = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
+                        IsFrozen = (liveMeasurement.statusBits & IsFrozenFlag) == IsFrozenFlag,
+                        IsStable = (liveMeasurement.statusBits & IsStableFlag) == IsStableFlag,
+                        IsValid = (liveMeasurement.statusBits & IsValidFlag) == IsValidFlag,
+                    }));
                 }
             }
         }
 
-        protected override async Task UpdateGaugeInformation()
+        protected override async Task<GaugeInformation> GetGaugeInformation()
         {
-            var gaugeInfo = await GetGaugeInfo();
+            Command command = new()
+            {
+                commandType = V1.CommandType.GetGaugeInfo,
+                Timestamp = DateTime.Now
+            };
+
+            var gaugeInfo = await _protobufCommandHandler.SendCommandWithResponse<Message.GaugeInfo, Message>(command, m => m.gaugeInfo);
             if (gaugeInfo != null)
             {
-                _gaugePresenter?.SerialNumber = gaugeInfo.serialNumber.ToString();
-                _logger.LogInformation("Updated gauge info for {DeviceIdentifier}: Serial Number {SerialNumber}", _device?.Id, _gaugePresenter?.SerialNumber);
+                _logger.LogInformation("Updated gauge info for {Device}: Serial Number {SerialNumber}", _device?.Name, gaugeInfo.serialNumber);
             }
             else
             {
-                _logger.LogError("No gauge info returned for device {DeviceIdentifier}", _device?.Id);
+                _logger.LogError("No gauge info returned for device {Device}", _device?.Name);
             }
+
+            return new GaugeInformation
+            {
+                SerialNumber = gaugeInfo?.serialNumber ?? 0,
+                GaugeUD = gaugeInfo?.gaugeUD ?? 0,
+                VersionNumber = gaugeInfo?.versionNumber ?? 0,
+                BatteryLevel = gaugeInfo?.batteryLevel ?? 0,
+                GaugeVariant = (Models.GaugeVariant)(gaugeInfo?.gaugeVariant ?? V1.GaugeVariant.Test)
+            };
         }
     }
 }

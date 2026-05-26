@@ -1,9 +1,12 @@
 ﻿using Cygnus.Models;
 using Cygnus.BLE.Protobuf.Interfaces;
-using InTheHand.Bluetooth;
+using Cygnus.Interfaces;
+using Cygnus.BLE.Interfaces;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Cygnus.BLE.Protobuf.Services
 {
+    [ExcludeFromCodeCoverage]
     public class ProtobufNullChannel : IProtobufChannel
     {
         public bool IsInitialized => false;
@@ -13,7 +16,7 @@ namespace Cygnus.BLE.Protobuf.Services
             throw new NotImplementedException();
         }
 
-        public Task Connect(BluetoothDevice device, IBLEGaugePresenter gaugeInformation)
+        public Task<GaugeInformation?> Connect(IBLEDevice device)
         {
             throw new NotImplementedException();
         }
@@ -49,6 +52,11 @@ namespace Cygnus.BLE.Protobuf.Services
         }
 
         public void UnsubscribeFromLiveUpdates()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddObserver(ILiveMeasurementObserver observer)
         {
             throw new NotImplementedException();
         }

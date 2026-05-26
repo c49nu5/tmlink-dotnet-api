@@ -429,8 +429,6 @@ internal partial class MeasurementConverter : IMeasurementConverter
 
     public double GetVelocityIncrement() => _settingsService.Units == MeasurementUnits.Metric ? 1 : 0.0001;
 
-    public Regex GetVelocityRegex() => _settingsService.Units == MeasurementUnits.Metric ? MetricVelocityParser : ImperialVelocityParser;
-
     public double? GetWastage(string displayedThickness, string displayedReference, string displayedMinimum, string? parentReference, string? parentMinimum)
     {
         if (displayedReference == string.Empty) displayedReference = parentReference ?? string.Empty;
@@ -490,8 +488,4 @@ internal partial class MeasurementConverter : IMeasurementConverter
     public string SpeedString => _settingsService.Units == MeasurementUnits.Metric ? "m/s" : "in/µs";
 
     private static Regex NumericParser => new Regex(@"^-?\d+(?:[\,\.]\d+)?");
-
-    private static Regex MetricVelocityParser => new Regex(@"^\d*[1-9]\d*$");
-
-    private static Regex ImperialVelocityParser => new Regex(@"^[+]?([.]\d+|\d+([.]\d+)?)$");
 }

@@ -1,4 +1,6 @@
-﻿namespace Cygnus.BLE.API.Interfaces;
+﻿using Cygnus.BLE.Interfaces;
+
+namespace Cygnus.BLE.API.Interfaces;
 
 public interface IConnectionService
 {
@@ -10,5 +12,5 @@ public interface IConnectionService
     Task ConnectToGauge(IBLEGauge gauge);
     IBLEGauge? ConnectedGauge { get; }
 
-    internal void GaugeIsConnectedChanged(string deviceIdentifier);
+    internal void GaugeIsDisconnected(string deviceIdentifier);
 }

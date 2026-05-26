@@ -19,6 +19,7 @@
 	<RepositoryUrl>https://github.com/c49nu5/tmlink-dotnet-api</RepositoryUrl>
 	<PackageIcon>icon.png</PackageIcon>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageReadmeFile>README.md</PackageReadmeFile>	  
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,6 +30,13 @@
     <None Include="..\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
     </None>
   </ItemGroup>
 

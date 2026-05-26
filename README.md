@@ -17,6 +17,8 @@ services.AddSingleton<IPlatformService, PlatformService>();
 services.AddBleServices();
 ```
 
+By default the call to AddBleServices registers an implementation of the IGaugeDiscoverer interface based on the [InTheHand.BluetoothLE package](https://github.com/inthehand/32feet). If you want to use a different BLE library, you can register your own implementation of IGaugeDiscoverer in DI after calling AddBleServices(false) which will prevent the default implementation from being registered.
+
 Clients need to implement `IPlatformService` interface to provide platform-specific functionality such as checking that BLE is configured correctly and displaying messages to the end user. 
 
 An example of these implementations for Maui can be found here
