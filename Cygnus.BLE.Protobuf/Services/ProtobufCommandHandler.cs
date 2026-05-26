@@ -26,6 +26,8 @@ namespace Cygnus.BLE.Protobuf.Services
 
         public async Task<bool> Connect(IEnumerable<IBLECharacteristic> characteristics)
         {
+            _logger.LogError("Connecting to TM-Link command characteristics");
+
             var writeCommandCharacteristic = characteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.TMLinkWriteCommandCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
             if (writeCommandCharacteristic != null)
             {
@@ -73,6 +75,7 @@ namespace Cygnus.BLE.Protobuf.Services
 
         public void CancelCommand()
         {
+            _logger.LogInformation("Call made to cancel command");
             _requestCompletionSource?.TrySetCanceled();
             _requestCompletionSource = null;
         }
@@ -108,7 +111,6 @@ namespace Cygnus.BLE.Protobuf.Services
                             commandTask.Result.CommandType == gaugeCommand.CommandType &&
                             commandTask.Result.ReadDataAvailable)
                         {
-
                             // Read the message
                             IBLECharacteristic? readMessageCharacteristic = _readMessageCharacteristic;
                             if (readMessageCharacteristic != null)
@@ -127,7 +129,11 @@ namespace Cygnus.BLE.Protobuf.Services
                         }
                         else
                         {
-                            _logger.LogInformation("Notification did not arrive {Command} {Completion}", gaugeCommand.CommandType, requestCompletionSource.Task.IsCompleted);
+                            _logger.LogInformation("Notification did not arrive {Command} {CancelRequested} {CompletedSuccessfully}", gaugeCommand.CommandType, cancellationToken.IsCancellationRequested, requestCompletionSource.Task.IsCompletedSuccessfully);
+                            if (commandTask.IsCompletedSuccessfully)
+                            {
+                                _logger.LogInformation("Notification that did arrive {CommandType} {ReadDataAvailable}", commandTask.Result.CommandType, commandTask.Result.ReadDataAvailable);
+                            }
                         }
                     }
                 }
@@ -192,7 +198,7 @@ namespace Cygnus.BLE.Protobuf.Services
             try
             {
                 var notifyReady = _protobufMessageConverter.FromProtobuf<NotifyMessage>(e.Value);
-                _logger.LogInformation("Notification characteristic received command {Command}", notifyReady.CommandType);
+                _logger.LogInformation("Notification characteristic received command {Command} {ErrorCode} {ReadDataAvailable}", notifyReady.CommandType, notifyReady.ErrorCode, notifyReady.ReadDataAvailable);
                 _requestCompletionSource?.TrySetResult(notifyReady);
                 return;
             }
