@@ -1,9 +1,8 @@
 ﻿using Cygnus.BLE.Interfaces;
-using Cygnus.BLE.Protobuf.V1;
 
 namespace Cygnus.BLE.Protobuf.Interfaces
 {
-    public interface IProtobufCommandHandler
+    internal interface IProtobufCommandHandler
     {
         Task<bool> Connect(IEnumerable<IBLECharacteristic> characteristics);
         void Disconnect();

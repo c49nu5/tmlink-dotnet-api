@@ -1,6 +1,6 @@
 ﻿namespace Cygnus.BLE.Protobuf.Interfaces
 {
-    public interface ICommand
+    internal interface ICommand
     {
         CommandType CommandType { get; }
     }

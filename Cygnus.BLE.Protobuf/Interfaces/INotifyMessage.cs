@@ -1,7 +1,7 @@
 ﻿namespace Cygnus.BLE.Protobuf.Interfaces
 {
 
-    public interface INotifyMessage
+    internal interface INotifyMessage
     {
         CommandType CommandType { get; }
         ErrorCodes ErrorCode { get; }

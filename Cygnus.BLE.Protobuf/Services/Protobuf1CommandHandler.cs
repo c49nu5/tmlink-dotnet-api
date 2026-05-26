@@ -5,7 +5,7 @@ namespace Cygnus.BLE.Protobuf.Services
 {
     internal class Protobuf1CommandHandler : ProtobufCommandHandler<NotifyMessage>
     {
-        public Protobuf1CommandHandler(ILogger logger, IProtobufMessageConverter protobufMessageConverter) : base(logger, protobufMessageConverter)
+        public Protobuf1CommandHandler(ILogger<Protobuf1CommandHandler> logger, IProtobufMessageConverter protobufMessageConverter) : base(logger, protobufMessageConverter)
         {
         }
     }
