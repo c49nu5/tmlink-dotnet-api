@@ -324,22 +324,6 @@ namespace Cygnus.BLE.Protobuf.Services
             NotifyLiveMeasurement liveMeasurement = _protobufMessageConverter.FromProtobuf<NotifyLiveMeasurement>(value);
             if (liveMeasurement != null)
             {
-                NotifyObservers(o => o.UpdateLiveMeasurement(new LiveMeasurement
-                {
-                    BatteryLevel = liveMeasurement.batteryLevel,
-                    GaindB = liveMeasurement.gaindB,
-                    Index = liveMeasurement.Index,
-                    Units = (liveMeasurement.statusBits & IsImperialUnits) == IsImperialUnits ? MeasurementUnits.Imperial : MeasurementUnits.Metric,
-                    SurfaceTemp = liveMeasurement.surfaceTemp,
-                    Thickness = liveMeasurement.Thickness,
-                    Mode = (Models.UTMode)liveMeasurement.UTMode,
-                    Velocity = liveMeasurement.Velocity,
-                    IsDeepcoat = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
-                    IsFrozen = (liveMeasurement.statusBits & IsFrozenFlag) == IsFrozenFlag,
-                    IsStable = (liveMeasurement.statusBits & IsStableFlag) == IsStableFlag,
-                    IsValid = (liveMeasurement.statusBits & IsValidFlag) == IsValidFlag,
-                }));
-
                 if (liveMeasurement.liveMeasurementType == LiveMeasurementType.Frozen)
                 {
                     var frozenCharacteristic = _frozenCharacteristic;
@@ -353,9 +337,9 @@ namespace Cygnus.BLE.Protobuf.Services
                         {
                             if (task.IsCompletedSuccessfully && task.Result.Length > 0)
                             {
-                                var frozenMeasurement = _protobufMessageConverter.FromZippedProtoBuf<FrozenLiveMeasurement>(task.Result);
+                                var frozenMeasurement = _protobufMessageConverter.FromZippedProtobuf<FrozenLiveMeasurement>(task.Result);
                                 _logger.LogInformation("Received frozen measurement from gauge {DeviceIdentifier}: {serialNumber}", _device?.Name, frozenMeasurement.Index);
-                                NotifyObservers(o => o.UpdateLiveMeasurement(new LiveMeasurement
+                                NotifyObservers(o => o.OnLiveMeasurementReceived(new LiveMeasurement
                                 {
                                     BatteryLevel = frozenMeasurement.batteryLevel,
                                     GaindB = frozenMeasurement.gaindB,
@@ -371,14 +355,31 @@ namespace Cygnus.BLE.Protobuf.Services
                                     IsValid = frozenMeasurement.validMeasurement,
                                     AScan = GetAScan(frozenMeasurement.Ascan)
                                 }));
-
                             }
-                            else if (task.IsFaulted)
+                            else
                             {
                                 _logger.LogError(task.Exception, "Error retrieving frozen measurement for gauge {DeviceIdentifier}", _device?.Name);
                             }
                         });
                     }
+                }
+                else
+                {
+                    NotifyObservers(o => o.OnLiveMeasurementReceived(new LiveMeasurement
+                    {
+                        BatteryLevel = liveMeasurement.batteryLevel,
+                        GaindB = liveMeasurement.gaindB,
+                        Index = liveMeasurement.Index,
+                        Units = (liveMeasurement.statusBits & IsImperialUnits) == IsImperialUnits ? MeasurementUnits.Imperial : MeasurementUnits.Metric,
+                        SurfaceTemp = liveMeasurement.surfaceTemp,
+                        Thickness = liveMeasurement.Thickness,
+                        Mode = (Models.UTMode)liveMeasurement.UTMode,
+                        Velocity = liveMeasurement.Velocity,
+                        IsDeepcoat = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
+                        IsFrozen = (liveMeasurement.statusBits & IsFrozenFlag) == IsFrozenFlag,
+                        IsStable = (liveMeasurement.statusBits & IsStableFlag) == IsStableFlag,
+                        IsValid = (liveMeasurement.statusBits & IsValidFlag) == IsValidFlag,
+                    }));
                 }
             }
         }

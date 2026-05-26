@@ -3,7 +3,7 @@
     public interface IProtobufMessageConverter
     {
         T FromProtobuf<T>(byte[] protobufData);
-        T FromZippedProtoBuf<T>(byte[] data);
+        T FromZippedProtobuf<T>(byte[] data);
         byte[] ToProtobuf<T>(T message);
         byte[] ToZippedProtobuf<T>(T message);
     }

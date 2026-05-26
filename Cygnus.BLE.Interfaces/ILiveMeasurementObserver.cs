@@ -4,6 +4,6 @@ namespace Cygnus.BLE.Interfaces
 {
     public interface ILiveMeasurementObserver
     {
-        void UpdateLiveMeasurement(LiveMeasurement liveMeasurement);
+        void OnLiveMeasurementReceived(LiveMeasurement liveMeasurement);
     }
 }

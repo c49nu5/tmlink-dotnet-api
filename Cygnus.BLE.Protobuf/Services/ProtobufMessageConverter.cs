@@ -5,7 +5,7 @@ namespace Cygnus.BLE.Protobuf.Services
 {
     public class ProtobufMessageConverter : IProtobufMessageConverter
     {
-        public T FromZippedProtoBuf<T>(byte[] data)
+        public T FromZippedProtobuf<T>(byte[] data)
         {
             using MemoryStream unzippedStream = new();
             using (MemoryStream compressedData = new(data))

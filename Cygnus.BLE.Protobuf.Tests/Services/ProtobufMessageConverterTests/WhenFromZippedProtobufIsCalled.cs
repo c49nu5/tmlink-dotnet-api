@@ -26,7 +26,7 @@ internal class WhenFromZippedProtobufIsCalled
         var bytes = sut.ToZippedProtobuf(record);
 
         // Act
-        var result = sut.FromZippedProtoBuf<V1.Message.Record>(bytes);
+        var result = sut.FromZippedProtobuf<V1.Message.Record>(bytes);
 
         // Assert
         result.Created.ShouldBe(record.Created);

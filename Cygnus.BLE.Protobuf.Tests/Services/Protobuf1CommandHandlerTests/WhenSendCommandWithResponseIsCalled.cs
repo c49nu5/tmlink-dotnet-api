@@ -16,7 +16,7 @@ internal class WhenSendCommandWithResponseIsCalled
         testBed.ConfigureCommand(CommandType.GetRecord);
         testBed.ReadMessageCharacteristic.Setup(c => c.ReadValue()).ReturnsAsync(testBed.ReadBytes);
         Message.Record expectedValue = new() { recordType = RecordType.Linear };
-        testBed.ProtobufMessageConverter.Setup(c => c.FromZippedProtoBuf<Message>(testBed.ReadBytes)).Returns(new Message { commandType = CommandType.GetRecord, record = expectedValue });
+        testBed.ProtobufMessageConverter.Setup(c => c.FromZippedProtobuf<Message>(testBed.ReadBytes)).Returns(new Message { commandType = CommandType.GetRecord, record = expectedValue });
 
         // Act
         var result = await sut.SendCommandWithResponse<Message.Record, Message>(new Command { commandType = CommandType.GetRecord }, m => m.record);
@@ -34,7 +34,7 @@ internal class WhenSendCommandWithResponseIsCalled
         testBed.ConfigureCommand(CommandType.GetRecord, 500);
         testBed.ReadMessageCharacteristic.Setup(c => c.ReadValue()).ReturnsAsync(testBed.ReadBytes);
         Message.Record expectedValue = new() { recordType = RecordType.Linear };
-        testBed.ProtobufMessageConverter.Setup(c => c.FromZippedProtoBuf<Message>(testBed.ReadBytes)).Returns(new Message { commandType = CommandType.GetRecord, record = expectedValue });
+        testBed.ProtobufMessageConverter.Setup(c => c.FromZippedProtobuf<Message>(testBed.ReadBytes)).Returns(new Message { commandType = CommandType.GetRecord, record = expectedValue });
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(200);
 
         // Act

@@ -4,6 +4,6 @@ namespace Cygnus.BLE.Interfaces
 {
     public interface IGaugeMonitor
     {
-        void UpdateLiveMeasurement(LiveMeasurement liveMeasurement);
+        void OnLiveMeasurementReceived(LiveMeasurement liveMeasurement);
     }
 }

@@ -136,9 +136,9 @@ namespace Cygnus.BLE.API.Models
             _connectionService.GaugeIsDisconnected(DeviceIdentifier);
         }
 
-        public void UpdateLiveMeasurement(LiveMeasurement liveMeasurement)
+        public void OnLiveMeasurementReceived(LiveMeasurement liveMeasurement)
         {
-            NotifyObservers(o => o.UpdateLiveMeasurement(liveMeasurement));
+            NotifyObservers(o => o.OnLiveMeasurementReceived(liveMeasurement));
         }
 
         public void DeviceDisconnected(string deviceId)

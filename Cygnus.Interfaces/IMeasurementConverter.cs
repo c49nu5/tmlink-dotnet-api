@@ -42,8 +42,5 @@ public interface IMeasurementConverter
     uint GetTargetVelocityForThicknessTime(double targetThickness, uint calibrationThicknessTime);
     double GetMinVelocity();
     double GetMaxVelocity();
-
-    Regex GetVelocityRegex();
-
     double GetMaximumThickness { get; }
 }

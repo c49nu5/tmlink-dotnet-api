@@ -11,12 +11,12 @@ internal class WhenUpdateLiveMeasurementIsCalled
         var testBed = new TestBed();
         var sut = testBed.CreateSUT(true);        
         LiveMeasurement liveMeasurement = new();
-        testBed.Observer.Setup(o => o.UpdateLiveMeasurement(liveMeasurement));
+        testBed.Observer.Setup(o => o.OnLiveMeasurementReceived(liveMeasurement));
 
         // Act
-        sut.UpdateLiveMeasurement(liveMeasurement);
+        sut.OnLiveMeasurementReceived(liveMeasurement);
 
         // Assert
-        testBed.Observer.Verify(o => o.UpdateLiveMeasurement(liveMeasurement), Times.Once);
+        testBed.Observer.Verify(o => o.OnLiveMeasurementReceived(liveMeasurement), Times.Once);
     }
 }
