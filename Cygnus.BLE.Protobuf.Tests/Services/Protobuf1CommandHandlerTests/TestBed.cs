@@ -34,12 +34,12 @@ internal class TestBed
     {
         var sut = CreateSUT();
 
-        await sut.Connect(new List<IBLECharacteristic> {
+        await sut.Connect([
             WriteCommandCharacteristic.Object,
             NotifyMessageCharacteristic.Object,
             ReadMessageCharacteristic.Object,
             FrozenCharacteristic.Object
-        });
+        ]);
         return sut;
     }
 

@@ -18,7 +18,7 @@ internal class TestBed
     public Mock<IBLECharacteristic> ReadMessageCharacteristic { get; set; } = new Mock<IBLECharacteristic>(MockBehavior.Strict);
     public Mock<IBLECharacteristic> LiveCharacteristic { get; set; } = new Mock<IBLECharacteristic>(MockBehavior.Strict);
     public Mock<IBLECharacteristic> FrozenCharacteristic { get; set; } = new Mock<IBLECharacteristic>(MockBehavior.Strict);
-    public IEnumerable<IBLECharacteristic> Characteristics { get; set; }
+    public IBLECharacteristic[] Characteristics { get; set; }
 
     public byte[] CommandBytes = [0x01, 0x02, 0x03, 0x04];
     public byte[] ReadBytes = [0x05, 0x06, 0x07];
@@ -91,15 +91,15 @@ internal class TestBed
         return gaugeInfo;
     }
 
-    private IEnumerable<IBLECharacteristic> CreateTMLinkCharacteristics()
+    private IBLECharacteristic[] CreateTMLinkCharacteristics()
     {
-        return new List<IBLECharacteristic> {
+        return [
             WriteCommandCharacteristic.Object,
             NotifyMessageCharacteristic.Object,
             ReadMessageCharacteristic.Object,
             LiveCharacteristic.Object,
             FrozenCharacteristic.Object,
-        };
+        ];
     }
 
     internal void PrepareForDisconnect()
