@@ -22,7 +22,7 @@ namespace Cygnus.BLE.Protobuf.Services
             _protobufMessageConverter = protobufMessageConverter ?? throw new ArgumentNullException(nameof(protobufMessageConverter));
         }
 
-        public async Task<bool> Connect(IEnumerable<IBLECharacteristic> characteristics)
+        public async Task<bool> Connect(IBLECharacteristic[] characteristics)
         {
             _logger.LogError("Connecting to TM-Link command characteristics");
 
@@ -165,8 +165,10 @@ namespace Cygnus.BLE.Protobuf.Services
                         _requestCompletionSource = null;
                         if (ignoreErrors ||
                             (commandTask.IsCompletedSuccessfully &&
-                            commandTask.Result.CommandType == gaugeCommand.CommandType &&
-                            commandTask.Result.ErrorCode == Interfaces.ErrorCodes.Success))
+                            (commandTask.Result.CommandType == gaugeCommand.CommandType &&
+                            commandTask.Result.ErrorCode == ErrorCodes.Success) ||
+                            (commandTask.Result.CommandType == CommandType.CancelRecordTransfer &&
+                            commandTask.Result.ErrorCode == ErrorCodes.TransferCancelled)))
                         {
                             return true;
                         }

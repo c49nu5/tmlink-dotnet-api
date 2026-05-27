@@ -30,11 +30,11 @@ namespace Cygnus.BLE.API.Services
             }
         }
 
-        public async Task<IEnumerable<IBLECharacteristic>?> GetCharacteristics(string serviceId)
+        public async Task<IBLECharacteristic[]?> GetCharacteristics(string serviceId)
         {
             var service = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new Guid(serviceId)));
             var characteristics = await service.GetCharacteristicsAsync();
-            return characteristics?.Select(c => new BLECharacteristic(c));
+            return characteristics?.Select(c => new BLECharacteristic(c)).ToArray();
         }
 
         public Task RequestMtuAsync(int mtu)

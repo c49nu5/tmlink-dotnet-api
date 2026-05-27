@@ -33,7 +33,7 @@ namespace Cygnus.BLE.Protobuf.Services
 
             await _device.RequestMtuAsync(500);
 
-            IEnumerable<IBLECharacteristic>? characteristics = await _device.GetCharacteristics(Constants.TMLinkServiceId);
+            IBLECharacteristic[]? characteristics = await _device.GetCharacteristics(Constants.TMLinkServiceId);
             if (characteristics == null)
             {
                 _logger.LogError("Could not find characteristics for TM Link service on device {Device}", _device.Name);

@@ -92,7 +92,7 @@ internal class WhenConnectIsCalled
         var sut = testBed.CreateSUT();
         testBed.Device.Setup(d => d.RequestMtuAsync(500)).Returns(Task.CompletedTask);
         testBed.Device.SetupGet(g => g.Name).Returns("Test Gauge");
-        testBed.Device.Setup(d => d.GetCharacteristics(Constants.TMLinkServiceId)).ReturnsAsync((IEnumerable<IBLECharacteristic>)null);
+        testBed.Device.Setup(d => d.GetCharacteristics(Constants.TMLinkServiceId)).ReturnsAsync((IBLECharacteristic[])null);
 
         // Act
         var gaugeInfo = await sut.Connect(testBed.Device.Object);

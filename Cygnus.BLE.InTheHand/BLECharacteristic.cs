@@ -10,7 +10,12 @@ namespace Cygnus.BLE.API.Services
         public BLECharacteristic(GattCharacteristic c)
         {
             _c = c;
-            c.CharacteristicValueChanged += (s, e) => CharacteristicValueChanged?.Invoke(this, new BLECharacteristicValueChangedEventArgs{ Value = e.Value ?? [] });
+            c.CharacteristicValueChanged += OnCharacteristicValueChanged;
+        }
+
+        private void OnCharacteristicValueChanged(object sender, GattCharacteristicValueChangedEventArgs e)
+        {
+            CharacteristicValueChanged?.Invoke(this, new BLECharacteristicValueChangedEventArgs { Value = e.Value ?? [] });
         }
 
         public event EventHandler<BLECharacteristicValueChangedEventArgs>? CharacteristicValueChanged;
