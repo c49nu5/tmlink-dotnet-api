@@ -398,6 +398,11 @@ namespace Cygnus.BLE.Protobuf.Services
 
         private IEnumerable<EchoPoint> GetEchoPoints(V1.AScan ascan)
         {
+            if (ascan == null)
+            {
+                yield break;
+            }
+
             if (ascan.Echo1 > 0)
             {
                 yield return new EchoPoint { Time = ascan.Echo1 };
