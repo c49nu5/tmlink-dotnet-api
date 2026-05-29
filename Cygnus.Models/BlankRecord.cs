@@ -9,6 +9,6 @@
         public uint ColumnCount { get; set; }
         public uint RowCount { get; set; }
         public BlankPoint[] MeasurementPoints { get; set; } = [];
-        public GridPattern GridPattern { get; set; }
+        public GridType GridPattern { get; set; }
     }
 }

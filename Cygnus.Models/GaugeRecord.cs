@@ -18,7 +18,7 @@
 
         public RecordType RecordType { get; set; }
 
-        public IList<MeasurementPoint> Measurements { get; set; } = [];
+        public IList<Measurement> Measurements { get; set; } = [];
 
         public uint NumberPointsRequired { get; set; }
 

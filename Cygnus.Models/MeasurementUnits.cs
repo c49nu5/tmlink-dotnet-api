@@ -1,9 +1,8 @@
-﻿namespace Cygnus.Models
+﻿namespace Cygnus.Models;
+
+public enum MeasurementUnits
 {
-    public enum MeasurementUnits
-    {
-        Metric = 0,
-        Imperial = 1,
-        Default = Metric,
-    }
+    Metric,
+    Imperial,
+    Default = Metric
 }

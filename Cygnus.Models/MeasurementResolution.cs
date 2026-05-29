@@ -1,10 +1,9 @@
-﻿namespace Cygnus.Models
+﻿namespace Cygnus.Models;
+
+public enum MeasurementResolution
 {
-    public enum MeasurementResolution
-    {
-        Low,
-        Medium,
-        High,
-        Default = Medium
-    }
+    Low,
+    Medium,
+    High,
+    Default = Medium
 }

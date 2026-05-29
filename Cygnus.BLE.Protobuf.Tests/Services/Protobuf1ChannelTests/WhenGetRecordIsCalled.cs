@@ -8,7 +8,7 @@ namespace Cygnus.BLE.Protobuf.Tests.Services.Protobuf1ChannelTests;
 internal class WhenGetRecordIsCalled
 {
     [Test]
-    [TestCase(Models.RecordType.Grid)]
+    [TestCase(Models.RecordType.Grid2D)]
     [TestCase(Models.RecordType.Linear)]
     public async Task AndRecordTypeIsRecord_ShouldSendACommandWithGetRecordCommandTypeAndName(Models.RecordType recordType)
     {
@@ -26,7 +26,7 @@ internal class WhenGetRecordIsCalled
     }
 
     [Test]
-    [TestCase(Models.RecordType.Grid)]
+    [TestCase(Models.RecordType.Grid2D)]
     [TestCase(Models.RecordType.Linear)]
     public async Task AndRecordTypeIsRecord_ShouldReturnTheCorrectRecord(Models.RecordType recordType)
     {
@@ -45,13 +45,13 @@ internal class WhenGetRecordIsCalled
     }
 
     [Test]
-    public async Task AndRecordTypeIsGrid_ShouldSendACommandWithGetRecordPointCommandTypeCorrectly([Random(1, 15, 1)] int measurementCount, [Values] bool withAScans)
+    public async Task AndRecordTypeIsGrid2D_ShouldSendACommandWithGetRecordPointCommandTypeCorrectly([Random(1, 15, 1)] int measurementCount, [Values] bool withAScans)
     {
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
         string recordName = "test_record";
-        ITransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.Grid, testBed, recordName, CommandType.GetRecord, measurementCount, withAScans);
+        ITransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.Grid2D, testBed, recordName, CommandType.GetRecord, measurementCount, withAScans);
 
         // Act
         await sut.GetRecord(transferRequestMock, withAScans);

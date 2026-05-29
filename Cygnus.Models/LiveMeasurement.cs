@@ -1,31 +1,17 @@
-﻿namespace Cygnus.Models
-{
-    public class LiveMeasurement
-    {
-        public uint Thickness { get; set; }
+﻿namespace Cygnus.Models;
 
-        public uint Velocity { get; set; }
+public record LiveMeasurement : Measurement
+{    
+    public bool ValidMeasurement;
+    public bool StableMeasurement;
+    public bool ProbeConnected;
+    public bool DeepCoatAvailable;
+    public bool ProbeZeroAvailable;
+    public bool WaitingProbeZero;
+    public MeasureMode[] MeasurementModesAvailable = [];
+    public AScanFixedRange[] AScanRangesAvailable = [];
 
-        public MeasurementUnits Units { get; set; }
-
-        public UTMode Mode { get; set; }
-
-        public uint BatteryLevel { get; set; }
-
-        public uint GaindB { get; set; }
-
-        public uint Index { get; set; }
-
-        public uint SurfaceTemp { get; set; }
-
-        public bool IsDeepcoat { get; set; }
-
-        public bool IsFrozen { get; set; }
-
-        public bool IsStable { get; set; }
-
-        public bool IsValid { get; set; }
-
-        public AScan? AScan { get; set; }
-    }
+    public uint Index { get; set; }
+    public uint BatteryLevel { get; set; }
+    public bool IsFrozen { get; set; }
 }
