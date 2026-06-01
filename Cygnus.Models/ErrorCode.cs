@@ -1,0 +1,52 @@
+﻿namespace Cygnus.Models;
+
+public enum ErrorCode
+{    
+// Gauge error codes from the API
+    Success,
+    InvalidParameter,
+    UnsupportedGaugeType,
+    SerialPortNameInvalid,
+    SerialPortClosed,
+    SerialPortIsAlreadyOpen,
+    SerialPortUnauthorizedAccess,
+    SerialPortParameter,
+    SerialPortWriteFailed,
+    SerialPortSilent,
+    TimeoutWaitingForReply,
+    FileDeleteFailed,
+    FileSendFailed,
+    FileGetFailed,
+    FileSendSizeError,
+    FileMemStreamError,
+    FileMemStreamSize,
+    FileMemStreamCantWrite,
+    FileMemStreamCantRead,
+    FrameHeaderSize,
+    FrameSequence,
+    FrameError,
+    FrameSendFailed,
+    PacketError,
+    PacketSequence,
+    PacketSendFailed,
+    PacketHeaderSize,
+    TransferStateBusy,
+    MessageError,
+    MessageHeaderError,
+    MessageReceiveTimout,
+    MessageSendTimeout,
+    MessageQueueFull,
+    InvalidMessage,
+    InvalidCommand,
+    TransferStateError,
+    FeatureNotSupported,
+    FileIDInavlid,
+    FileMemStreamReadError,
+    FileMemStreamWriteError,
+    RecordDataInvalid,
+    RecordIsEmpty,
+
+    // Service error codes
+    NoCOMPortFound = 0x10000,
+    UnknownGaugeType = 0x10001
+}

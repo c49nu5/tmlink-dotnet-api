@@ -62,9 +62,9 @@ internal class WhenConnectIsCalled
         var gaugeInfo = await sut.Connect(testBed.Device.Object);
 
         // Assert
-        gaugeInfo.BatteryLevel.ShouldBe(expectedInfo.batteryLevel);
-        gaugeInfo.SerialNumber.ShouldBe(expectedInfo.serialNumber);
-        gaugeInfo.VersionNumber.ShouldBe(expectedInfo.versionNumber);
+        gaugeInfo?.BatteryLevel.ShouldBe(expectedInfo.batteryLevel);
+        gaugeInfo?.SerialNumber.ShouldBe(expectedInfo.serialNumber);
+        gaugeInfo?.SoftwareVersionNumber.ShouldBe(expectedInfo.versionNumber);
     }
 
     [Test]

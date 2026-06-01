@@ -7,7 +7,7 @@ namespace Cygnus.BLE.Protobuf.Tests.Services.Protobuf1ChannelTests;
 internal class WhenNewRecordIsCalled
 {
     [Test]
-    public async Task ShouldSendACommandWithNewRecordCommandType([Values] RecordType recordType, [Random(3,10,1) ] int measurementCount)
+    public async Task ShouldSendACommandWithNewRecordCommandType([Values(RecordType.Linear, RecordType.Grid2D)] RecordType recordType, [Random(3,10,1) ] int measurementCount)
     {
         // Arrange
         var testBed = new TestBed();
@@ -24,7 +24,7 @@ internal class WhenNewRecordIsCalled
     }
 
     [Test]
-    public async Task ShouldSendCommandWithAddRecordPointsTheExpectedNumberOfTimes([Values] RecordType recordType, [Random(9, 100, 3)] int measurementCount)
+    public async Task ShouldSendCommandWithAddRecordPointsTheExpectedNumberOfTimes([Values(RecordType.Linear, RecordType.Grid2D)] RecordType recordType, [Random(9, 100, 3)] int measurementCount)
     {
         // Arrange
         var testBed = new TestBed();
@@ -41,7 +41,7 @@ internal class WhenNewRecordIsCalled
     }
 
     [Test]
-    public async Task ShouldSendACommandWithExpectedNewRecord([Values] RecordType recordType, [Random(3, 10, 1)] int measurementCount)
+    public async Task ShouldSendACommandWithExpectedNewRecord([Values(RecordType.Linear, RecordType.Grid2D)] RecordType recordType, [Random(3, 10, 1)] int measurementCount)
     {
         // Arrange
         var testBed = new TestBed();
@@ -59,9 +59,9 @@ internal class WhenNewRecordIsCalled
 
     private bool WithExpectedProperties(V1.Command.NewRecord newRecord, BlankRecord blankRecord)
     {
-        newRecord.recordType.ShouldBe((V1.RecordType)blankRecord.Type);
-        newRecord.numColsX.ShouldBe(blankRecord.Type == RecordType.Grid ? blankRecord.ColumnCount : (uint)blankRecord.MeasurementPoints.Length);
-        newRecord.numRowsY.ShouldBe(blankRecord.Type == RecordType.Grid ? blankRecord.RowCount : 1);
+        newRecord.recordType.ShouldBe(blankRecord.Type == RecordType.Linear ? V1.RecordType.Linear : V1.RecordType.Grid);
+        newRecord.numColsX.ShouldBe(blankRecord.Type == RecordType.Grid2D ? blankRecord.ColumnCount : (uint)blankRecord.MeasurementPoints.Length);
+        newRecord.numRowsY.ShouldBe(blankRecord.Type == RecordType.Grid2D ? blankRecord.RowCount : 1);
         newRecord.Key.ShouldBe(blankRecord.Key);
         newRecord.Name.ShouldBe(blankRecord.Name);
         newRecord.Uom.ShouldBe((V1.Uom)blankRecord.Units);
@@ -69,7 +69,7 @@ internal class WhenNewRecordIsCalled
         return true;
     }
 
-    private static Models.BlankRecord CreateBlankRecord(RecordType recordType, int measurementCount)
+    private static BlankRecord CreateBlankRecord(RecordType recordType, int measurementCount)
     {
         int index = 0;
         return new()
@@ -79,15 +79,15 @@ internal class WhenNewRecordIsCalled
             RowCount = (uint)Random.Shared.Next(3, 10),
             Key = Guid.NewGuid().ToString(),
             Name = Guid.NewGuid().ToString(),
-            GridPattern = (GridPattern)Random.Shared.Next(16),
-            Units = Random.Shared.Next(2) == 0 ? Models.MeasurementUnits.Metric : Models.MeasurementUnits.Imperial,
+            GridPattern = (GridType)Random.Shared.Next(16),
+            Units = Random.Shared.Next(2) == 0 ? MeasurementUnits.Metric : MeasurementUnits.Imperial,
             MeasurementPoints = Enumerable.Range(0, measurementCount)
-                .Select(_ => new Models.BlankPoint
+                .Select(_ => new BlankPoint
                 {
                     ColNumX = (uint)(Random.Shared.NextDouble() * 100),
                     RowNumY = (uint)(Random.Shared.NextDouble() * 100),
                     Key = (uint)Random.Shared.Next(1, 1000),
-                    Method = recordType == Models.RecordType.BScan ? Models.Method.Spot : Models.Method.Scan,
+                    Method = recordType == RecordType.BScan ? Method.Spot : Method.Scan,
                     Name = index++.ToString(),
                     ThicknessMaxLimit = (uint)(Random.Shared.NextDouble() * 100),
                     ThicknessMinLimit = (uint)(Random.Shared.NextDouble() * 100),

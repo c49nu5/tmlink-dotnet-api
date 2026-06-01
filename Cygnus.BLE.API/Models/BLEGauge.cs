@@ -70,7 +70,7 @@ namespace Cygnus.BLE.API.Models
                         if (gaugeInformation != null)
                         {
                             IsConnected = true;
-                            SerialNumber = gaugeInformation.SerialNumber.ToString();
+                            SerialNumber = $"{gaugeInformation?.SerialNumber}";
                         }
                         else
                         {

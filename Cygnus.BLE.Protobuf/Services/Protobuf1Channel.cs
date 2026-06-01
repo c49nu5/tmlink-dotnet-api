@@ -11,12 +11,18 @@ namespace Cygnus.BLE.Protobuf.Services
     {
         protected IProtobufMessageConverter _protobufMessageConverter;
 
-        public Protobuf1Channel(ILogger<Protobuf1Channel> logger, IProtobufMessageConverter protobufMessageConverter, Protobuf1CommandHandler protobuf1CommandHandler) 
+        public Protobuf1Channel(
+            ILogger<Protobuf1Channel> logger,
+            IProtobufMessageConverter protobufMessageConverter,
+            Protobuf1CommandHandler protobuf1CommandHandler) 
             : this(protobuf1CommandHandler, logger, protobufMessageConverter)
         {
         }
 
-        internal Protobuf1Channel(IProtobufCommandHandler protobuf1CommandHandler, ILogger<Protobuf1Channel> logger, IProtobufMessageConverter protobufMessageConverter)
+        internal Protobuf1Channel(
+            IProtobufCommandHandler protobuf1CommandHandler,
+            ILogger<Protobuf1Channel> logger,
+            IProtobufMessageConverter protobufMessageConverter)
             : base(logger, protobuf1CommandHandler)
         {
             _protobufMessageConverter = protobufMessageConverter ?? throw new ArgumentNullException(nameof(protobufMessageConverter));
@@ -38,16 +44,19 @@ namespace Cygnus.BLE.Protobuf.Services
             var bScanList = await _protobufCommandHandler.SendCommandWithResponse<Message.BScanList, Message>(command, m => m.bscanList);
             _logger.LogInformation("Received bscan list from gauge {Device}: {RecordCount}", _device?.Name, bScanList?.Items.Count);
 
-            return bScanList?.Items.Select(i => new GaugeRecordSummary
-            {
-                FileSize = i.fileSize,
-                Name = i.Name,
-                Key = i.Key,
-                NumberOfPointsRequired = i.numScanPoints,
-                NumberOfPointsTaken = i.numScanPoints,
-                RecordType = Models.RecordType.BScan,
-                Updated = i.Updated,
-            }).ToList() ?? [];
+            return bScanList?.Items
+                .Select(i => new GaugeRecordSummary(
+                    default,
+                    i.Name,
+                    default,
+                    Models.RecordType.BScan,
+                    i.fileSize,
+                    null,
+                    i.Updated,
+                    i.Key,
+                    i.numScanPoints,
+                    i.numScanPoints))
+                .ToList() ?? [];
         }
 
         private async Task<List<GaugeRecordSummary>> DoGetRecordList()
@@ -61,17 +70,19 @@ namespace Cygnus.BLE.Protobuf.Services
             var recordList = await _protobufCommandHandler.SendCommandWithResponse<Message.RecordList, Message>(command, m => m.recordList);
             _logger.LogInformation("Received record list from gauge {Device}: {RecordCount}", _device?.Name, recordList?.Items.Count);
 
-            return recordList?.Items.Select(i => new GaugeRecordSummary
-            {
-                FileSize = i.fileSize,
-                Name = i.Name,
-                Key = i.Key,
-                NumberOfPointsRequired = i.numPointsRequired,
-                NumberOfPointsTaken = i.numPointsTaken,
-                RecordType = (Models.RecordType)i.recordType,
-                Created = i.Created,
-                Updated = i.Updated,
-            }).ToList() ?? [];
+            return recordList?.Items
+                .Select(i => new GaugeRecordSummary(
+                    default,
+                    i.Name,
+                    default,
+                    i.recordType == V1.RecordType.Linear ? Models.RecordType.Linear : Models.RecordType.Grid2D,
+                    i.fileSize,
+                    i.Created,
+                    i.Updated,
+                    i.Key,
+                    i.numPointsRequired,
+                    i.numPointsTaken))
+                .ToList() ?? [];
         }
 
         protected override async Task<GaugeRecord?> GetGaugeRecord(ITransferRequest transferRequest)
@@ -94,7 +105,7 @@ namespace Cygnus.BLE.Protobuf.Services
                     Key = record.Key,
                     Location = record.Location,
                     RecordID = record.recordID,
-                    RecordType = (Models.RecordType)record.recordType,
+                    RecordType = ConvertToRecordType(record.recordType),
                     Surveyor = record.Surveyor,
                     Created = record.Created,
                     Updated = record.Updated,
@@ -109,7 +120,7 @@ namespace Cygnus.BLE.Protobuf.Services
             return null;
         }
 
-        protected override async Task<MeasurementPoint?> GetMeasurementPoint(string recordName, bool withAscans = false)
+        protected override async Task<Measurement?> GetMeasurementPoint(string recordName, bool withAscans = false)
         {
             Command command = new()
             {
@@ -118,24 +129,26 @@ namespace Cygnus.BLE.Protobuf.Services
             };
 
             var measurement = await _protobufCommandHandler.SendCommandWithResponse<Message.RecordPoint, Message>(command, m => m.recordPoint, _recordTransferCts?.Token);
-            if (measurement != null)
+            if (measurement != null && measurement.State != MeasurementPointState.Deleted)
             {
                 _logger.LogInformation("Received record point from gauge {RecordId}: {PointName}", measurement.recordID, measurement.Name);
                 return new()
                 {
                     Name = measurement.Name,
-                    RecordID = measurement.recordID,
+                    Type = ConvertToMeasurementType(measurement.State),
+                    RecordId = measurement.recordID,
                     Key = measurement.Key,
                     Method = (Models.Method)measurement.Method,
-                    Mode = (Models.UTMode)measurement.UTMode,
-                    ProbeType = (Models.ProbeType)measurement.probeType,
-                    Timestamp = measurement.Taken,
-                    ColNumX = measurement.colNumX,
-                    RowNumY = measurement.rowNumY,
+                    Mode = ConvertToMeasureMode(measurement.UTMode),
+                    //Probe = (Models.ProbeType)measurement.probeType,                   
+                    Time = measurement.Taken,
+                    GridCoordinate = new() { Column = (ushort)measurement.colNumX, Row = (ushort)measurement.rowNumY },
                     Units = (MeasurementUnits)measurement.Uom,
                     Thickness = measurement.Thickness,
                     Velocity = measurement.Velocity,
-                    AScan = GetAScan(measurement.Ascan)
+                    AScan = GetAScan(measurement.Ascan),
+                    EchoPoints = [.. GetEchoPoints(measurement.Ascan)],
+                    HasAScan = measurement.Ascan?.ascanPoints?.Length > 0
                 };
             }
 
@@ -173,7 +186,7 @@ namespace Cygnus.BLE.Protobuf.Services
             return null;
         }
 
-        protected override async Task<MeasurementPoint?> GetBScanPoint(string recordName, bool withAscans = false)
+        protected override async Task<Measurement?> GetBScanPoint(string recordName, bool withAscans = false)
         {
             Command command = new()
             {
@@ -188,14 +201,17 @@ namespace Cygnus.BLE.Protobuf.Services
                 return new()
                 {
                     Name = measurement.scanPointNum.ToString(),
-                    RecordID = measurement.BScanID,
+                    Type = MeasurementType.Valid,
+                    RecordId = measurement.BScanID,
                     Method = Models.Method.Scan,
-                    Mode = (Models.UTMode)measurement.UTMode,
-                    ProbeType = (Models.ProbeType)measurement.probeType,
+                    Mode = ConvertToMeasureMode(measurement.UTMode),
+                    //Probe = (Models.ProbeType)measurement.probeType,
                     Units = (MeasurementUnits)measurement.Uom,
                     Thickness = measurement.Thickness,
                     Velocity = measurement.Velocity,
-                    AScan = GetAScan(measurement.Ascan)
+                    AScan = GetAScan(measurement.Ascan),
+                    EchoPoints = [.. GetEchoPoints(measurement.Ascan)],
+                    HasAScan = measurement.Ascan?.ascanPoints?.Length > 0
                 };
             }
 
@@ -203,22 +219,19 @@ namespace Cygnus.BLE.Protobuf.Services
             return null;
         }
 
-        private Models.AScan? GetAScan(V1.AScan ascan)
+        private Models.AScan GetAScan(V1.AScan? ascan)
         {
             if (ascan == null)
             {
-                return null;
+                return new Models.AScan();
             }
 
             return new()
             {
-                Rectify = (Models.AScanRectify)ascan.Rectify,
-                AScanPoints = ascan.ascanPoints.ToArray(),
-                AScanStart = ascan.ascanStart,
-                AScanWidth = ascan.ascanWidth,
-                Echo1 = ascan.Echo1,
-                Echo2 = ascan.Echo2,
-                Echo3 = ascan.Echo3
+                RectifyMode = (RectifyMode)ascan.Rectify,
+                Amplitudes = [.. ascan.ascanPoints.Select(p => (sbyte)p)],
+                StartTime = ascan.ascanStart,
+                WidthTime = ascan.ascanWidth
             };
         }
 
@@ -256,14 +269,19 @@ namespace Cygnus.BLE.Protobuf.Services
 
         public override async Task NewRecord(BlankRecord record)
         {
+            if (record.Type != Models.RecordType.Linear && record.Type != Models.RecordType.Grid2D)
+            {
+                throw new ArgumentException($"Unsupported record type {record.Type} for new record command, can only create linear or grid records");
+            }
+
             Command.NewRecord newRecord = new()
             {
                 Key = record.Key,
                 Name = record.Name,
-                recordType = (V1.RecordType)record.Type,
+                recordType = ConvertToRecordType(record.Type),
                 Uom = (Uom)record.Units,
-                numColsX = record.Type == Models.RecordType.Grid ? record.ColumnCount : (uint)record.MeasurementPoints.Length,
-                numRowsY = record.Type == Models.RecordType.Grid ? record.RowCount : 1,
+                numColsX = record.Type == Models.RecordType.Grid2D ? record.ColumnCount : (uint)record.MeasurementPoints.Length,
+                numRowsY = record.Type == Models.RecordType.Grid2D ? record.RowCount : 1,
                 gridPattern = (V1.GridPattern)record.GridPattern                
             };
 
@@ -306,7 +324,7 @@ namespace Cygnus.BLE.Protobuf.Services
                 await _protobufCommandHandler.SendCommand(pointsCommand);
             }
         }
-        
+
         public override async Task CancelRecordTransfer()
         {
             await base.CancelRecordTransfer();
@@ -339,20 +357,23 @@ namespace Cygnus.BLE.Protobuf.Services
                                 var frozenMeasurement = _protobufMessageConverter.FromZippedProtobuf<FrozenLiveMeasurement>(task.Result);
                                 _logger.LogInformation("Received frozen measurement from gauge {DeviceIdentifier}: {serialNumber}", _device?.Name, frozenMeasurement.Index);
                                 NotifyObservers(o => o.OnLiveMeasurementReceived(new LiveMeasurement
-                                {
+                                {                                    
                                     BatteryLevel = frozenMeasurement.batteryLevel,
                                     GaindB = frozenMeasurement.gaindB,
                                     Index = frozenMeasurement.Index,
                                     Units = (MeasurementUnits)frozenMeasurement.Uom,
-                                    SurfaceTemp = frozenMeasurement.surfaceTemp,
+                                    SurfaceTemperatureCelsius = (int)frozenMeasurement.surfaceTemp,
                                     Thickness = frozenMeasurement.Thickness,
-                                    Mode = (Models.UTMode)frozenMeasurement.UTMode,
+                                    Mode = ConvertToMeasureMode(frozenMeasurement.UTMode),
                                     Velocity = frozenMeasurement.Velocity,
-                                    IsDeepcoat = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
+                                    DeepCoatOn = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
+                                    HasAScan = frozenMeasurement.Ascan?.ascanPoints?.Length > 0,
                                     IsFrozen = true,
-                                    IsStable = frozenMeasurement.stableMeasurement,
-                                    IsValid = frozenMeasurement.validMeasurement,
-                                    AScan = GetAScan(frozenMeasurement.Ascan)
+                                    StableMeasurement = frozenMeasurement.stableMeasurement,
+                                    ValidMeasurement = frozenMeasurement.validMeasurement,
+                                    AScan = GetAScan(frozenMeasurement.Ascan),
+                                    EchoPoints = [.. GetEchoPoints(frozenMeasurement.Ascan)],
+                                    Type = frozenMeasurement.Thickness > 0 ? MeasurementType.Valid : MeasurementType.None,
                                 }));
                             }
                             else
@@ -370,17 +391,83 @@ namespace Cygnus.BLE.Protobuf.Services
                         GaindB = liveMeasurement.gaindB,
                         Index = liveMeasurement.Index,
                         Units = (liveMeasurement.statusBits & IsImperialUnits) == IsImperialUnits ? MeasurementUnits.Imperial : MeasurementUnits.Metric,
-                        SurfaceTemp = liveMeasurement.surfaceTemp,
+                        SurfaceTemperatureCelsius = (int)liveMeasurement.surfaceTemp,
                         Thickness = liveMeasurement.Thickness,
-                        Mode = (Models.UTMode)liveMeasurement.UTMode,
+                        Mode = ConvertToMeasureMode(liveMeasurement.UTMode),
                         Velocity = liveMeasurement.Velocity,
-                        IsDeepcoat = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
+                        DeepCoatOn = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
                         IsFrozen = (liveMeasurement.statusBits & IsFrozenFlag) == IsFrozenFlag,
-                        IsStable = (liveMeasurement.statusBits & IsStableFlag) == IsStableFlag,
-                        IsValid = (liveMeasurement.statusBits & IsValidFlag) == IsValidFlag,
+                        StableMeasurement = (liveMeasurement.statusBits & IsStableFlag) == IsStableFlag,
+                        ValidMeasurement = (liveMeasurement.statusBits & IsValidFlag) == IsValidFlag,
+                        Type = liveMeasurement.Thickness > 0 ? MeasurementType.Valid : MeasurementType.None,
                     }));
                 }
             }
+        }
+
+        private IEnumerable<EchoPoint> GetEchoPoints(V1.AScan? ascan)
+        {
+            if (ascan == null)
+            {
+                yield break;
+            }
+
+            if (ascan.Echo1 > 0)
+            {
+                yield return new EchoPoint { Time = ascan.Echo1 };
+            }
+
+            if (ascan.Echo2 > 0)
+            {
+                yield return new EchoPoint { Time = ascan.Echo2 };
+            }
+
+            if (ascan.Echo3 > 0)
+            {
+                yield return new EchoPoint { Time = ascan.Echo3 };
+            }
+        }
+
+        private MeasureMode ConvertToMeasureMode(UTMode uTMode)
+        {
+            return uTMode switch
+            {
+                UTMode.Se => MeasureMode.SingleEcho,
+                UTMode.Ee => MeasureMode.EchoEcho,
+                UTMode.Me => MeasureMode.MultipleEcho,
+                UTMode.Gt => MeasureMode.Manual,
+                _ => MeasureMode.Auto,
+            };
+        }
+
+        private Models.RecordType ConvertToRecordType(V1.RecordType recordType)
+        {
+            return recordType switch
+            {
+                V1.RecordType.Linear => Models.RecordType.Linear,
+                V1.RecordType.Grid => Models.RecordType.Grid2D,
+                _ => Models.RecordType.None,
+            };
+        }
+
+        private V1.RecordType ConvertToRecordType(Models.RecordType type)
+        {
+            return type switch
+            {
+                Models.RecordType.Grid2D => V1.RecordType.Grid,
+                _ => V1.RecordType.Linear,
+            };
+        }
+
+        private MeasurementType ConvertToMeasurementType(MeasurementPointState state)
+        {
+            return state switch
+            {
+                MeasurementPointState.Valid => MeasurementType.Valid,
+                MeasurementPointState.Obstructed => MeasurementType.Obstructed,
+                MeasurementPointState.NoReading => MeasurementType.NoReading,
+                _ => MeasurementType.None,
+            };
         }
 
         protected override async Task<GaugeInformation> GetGaugeInformation()
@@ -404,8 +491,8 @@ namespace Cygnus.BLE.Protobuf.Services
             return new GaugeInformation
             {
                 SerialNumber = gaugeInfo?.serialNumber ?? 0,
-                GaugeUD = gaugeInfo?.gaugeUD ?? 0,
-                VersionNumber = gaugeInfo?.versionNumber ?? 0,
+                GaugeId = gaugeInfo?.gaugeUD ?? 0,
+                SoftwareVersionNumber = gaugeInfo?.versionNumber ?? 0,
                 BatteryLevel = gaugeInfo?.batteryLevel ?? 0,
                 GaugeVariant = (Models.GaugeVariant)(gaugeInfo?.gaugeVariant ?? V1.GaugeVariant.Test)
             };

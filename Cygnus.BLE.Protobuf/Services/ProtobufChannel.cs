@@ -103,18 +103,18 @@ namespace Cygnus.BLE.Protobuf.Services
                 try
                 {
                     transferRequest.PercentageTransferred = 0;
-                    transferRequest.Status = TransferStatus.Requested;
+                    transferRequest.Status = FileTransferState.Pending;
                     GaugeRecord? gaugeRecord = transferRequest.RecordType == RecordType.BScan
                         ? await GetGaugeBScan(transferRequest)
                         : await GetGaugeRecord(transferRequest);
                     if (gaugeRecord != null)
                     {
-                        transferRequest.Status = TransferStatus.InProgress;
+                        transferRequest.Status = FileTransferState.Receiving;
                         for (int i = 0; i < gaugeRecord.NumberOfPointsTaken; i++)
                         {
                             recordTransferCts.Token.ThrowIfCancellationRequested();
                             _logger.LogInformation("Transferring point {PointIndex} of {TotalPoints} for record {RecordName}", i + 1, gaugeRecord.NumberOfPointsTaken, gaugeRecord.Name);
-                            MeasurementPoint? measurement = transferRequest.RecordType == RecordType.BScan
+                            Measurement? measurement = transferRequest.RecordType == RecordType.BScan
                                 ? await GetBScanPoint(transferRequest.Name, withAScans)
                                 : await GetMeasurementPoint(transferRequest.Name, withAScans);
                             if (measurement != null)
@@ -125,14 +125,13 @@ namespace Cygnus.BLE.Protobuf.Services
                             else
                             {
                                 _logger.LogInformation("Failed to retrieve measurement {Index} for record {RecordName}", i, transferRequest.Name);
-                                transferRequest.Status = TransferStatus.Failed;
                             }
                         }
 
                         _recordTransferCts = null;
-                        if (transferRequest.Status != TransferStatus.Failed)
+                        if (transferRequest.Status != FileTransferState.Error)
                         {
-                            transferRequest.Status = TransferStatus.Completed;
+                            transferRequest.Status = FileTransferState.Complete;
                             return gaugeRecord;
                         }
                     }
@@ -140,13 +139,13 @@ namespace Cygnus.BLE.Protobuf.Services
                     {
                         _logger.LogInformation("No record retrieved for record {RecordName}", transferRequest.Name);
                         _recordTransferCts = null;
-                        transferRequest.Status = TransferStatus.Failed;
+                        transferRequest.Status = FileTransferState.Error;
                     }
                 }
                 catch (OperationCanceledException)
                 {
                     _logger.LogInformation("Record transfer cancelled for record {RecordName}", transferRequest.Name);
-                    transferRequest.Status = TransferStatus.Failed;
+                    transferRequest.Status = FileTransferState.Error;
                 }
             }
 
@@ -155,11 +154,11 @@ namespace Cygnus.BLE.Protobuf.Services
         
         protected abstract Task<GaugeRecord?> GetGaugeRecord(ITransferRequest transferRequest);
 
-        protected abstract Task<MeasurementPoint?> GetMeasurementPoint(string name, bool withAScans);
+        protected abstract Task<Measurement?> GetMeasurementPoint(string name, bool withAScans);
 
         protected abstract Task<GaugeRecord?> GetGaugeBScan(ITransferRequest transferRequest);
 
-        protected abstract Task<MeasurementPoint?> GetBScanPoint(string name, bool withAScans);
+        protected abstract Task<Measurement?> GetBScanPoint(string name, bool withAScans);
 
         protected abstract Task<GaugeInformation> GetGaugeInformation();
 
