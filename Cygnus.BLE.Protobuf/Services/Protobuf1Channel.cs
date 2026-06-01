@@ -225,7 +225,7 @@ namespace Cygnus.BLE.Protobuf.Services
             return new()
             {
                 RectifyMode = (RectifyMode)ascan.Rectify,
-                Amplitudes = ascan.ascanPoints.Select(p => (sbyte)p).ToArray(), // TODO: consider changing to signed bytes in protobuf definition
+                Amplitudes = [.. ascan.ascanPoints.Select(Convert.ToSByte)],
                 StartTime = ascan.ascanStart,
                 WidthTime = ascan.ascanWidth
             };
@@ -353,7 +353,7 @@ namespace Cygnus.BLE.Protobuf.Services
                                     GaindB = frozenMeasurement.gaindB,
                                     Index = frozenMeasurement.Index,
                                     Units = (MeasurementUnits)frozenMeasurement.Uom,
-                                    SurfaceTemperatureCelsius = (int)frozenMeasurement.surfaceTemp, // TODO consider changing to int in protobuf definition
+                                    SurfaceTemperatureCelsius = (int)frozenMeasurement.surfaceTemp,
                                     Thickness = frozenMeasurement.Thickness,
                                     Mode = ConvertToMeasureMode(frozenMeasurement.UTMode),
                                     Velocity = frozenMeasurement.Velocity,
