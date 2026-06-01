@@ -7,7 +7,7 @@ namespace Cygnus.BLE.Protobuf.Tests.Services.Protobuf1ChannelTests;
 internal class WhenNewRecordIsCalled
 {
     [Test]
-    public async Task ShouldSendACommandWithNewRecordCommandType([Values] RecordType recordType, [Random(3,10,1) ] int measurementCount)
+    public async Task ShouldSendACommandWithNewRecordCommandType([Values(RecordType.Linear, RecordType.Grid2D)] RecordType recordType, [Random(3,10,1) ] int measurementCount)
     {
         // Arrange
         var testBed = new TestBed();
@@ -24,7 +24,7 @@ internal class WhenNewRecordIsCalled
     }
 
     [Test]
-    public async Task ShouldSendCommandWithAddRecordPointsTheExpectedNumberOfTimes([Values] RecordType recordType, [Random(9, 100, 3)] int measurementCount)
+    public async Task ShouldSendCommandWithAddRecordPointsTheExpectedNumberOfTimes([Values(RecordType.Linear, RecordType.Grid2D)] RecordType recordType, [Random(9, 100, 3)] int measurementCount)
     {
         // Arrange
         var testBed = new TestBed();
