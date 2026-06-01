@@ -225,7 +225,7 @@ namespace Cygnus.BLE.Protobuf.Services
             return new()
             {
                 RectifyMode = (RectifyMode)ascan.Rectify,
-                Amplitudes = [.. ascan.ascanPoints.Select(Convert.ToSByte)],
+                Amplitudes = [.. ascan.ascanPoints.Select(p => (sbyte)p)],
                 StartTime = ascan.ascanStart,
                 WidthTime = ascan.ascanWidth
             };
