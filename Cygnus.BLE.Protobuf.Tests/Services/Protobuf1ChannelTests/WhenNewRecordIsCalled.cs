@@ -41,7 +41,7 @@ internal class WhenNewRecordIsCalled
     }
 
     [Test]
-    public async Task ShouldSendACommandWithExpectedNewRecord([Values] RecordType recordType, [Random(3, 10, 1)] int measurementCount)
+    public async Task ShouldSendACommandWithExpectedNewRecord([Values(RecordType.Linear, RecordType.Grid2D)] RecordType recordType, [Random(3, 10, 1)] int measurementCount)
     {
         // Arrange
         var testBed = new TestBed();
@@ -59,7 +59,7 @@ internal class WhenNewRecordIsCalled
 
     private bool WithExpectedProperties(V1.Command.NewRecord newRecord, BlankRecord blankRecord)
     {
-        newRecord.recordType.ShouldBe((V1.RecordType)blankRecord.Type);
+        newRecord.recordType.ShouldBe(blankRecord.Type == RecordType.Linear ? V1.RecordType.Linear : V1.RecordType.Grid);
         newRecord.numColsX.ShouldBe(blankRecord.Type == RecordType.Grid2D ? blankRecord.ColumnCount : (uint)blankRecord.MeasurementPoints.Length);
         newRecord.numRowsY.ShouldBe(blankRecord.Type == RecordType.Grid2D ? blankRecord.RowCount : 1);
         newRecord.Key.ShouldBe(blankRecord.Key);

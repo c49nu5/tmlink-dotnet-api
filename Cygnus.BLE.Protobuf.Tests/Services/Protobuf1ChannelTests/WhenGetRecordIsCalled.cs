@@ -150,7 +150,7 @@ internal class WhenGetRecordIsCalled
         }
         else
         {
-            testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == command), It.IsAny<Func<V1.Message, V1.Message.Record>>(), It.IsAny<CancellationToken>())).ReturnsAsync(new V1.Message.Record { Name = recordName, recordType = (V1.RecordType)recordType, numPointsTaken = (uint)measurementCount });
+            testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == command), It.IsAny<Func<V1.Message, V1.Message.Record>>(), It.IsAny<CancellationToken>())).ReturnsAsync(new V1.Message.Record { Name = recordName, recordType = recordType == RecordType.Linear ? V1.RecordType.Linear : V1.RecordType.Grid, numPointsTaken = (uint)measurementCount });
         }
 
         var transferRequestMock = Mock.Of<ITransferRequest>(t => t.Name == recordName && t.RecordType == recordType);

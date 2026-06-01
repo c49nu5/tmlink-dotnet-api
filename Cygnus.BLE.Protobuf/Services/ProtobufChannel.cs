@@ -125,7 +125,6 @@ namespace Cygnus.BLE.Protobuf.Services
                             else
                             {
                                 _logger.LogInformation("Failed to retrieve measurement {Index} for record {RecordName}", i, transferRequest.Name);
-                                transferRequest.Status = FileTransferState.Error;
                             }
                         }
 
