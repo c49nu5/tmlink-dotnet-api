@@ -1,9 +1,9 @@
-﻿using Cygnus.BLE.Interfaces;
+﻿using Cygnus.TMLink.Interfaces;
 using InTheHand.Bluetooth;
 
-namespace Cygnus.BLE.API.Services
+namespace Cygnus.BLE.InTheHand
 {
-    internal class BLECharacteristic : IBLECharacteristic
+    internal class BLECharacteristic : ITMLinkCharacteristic
     {
         private readonly GattCharacteristic _c;
 
@@ -15,10 +15,10 @@ namespace Cygnus.BLE.API.Services
 
         private void OnCharacteristicValueChanged(object sender, GattCharacteristicValueChangedEventArgs e)
         {
-            CharacteristicValueChanged?.Invoke(this, new BLECharacteristicValueChangedEventArgs { Value = e.Value ?? [] });
+            CharacteristicValueChanged?.Invoke(this, new ValueChangedEventArgs { Value = e.Value ?? [] });
         }
 
-        public event EventHandler<BLECharacteristicValueChangedEventArgs>? CharacteristicValueChanged;
+        public event EventHandler<ValueChangedEventArgs>? CharacteristicValueChanged;
 
         public string Uuid => _c.Uuid.Value.ToString();
 

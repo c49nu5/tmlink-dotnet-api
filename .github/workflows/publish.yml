@@ -45,7 +45,7 @@ jobs:
       continue-on-error: true
       
     - name: Generate third party notices
-      run: thirdlicense --project  ./Cygnus.BLE.API/Cygnus.BLE.API.csproj --output ./THIRD-PARTY-NOTICES.txt
+      run: thirdlicense --project  ./Cygnus.TMLink.API/Cygnus.TMLink.API.csproj --output ./THIRD-PARTY-NOTICES.txt
       continue-on-error: true
 
     - name: Build

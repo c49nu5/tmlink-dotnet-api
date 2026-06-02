@@ -10,22 +10,34 @@ Licensed under MIT
 Available at https://licenses.nuget.org/MIT
 
 
-License notice for Linux.Bluetooth (v5.67.1)
+License notice for MessagePack (v3.1.6)
 ------------------------------------
 
-https://github.com/SuessLabs/Linux.Bluetooth at ea701ec825a232df7beffe6e6c8caa327a7bb5d8
+https://github.com/MessagePack-CSharp/MessagePack-CSharp at 3a020c238ad98c9d737c7dee8b8c091097ebcec8
 
-Copyright 2024 Xeno Innovations, Inc.
+Copyright © Yoshifumi Kawai and contributors. All rights reserved.
 
-Licensed under Apache-2.0
+Licensed under MIT
 
-Available at https://licenses.nuget.org/Apache-2.0
+Available at https://licenses.nuget.org/MIT
 
 
-License notice for Microsoft.Extensions.DependencyInjection (v10.0.5)
+License notice for MessagePack.Annotations (v3.1.6)
 ------------------------------------
 
-https://github.com/dotnet/dotnet at a612c2a1056fe3265387ae3ff7c94eba1505caf9
+https://github.com/MessagePack-CSharp/MessagePack-CSharp at 3a020c238ad98c9d737c7dee8b8c091097ebcec8
+
+Copyright © Yoshifumi Kawai and contributors. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for Microsoft.Bcl.AsyncInterfaces (v8.0.0)
+------------------------------------
+
+https://github.com/dotnet/runtime at 5535e31a712343a63f5d7d796cd874e563e5ac14
 
 https://dot.net/
 
@@ -36,10 +48,10 @@ Licensed under MIT
 Available at https://licenses.nuget.org/MIT
 
 
-License notice for Microsoft.Extensions.DependencyInjection.Abstractions (v10.0.5)
+License notice for Microsoft.Extensions.DependencyInjection (v10.0.8)
 ------------------------------------
 
-https://github.com/dotnet/dotnet at a612c2a1056fe3265387ae3ff7c94eba1505caf9
+https://github.com/dotnet/dotnet at 94ea82652cdd4e0f8046b5bd5becbd11461482ca
 
 https://dot.net/
 
@@ -50,10 +62,10 @@ Licensed under MIT
 Available at https://licenses.nuget.org/MIT
 
 
-License notice for Microsoft.Extensions.Logging (v10.0.5)
+License notice for Microsoft.Extensions.DependencyInjection.Abstractions (v10.0.8)
 ------------------------------------
 
-https://github.com/dotnet/dotnet at a612c2a1056fe3265387ae3ff7c94eba1505caf9
+https://github.com/dotnet/dotnet at 94ea82652cdd4e0f8046b5bd5becbd11461482ca
 
 https://dot.net/
 
@@ -64,10 +76,10 @@ Licensed under MIT
 Available at https://licenses.nuget.org/MIT
 
 
-License notice for Microsoft.Extensions.Logging.Abstractions (v10.0.5)
+License notice for Microsoft.Extensions.Logging (v10.0.8)
 ------------------------------------
 
-https://github.com/dotnet/dotnet at a612c2a1056fe3265387ae3ff7c94eba1505caf9
+https://github.com/dotnet/dotnet at 94ea82652cdd4e0f8046b5bd5becbd11461482ca
 
 https://dot.net/
 
@@ -78,10 +90,10 @@ Licensed under MIT
 Available at https://licenses.nuget.org/MIT
 
 
-License notice for Microsoft.Extensions.Options (v10.0.5)
+License notice for Microsoft.Extensions.Logging.Abstractions (v10.0.8)
 ------------------------------------
 
-https://github.com/dotnet/dotnet at a612c2a1056fe3265387ae3ff7c94eba1505caf9
+https://github.com/dotnet/dotnet at 94ea82652cdd4e0f8046b5bd5becbd11461482ca
 
 https://dot.net/
 
@@ -92,12 +104,40 @@ Licensed under MIT
 Available at https://licenses.nuget.org/MIT
 
 
-License notice for Microsoft.Extensions.Primitives (v10.0.5)
+License notice for Microsoft.Extensions.Options (v10.0.8)
 ------------------------------------
 
-https://github.com/dotnet/dotnet at a612c2a1056fe3265387ae3ff7c94eba1505caf9
+https://github.com/dotnet/dotnet at 94ea82652cdd4e0f8046b5bd5becbd11461482ca
 
 https://dot.net/
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for Microsoft.Extensions.Primitives (v10.0.8)
+------------------------------------
+
+https://github.com/dotnet/dotnet at 94ea82652cdd4e0f8046b5bd5becbd11461482ca
+
+https://dot.net/
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for Microsoft.NET.StringTools (v17.11.4)
+------------------------------------
+
+https://github.com/dotnet/msbuild at 37eb419ad2c986ac5530292e6ee08e962390249e
+
+http://go.microsoft.com/fwlink/?LinkId=624683
 
 Copyright © Microsoft Corporation. All rights reserved.
 
@@ -130,10 +170,114 @@ Licensed under Apache-2.0
 Available at https://licenses.nuget.org/Apache-2.0
 
 
-License notice for Tmds.DBus (v0.92.0)
+License notice for System.Buffers (v4.6.1)
 ------------------------------------
 
-https://github.com/tmds/Tmds.DBus.git at 282acebca8d4e4e3ba211646ac650911ee94edfd
+https://github.com/dotnet/maintenance-packages at 6b84308c9ad012f53240d72c1d716d7e42546483
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for System.Collections.Immutable (v8.0.0)
+------------------------------------
+
+https://github.com/dotnet/runtime at 5535e31a712343a63f5d7d796cd874e563e5ac14
+
+https://dot.net/
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for System.ComponentModel.Annotations (v5.0.0)
+------------------------------------
+
+git://github.com/dotnet/runtime at cf258a14b70ad9069470a108f13765e0e5988f51
+
+https://github.com/dotnet/runtime
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for System.Diagnostics.DiagnosticSource (v10.0.8)
+------------------------------------
+
+https://github.com/dotnet/dotnet at 94ea82652cdd4e0f8046b5bd5becbd11461482ca
+
+https://dot.net/
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for System.Memory (v4.6.3)
+------------------------------------
+
+https://github.com/dotnet/maintenance-packages at f62ca0009b038cab4725a720f386623a969d73ad
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for System.Reflection.Emit (v4.7.0)
+------------------------------------
+
+https://github.com/dotnet/corefx
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for System.Runtime.CompilerServices.Unsafe (v6.1.2)
+------------------------------------
+
+https://github.com/dotnet/maintenance-packages at f62ca0009b038cab4725a720f386623a969d73ad
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for System.Security.Principal.Windows (v5.0.0)
+------------------------------------
+
+git://github.com/dotnet/runtime at cf258a14b70ad9069470a108f13765e0e5988f51
+
+https://github.com/dotnet/runtime
+
+Copyright © Microsoft Corporation. All rights reserved.
+
+Licensed under MIT
+
+Available at https://licenses.nuget.org/MIT
+
+
+License notice for Tmds.DBus (v0.93.0)
+------------------------------------
+
+https://github.com/tmds/Tmds.DBus.git at f144def5d8b898827b0b21b90d1ce3c81ded53f7
 
 Tom Deseyn;Alp Toker
 

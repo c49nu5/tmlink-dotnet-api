@@ -1,9 +1,10 @@
-﻿using Cygnus.BLE.Interfaces;
+﻿using Cygnus.Models;
+using Cygnus.TMLink.Interfaces;
 using InTheHand.Bluetooth;
 
-namespace Cygnus.BLE.API.Services
+namespace Cygnus.BLE.InTheHand
 {
-    internal class BLEDevice : ObservableModel<IBLEDeviceMonitor>, IBLEDevice
+    internal class BLEDevice : ObservableModel<ITMLinkDeviceMonitor>, ITMLinkDevice
     {
         private BluetoothDevice _device;
         private bool disposedValue;
@@ -25,21 +26,17 @@ namespace Cygnus.BLE.API.Services
             await _device.Gatt.ConnectAsync();
             if (_device.Gatt.IsConnected && !initialized)
             {
+                await _device.Gatt.RequestMtuAsync(500);
                 _device.GattServerDisconnected += OnDisconnected;
                 initialized = true;
             }
         }
 
-        public async Task<IBLECharacteristic[]?> GetCharacteristics(string serviceId)
+        public async Task<ITMLinkCharacteristic[]?> GetCharacteristics(string serviceId)
         {
             var service = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new Guid(serviceId)));
             var characteristics = await service.GetCharacteristicsAsync();
             return characteristics?.Select(c => new BLECharacteristic(c)).ToArray();
-        }
-
-        public Task RequestMtuAsync(int mtu)
-        {
-            return _device.Gatt.RequestMtuAsync(mtu);
         }
 
         private void OnDisconnected(object sender, EventArgs e)

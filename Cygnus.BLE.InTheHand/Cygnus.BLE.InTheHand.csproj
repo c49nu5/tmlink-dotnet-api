@@ -42,7 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Cygnus.BLE.Interfaces\Cygnus.BLE.Interfaces.csproj" />
+    <ProjectReference Include="..\Cygnus.TMLink.Interfaces\Cygnus.TMLink.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<LangVersion>Preview</LangVersion>
+	  <Authors>DMG</Authors>
+	  <Company>Cygnus Instruments Ltd</Company>
+	  <Product>TM-Link</Product>
+	  <Description>Interfaces for TM-Link Connected Cygnus Gauges</Description>
+	  <PackageId>Cygnus.TMLink.Interfaces</PackageId>
+	  <Title>Cygnus.TMLink.Interfaces</Title>
+	  <Copyright>© 2026 Cygnus Instruments Ltd</Copyright>
+	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	  <!--Auto-generate NuGet package-->
+	  <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <RepositoryUrl>https://github.com/c49nu5/tmlink-dotnet-api</RepositoryUrl>
+	  <PackageIcon>icon.png</PackageIcon>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <None Include="..\icon.png">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\LICENSE.txt">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\README.md">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+	  </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cygnus.Interfaces\Cygnus.Interfaces.csproj" />
+  </ItemGroup>
+
+</Project>

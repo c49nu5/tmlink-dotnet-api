@@ -1,4 +1,4 @@
-﻿namespace Cygnus.BLE.API.Services;
+﻿namespace Cygnus.Models;
 
 /// <summary>
 /// For models that each want to notify multiple observers - without holding a reference to them
