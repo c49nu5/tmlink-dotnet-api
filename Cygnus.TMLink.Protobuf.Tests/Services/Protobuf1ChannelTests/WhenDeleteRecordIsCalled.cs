@@ -22,10 +22,10 @@ internal class WhenDeleteRecordIsCalled
         testBed.ProtobufCommandHandler.Verify(c => c.SendCommand(It.Is<V1.Command>(m => m.commandType == (recordType == Models.RecordType.BScan ? V1.CommandType.DeleteBScan : V1.CommandType.DeleteRecord) && m.Name == recordName), false), Times.Once);
     }
 
-    private static IDeleteRequest ConfigureRequest(Models.RecordType recordType, TestBed testBed, string recordName, int measurementCount = 0)
+    private static IFileTransferRequest ConfigureRequest(Models.RecordType recordType, TestBed testBed, string recordName, int measurementCount = 0)
     {
         testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<V1.Command>(m => m.commandType == (recordType == Models.RecordType.BScan ? V1.CommandType.DeleteBScan : V1.CommandType.DeleteRecord) && m.Name == recordName), false)).ReturnsAsync(true);
-        var transferRequestMock = Mock.Of<IDeleteRequest>(t => t.Name == recordName && t.RecordType == recordType);
+        var transferRequestMock = Mock.Of<IFileTransferRequest>(t => t.Name == recordName && t.RecordType == recordType);
         return transferRequestMock;
     }
 }

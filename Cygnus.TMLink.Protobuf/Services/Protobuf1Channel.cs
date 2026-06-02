@@ -85,7 +85,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                 .ToList() ?? [];
         }
 
-        protected override async Task<GaugeRecord?> GetGaugeRecord(ITransferRequest transferRequest)
+        protected override async Task<GaugeRecord?> GetGaugeRecord(IFileTransferRequest transferRequest)
         {
             Command command = new()
             {
@@ -156,7 +156,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             return null;
         }
 
-        protected override async Task<GaugeRecord?> GetGaugeBScan(ITransferRequest transferRequest)
+        protected override async Task<GaugeRecord?> GetGaugeBScan(IFileTransferRequest transferRequest)
         {
             Command command = new()
             {
@@ -235,7 +235,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             };
         }
 
-        public override async Task DeleteRecord(IDeleteRequest deleteRequest)
+        public override async Task DeleteRecord(IFileTransferRequest deleteRequest)
         {
             await CancelRecordTransfer();
 

@@ -16,7 +16,7 @@ internal class WhenGetRecordIsCalled
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
         string recordName = "test_record";
-        ITransferRequest transferRequestMock = ConfigureTransfer(recordType, testBed, recordName, CommandType.GetRecord);
+        IFileTransferRequest transferRequestMock = ConfigureTransfer(recordType, testBed, recordName, CommandType.GetRecord);
 
         // Act
         await sut.GetRecord(transferRequestMock, false);
@@ -34,7 +34,7 @@ internal class WhenGetRecordIsCalled
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
         string recordName = "test_record";
-        ITransferRequest transferRequestMock = ConfigureTransfer(recordType, testBed, recordName, CommandType.GetRecord);
+        IFileTransferRequest transferRequestMock = ConfigureTransfer(recordType, testBed, recordName, CommandType.GetRecord);
 
         // Act
         var record = await sut.GetRecord(transferRequestMock, false);
@@ -51,7 +51,7 @@ internal class WhenGetRecordIsCalled
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
         string recordName = "test_record";
-        ITransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.Grid2D, testBed, recordName, CommandType.GetRecord, measurementCount, withAScans);
+        IFileTransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.Grid2D, testBed, recordName, CommandType.GetRecord, measurementCount, withAScans);
 
         // Act
         await sut.GetRecord(transferRequestMock, withAScans);
@@ -67,7 +67,7 @@ internal class WhenGetRecordIsCalled
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
         string recordName = "test_record";
-        ITransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.Linear, testBed, recordName, CommandType.GetRecord, measurementCount, withAScans);
+        IFileTransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.Linear, testBed, recordName, CommandType.GetRecord, measurementCount, withAScans);
 
         // Act
         await sut.GetRecord(transferRequestMock, withAScans);
@@ -83,7 +83,7 @@ internal class WhenGetRecordIsCalled
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
         string recordName = "test_record";
-        ITransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.BScan, testBed, recordName, CommandType.GetBScan);
+        IFileTransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.BScan, testBed, recordName, CommandType.GetBScan);
 
         // Act
         await sut.GetRecord(transferRequestMock, false);
@@ -99,7 +99,7 @@ internal class WhenGetRecordIsCalled
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
         string recordName = "test_record";
-        ITransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.BScan, testBed, recordName, CommandType.GetBScan);
+        IFileTransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.BScan, testBed, recordName, CommandType.GetBScan);
 
         // Act
         var record = await sut.GetRecord(transferRequestMock, false);
@@ -116,7 +116,7 @@ internal class WhenGetRecordIsCalled
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
         string recordName = "test_record";
-        ITransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.BScan, testBed, recordName, CommandType.GetBScan, measurementCount, withAScans);
+        IFileTransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.BScan, testBed, recordName, CommandType.GetBScan, measurementCount, withAScans);
 
         // Act
         await sut.GetRecord(transferRequestMock, withAScans);
@@ -125,7 +125,7 @@ internal class WhenGetRecordIsCalled
         testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == (withAScans ? CommandType.GetBScanPointAScan : CommandType.GetBScanPoint)), It.IsAny<Func<V1.Message, V1.Message.BScanPoint>>(), It.IsAny<CancellationToken>()), Times.Exactly(measurementCount));
     }
 
-    private static ITransferRequest ConfigureTransfer(Models.RecordType recordType, TestBed testBed, string recordName, CommandType command, int measurementCount, bool withAScans)
+    private static IFileTransferRequest ConfigureTransfer(Models.RecordType recordType, TestBed testBed, string recordName, CommandType command, int measurementCount, bool withAScans)
     {
         uint pointIndex = 0;
         if (recordType == RecordType.BScan)
@@ -142,7 +142,7 @@ internal class WhenGetRecordIsCalled
         return ConfigureTransfer(recordType, testBed, recordName, command, measurementCount);
     }
 
-    private static ITransferRequest ConfigureTransfer(Models.RecordType recordType, TestBed testBed, string recordName, CommandType command, int measurementCount = 0)
+    private static IFileTransferRequest ConfigureTransfer(Models.RecordType recordType, TestBed testBed, string recordName, CommandType command, int measurementCount = 0)
     {
         if (recordType == Models.RecordType.BScan)
         {
@@ -153,7 +153,7 @@ internal class WhenGetRecordIsCalled
             testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == command), It.IsAny<Func<V1.Message, V1.Message.Record>>(), It.IsAny<CancellationToken>())).ReturnsAsync(new V1.Message.Record { Name = recordName, recordType = recordType == RecordType.Linear ? V1.RecordType.Linear : V1.RecordType.Grid, numPointsTaken = (uint)measurementCount });
         }
 
-        var transferRequestMock = Mock.Of<ITransferRequest>(t => t.Name == recordName && t.RecordType == recordType);
+        var transferRequestMock = Mock.Of<IFileTransferRequest>(t => t.Name == recordName && t.RecordType == recordType);
         return transferRequestMock;
     }
 }

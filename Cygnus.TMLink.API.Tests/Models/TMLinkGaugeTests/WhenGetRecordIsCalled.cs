@@ -13,7 +13,7 @@ internal class WhenGetRecordIsCalled
         var sut = testBed.CreateSUT();
 
         // Act
-        var act = sut.GetRecord(Mock.Of<Cygnus.Interfaces.ITransferRequest>(), true);
+        var act = sut.GetRecord(Mock.Of<Cygnus.Interfaces.IFileTransferRequest>(), true);
 
         // Assert
         await act.ShouldThrowAsync<NotImplementedException>();
@@ -25,7 +25,7 @@ internal class WhenGetRecordIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
-        Cygnus.Interfaces.ITransferRequest transferRequest = Mock.Of<Cygnus.Interfaces.ITransferRequest>();
+        Cygnus.Interfaces.IFileTransferRequest transferRequest = Mock.Of<Cygnus.Interfaces.IFileTransferRequest>();
         testBed.Protobuf1Channel.Setup(p => p.GetRecord(transferRequest, withAScans)).ReturnsAsync(new GaugeRecord());
 
         // Act
@@ -41,7 +41,7 @@ internal class WhenGetRecordIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
-        Cygnus.Interfaces.ITransferRequest transferRequest = Mock.Of<Cygnus.Interfaces.ITransferRequest>();
+        Cygnus.Interfaces.IFileTransferRequest transferRequest = Mock.Of<Cygnus.Interfaces.IFileTransferRequest>();
         GaugeRecord expected = new();
         testBed.Protobuf1Channel.Setup(p => p.GetRecord(transferRequest, false)).ReturnsAsync(expected);
 

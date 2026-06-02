@@ -78,7 +78,7 @@ namespace Cygnus.TMLink.Protobuf.Services
         }
 
         public abstract Task DeleteAllRecords();
-        public abstract Task DeleteRecord(IDeleteRequest deleteRequest);
+        public abstract Task DeleteRecord(IFileTransferRequest deleteRequest);
         public abstract Task NewRecord(BlankRecord record);
         public abstract Task<List<GaugeRecordSummary>?> GetRecordList();
 
@@ -92,7 +92,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             return Task.CompletedTask;
         }
 
-        public async Task<GaugeRecord?> GetRecord(ITransferRequest transferRequest, bool withAScans)
+        public async Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans)
         {
             await CancelRecordTransfer();
             using (var recordTransferCts = _recordTransferCts = new(TimeSpan.FromMinutes(45))) // Allow time for 5000 measurements with A-Scans to transfer
@@ -149,11 +149,11 @@ namespace Cygnus.TMLink.Protobuf.Services
             return null;
         }
         
-        protected abstract Task<GaugeRecord?> GetGaugeRecord(ITransferRequest transferRequest);
+        protected abstract Task<GaugeRecord?> GetGaugeRecord(IFileTransferRequest transferRequest);
 
         protected abstract Task<Measurement?> GetMeasurementPoint(string name, bool withAScans);
 
-        protected abstract Task<GaugeRecord?> GetGaugeBScan(ITransferRequest transferRequest);
+        protected abstract Task<GaugeRecord?> GetGaugeBScan(IFileTransferRequest transferRequest);
 
         protected abstract Task<Measurement?> GetBScanPoint(string name, bool withAScans);
 

@@ -26,12 +26,12 @@ namespace Cygnus.TMLink.Protobuf.Services
             throw new NotImplementedException();
         }
 
-        public Task DeleteRecord(IDeleteRequest deleteRequest)
+        public Task DeleteRecord(IFileTransferRequest deleteRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<GaugeRecord?> GetRecord(ITransferRequest transferRequest, bool withAScans)
+        public Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans)
         {
             throw new NotImplementedException();
         }

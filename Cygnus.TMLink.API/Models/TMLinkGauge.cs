@@ -93,7 +93,7 @@ namespace Cygnus.TMLink.API.Models
             }
         }
 
-        public async Task<GaugeRecord?> GetRecord(ITransferRequest transferRequest, bool withAScans)
+        public async Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans)
         {
             return await _protobufChannel.GetRecord(transferRequest, withAScans);
         }
@@ -103,7 +103,7 @@ namespace Cygnus.TMLink.API.Models
             await _protobufChannel.DeleteAllRecords();
         }
 
-        public async Task DeleteRecord(IDeleteRequest deleteRequest)
+        public async Task DeleteRecord(IFileTransferRequest deleteRequest)
         {
             await _protobufChannel.DeleteRecord(deleteRequest);
         }

@@ -2,7 +2,7 @@
 
 namespace Cygnus.Interfaces;
 
-public interface ITransferRequest
+public interface IFileTransferRequest
 {
     string Name { get; }
     // A value between 0.0 and 1.0 that specifies the fraction of the measurements that have transferred

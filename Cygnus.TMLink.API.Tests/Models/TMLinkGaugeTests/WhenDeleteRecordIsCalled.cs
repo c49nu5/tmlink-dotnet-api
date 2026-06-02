@@ -12,7 +12,7 @@ internal class WhenDeleteRecordIsCalled
         var sut = testBed.CreateSUT();
 
         // Act
-        var act = sut.DeleteRecord(Mock.Of<Cygnus.Interfaces.IDeleteRequest>());
+        var act = sut.DeleteRecord(Mock.Of<Cygnus.Interfaces.IFileTransferRequest>());
 
         // Assert
         await act.ShouldThrowAsync<NotImplementedException>();
@@ -24,7 +24,7 @@ internal class WhenDeleteRecordIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
-        Cygnus.Interfaces.IDeleteRequest deleteRequest = Mock.Of<Cygnus.Interfaces.IDeleteRequest>();
+        Cygnus.Interfaces.IFileTransferRequest deleteRequest = Mock.Of<Cygnus.Interfaces.IFileTransferRequest>();
         testBed.Protobuf1Channel.Setup(p => p.DeleteRecord(deleteRequest)).Returns(Task.CompletedTask);
 
         // Act

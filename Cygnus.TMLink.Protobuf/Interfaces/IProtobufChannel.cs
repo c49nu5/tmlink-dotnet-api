@@ -12,9 +12,9 @@ namespace Cygnus.TMLink.Protobuf.Interfaces
         Task CancelRecordTransfer();
         Task<GaugeInformation?> Connect(ITMLinkDevice device);
         Task DeleteAllRecords();
-        Task DeleteRecord(IDeleteRequest deleteRequest);
+        Task DeleteRecord(IFileTransferRequest deleteRequest);
         void Disconnect();
-        Task<GaugeRecord?> GetRecord(ITransferRequest transferRequest, bool withAScans);
+        Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans);
         Task<List<GaugeRecordSummary>?> GetRecordList();
         Task NewRecord(BlankRecord record);
         Task SubscribeToLiveUpdates();
