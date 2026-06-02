@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<LangVersion>Preview</LangVersion>
+
+	<Authors>DMG</Authors>
+	<Company>Cygnus Instruments Ltd</Company>
+	<Product>TM-Link</Product>
+	<Description>Instrument API for TM-Link Connected Cygnus Gauges</Description>
+	<PackageId>Cygnus.TMLink.API</PackageId>
+	<Title>Cygnus.TMLink.API</Title>
+	<Copyright>© 2026 Cygnus Instruments Ltd</Copyright>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<!--Auto-generate NuGet package-->
+	<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<RepositoryUrl>https://github.com/c49nu5/tmlink-dotnet-api</RepositoryUrl>
+	<PackageIcon>icon.png</PackageIcon>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<!--Auto-generate the AssemblyInfo.cs file-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+	<None Include="..\README.md">
+      <Pack>True</Pack>
+	  <PackagePath>\</PackagePath>
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+	<None Include="..\THIRD-PARTY-NOTICES.txt">
+		<Pack>True</Pack>
+		<PackagePath>\</PackagePath>
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cygnus.BLE.InTheHand\Cygnus.BLE.InTheHand.csproj" />
+    <ProjectReference Include="..\Cygnus.TMLink.Protobuf\Cygnus.TMLink.Protobuf.csproj" />
+  </ItemGroup>
+
+</Project>
