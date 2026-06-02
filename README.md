@@ -62,10 +62,10 @@ The view model implements the `IConnectionMonitor` interface to receive updates 
 A view model can then use the following methods on the ITMLinkGauge interface to retrieve, delete or create records on the gauge.
 ``` C#
     Task<List<GaugeRecordSummary>?> GetRecordList();
-    Task<GaugeRecord?> GetRecord(ITransferRequest transferRequest, bool withAScans);
+    Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans);
     Task CancelRecordTransfer();
     Task DeleteAllRecords();
-    Task DeleteRecord(IDeleteRequest deleteRequest);
+    Task DeleteRecord(IFileTransferRequest deleteRequest);
     Task NewRecord(BlankRecord record);
 ```
 
