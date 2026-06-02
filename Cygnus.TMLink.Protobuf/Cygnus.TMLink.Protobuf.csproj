@@ -1,58 +1,62 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	<TargetFramework>netstandard2.1</TargetFramework>
-	<ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-	<LangVersion>Preview</LangVersion>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>Preview</LangVersion>
 
-	<Authors>DMG</Authors>
-	<Company>Cygnus Instruments Ltd</Company>
-	<Product>TM-Link</Product>
-	<Description>Protobuf models for TM-Link Connected Cygnus Gauges</Description>
-	<PackageId>Cygnus.TMLink.Protobuf</PackageId>
-	<Title>Cygnus.TMLink.Protobuf</Title>
-	<Copyright>© 2026 Cygnus Instruments Ltd</Copyright>
-	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	<!--Auto-generate NuGet package-->
-	<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<RepositoryUrl>https://github.com/c49nu5/tmlink-dotnet-api</RepositoryUrl>
-	<PackageIcon>icon.png</PackageIcon>
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
-  </PropertyGroup>
+		<Authors>DMG</Authors>
+		<Company>Cygnus Instruments Ltd</Company>
+		<Product>TM-Link</Product>
+		<Description>Protobuf models for TM-Link Connected Cygnus Gauges</Description>
+		<PackageId>Cygnus.TMLink.Protobuf</PackageId>
+		<Title>Cygnus.TMLink.Protobuf</Title>
+		<Copyright>© 2026 Cygnus Instruments Ltd</Copyright>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<!--Auto-generate NuGet package-->
+		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/c49nu5/tmlink-dotnet-api</RepositoryUrl>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
 
-  <ItemGroup>
-	  <None Include="..\icon.png">
-		  <Pack>True</Pack>
-		  <PackagePath>\</PackagePath>
-	  </None>
-	  <None Include="..\LICENSE.txt">
-		  <Pack>True</Pack>
-		  <PackagePath>\</PackagePath>
-	  </None>
-	  <None Include="..\README.md">
-		  <Pack>True</Pack>
-		  <PackagePath>\</PackagePath>
-	  </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\icon.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\LICENSE.txt">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="protobuf-net" Version="3.2.56" />
-    <PackageReference Include="protobuf-net.BuildTools" Version="3.2.52">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.8" />
-    <PackageReference Include="Tmds.DBus" Version="0.93.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="protobuf-net" Version="3.2.56" />
+		<PackageReference Include="protobuf-net.BuildTools" Version="3.2.52">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.8" />
+		<PackageReference Include="Tmds.DBus" Version="0.93.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-  	<AdditionalFiles Include="..\Protos\*.proto" />
-  </ItemGroup>
+	<ItemGroup>
+		<AdditionalFiles Include="..\Protos\*.proto">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</AdditionalFiles>
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Cygnus.TMLink.Interfaces\Cygnus.TMLink.Interfaces.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Cygnus.TMLink.Interfaces\Cygnus.TMLink.Interfaces.csproj" />
+	</ItemGroup>
 
 </Project>
