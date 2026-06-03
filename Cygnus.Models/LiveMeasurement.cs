@@ -10,8 +10,6 @@ public record LiveMeasurement : Measurement
     public bool WaitingProbeZero;
     public MeasureMode[] MeasurementModesAvailable = [];
     public AScanFixedRange[] AScanRangesAvailable = [];
-
-    public uint Index { get; set; }
-    public uint BatteryLevel { get; set; }
-    public bool IsFrozen { get; set; }
+    public uint BatteryLevel;
+    public bool IsFrozen;
 }

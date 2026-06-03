@@ -360,7 +360,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                                 {                                    
                                     BatteryLevel = frozenMeasurement.batteryLevel,
                                     GaindB = frozenMeasurement.gaindB,
-                                    Index = frozenMeasurement.Index,
+                                    PointIndex = frozenMeasurement.Index,
                                     Units = (MeasurementUnits)frozenMeasurement.Uom,
                                     SurfaceTemperatureCelsius = (int)frozenMeasurement.surfaceTemp,
                                     Thickness = frozenMeasurement.Thickness,
@@ -389,7 +389,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                     {
                         BatteryLevel = liveMeasurement.batteryLevel,
                         GaindB = liveMeasurement.gaindB,
-                        Index = liveMeasurement.Index,
+                        PointIndex = liveMeasurement.Index,
                         Units = (liveMeasurement.statusBits & IsImperialUnits) == IsImperialUnits ? MeasurementUnits.Imperial : MeasurementUnits.Metric,
                         SurfaceTemperatureCelsius = (int)liveMeasurement.surfaceTemp,
                         Thickness = liveMeasurement.Thickness,
