@@ -35,6 +35,11 @@ namespace Cygnus.BLE.InTheHand
         public async Task<ITMLinkCharacteristic[]?> GetCharacteristics(string serviceId)
         {
             var service = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new Guid(serviceId)));
+            if (service == null)
+            {
+                return null;
+            }
+            
             var characteristics = await service.GetCharacteristicsAsync();
             return characteristics?.Select(c => new BLECharacteristic(c)).ToArray();
         }
