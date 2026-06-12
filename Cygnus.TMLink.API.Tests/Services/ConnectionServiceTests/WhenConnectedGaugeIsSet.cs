@@ -1,4 +1,4 @@
-﻿using Cygnus.TMLink.Interfaces;
+﻿using Cygnus.Interfaces;
 using Moq;
 using Shouldly;
 
@@ -10,7 +10,7 @@ internal class WhenConnectedGaugeIsSet
     {
         // Arrange
         var testBed = new TestBed();
-        var gauge = Mock.Of<ITMLinkGauge>();
+        var gauge = Mock.Of<IGauge>();
         var sut = testBed.CreateSUT();
 
         // Act
@@ -26,7 +26,7 @@ internal class WhenConnectedGaugeIsSet
         // Arrange
         var testBed = new TestBed();
         var sut = testBed.CreateSUT(true);
-        var gauge = Mock.Of<ITMLinkGauge>();
+        var gauge = Mock.Of<IGauge>();
         testBed.Observer.Setup(m => m.GaugeConnected(gauge));
 
         // Act

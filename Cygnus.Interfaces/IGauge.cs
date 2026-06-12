@@ -1,9 +1,8 @@
-﻿using Cygnus.Interfaces;
-using Cygnus.Models;
+﻿using Cygnus.Models;
 
-namespace Cygnus.TMLink.Interfaces
+namespace Cygnus.Interfaces
 {
-    public interface ITMLinkGauge : IDisposable
+    public interface IGauge : IDisposable
     {
         bool IsConnected { get; }
         string Name { get; }
@@ -11,7 +10,7 @@ namespace Cygnus.TMLink.Interfaces
         Version? FirmwareVersion { get; }
         string SerialNumber { get; }
 
-        void AddObserver(ITMLinkGaugeMonitor observer);
+        void AddObserver(IGaugeMonitor observer);
 
         Task<List<GaugeRecordSummary>?> GetRecordList();
         Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans);

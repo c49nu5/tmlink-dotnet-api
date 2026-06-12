@@ -16,9 +16,9 @@ public static class ServiceCollectionsExtensions
     [ExcludeFromCodeCoverage]
     public static void AddTMLinkServices(this IServiceCollection services, bool withInTheHandBLE = true)
     {
-        services.AddSingleton<IConnectionService, ConnectionService>();
-        services.AddTransient<ITMLinkGaugeInternal, TMLinkGauge>();
-        services.AddSingleton<Func<ITMLinkGaugeInternal>>(s => s.GetRequiredService<ITMLinkGaugeInternal>);
+        services.AddSingleton<ITMLinkConnectionService, ConnectionService>();
+        services.AddTransient<ITMLinkGauge, TMLinkGauge>();
+        services.AddSingleton<Func<ITMLinkGauge>>(s => s.GetRequiredService<ITMLinkGauge>);
         services.AddProtobufServices();
         if (withInTheHandBLE)
         {

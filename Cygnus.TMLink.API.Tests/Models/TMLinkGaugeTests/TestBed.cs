@@ -5,6 +5,7 @@ using Cygnus.TMLink.Protobuf.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Text;
+using Cygnus.Interfaces;
 
 namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
 {
@@ -26,8 +27,8 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
         public ILogger<TMLinkGauge> Logger { get; set; } = Mock.Of<ILogger<TMLinkGauge>>();
         public Mock<IProtobufChannel> Protobuf1Channel { get; set; } = new Mock<IProtobufChannel>(MockBehavior.Strict);
         public Mock<IProtobufChannel> Protobuf2Channel { get; set; } = new Mock<IProtobufChannel>(MockBehavior.Strict);
-        public Mock<IConnectionService> ConnectionService { get; set; } = new Mock<IConnectionService>(MockBehavior.Strict);
-        public Mock<ITMLinkGaugeMonitor> Observer { get; private set; }
+        public Mock<ITMLinkConnectionService> ConnectionService { get; set; } = new Mock<ITMLinkConnectionService>(MockBehavior.Strict);
+        public Mock<IGaugeMonitor> Observer { get; private set; }
         public Func<byte, IProtobufChannel> ProtobufChannelFactory { get; set; }
 
         internal TMLinkGauge CreateSUT(bool configureObserver = false)
@@ -37,7 +38,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
             TMLinkGauge gauge = new(Logger, ProtobufChannelFactory, ConnectionService?.Object);
             if (configureObserver)
             {
-                Observer = new Mock<ITMLinkGaugeMonitor>(MockBehavior.Strict);
+                Observer = new Mock<IGaugeMonitor>(MockBehavior.Strict);
                 gauge.AddObserver(Observer.Object);
             }
 

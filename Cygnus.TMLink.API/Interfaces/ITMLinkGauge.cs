@@ -1,9 +1,9 @@
-﻿using Cygnus.Models;
+﻿using Cygnus.Interfaces;
 using Cygnus.TMLink.Interfaces;
 
 namespace Cygnus.TMLink.API.Interfaces;
 
-public interface ITMLinkGaugeInternal : ITMLinkGauge
+public interface ITMLinkGauge : IGauge
 {
     internal string DeviceIdentifier { get; }
 

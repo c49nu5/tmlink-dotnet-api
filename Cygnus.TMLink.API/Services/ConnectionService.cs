@@ -1,24 +1,24 @@
-﻿using Cygnus.TMLink.API.Models;
-using Cygnus.TMLink.API.Interfaces;
+﻿using Cygnus.TMLink.API.Interfaces;
 using Cygnus.TMLink.Interfaces;
 using Microsoft.Extensions.Logging;
 using Cygnus.Models;
+using Cygnus.Interfaces;
 
 namespace Cygnus.TMLink.API.Services;
 
-internal class ConnectionService : ObservableModel<IConnectionMonitor>, IConnectionService
+internal class ConnectionService : ObservableModel<IConnectionMonitor>, ITMLinkConnectionService
 {
-    private readonly ILogger<IConnectionService> _logger;
+    private readonly ILogger<ITMLinkConnectionService> _logger;
     private readonly IPlatformService _platformService;
     private readonly ITMLinkDeviceDiscoverer _deviceDiscoverer;
-    private readonly Func<ITMLinkGaugeInternal> _gaugeFactory;
-    private ITMLinkGauge? _connectedGauge;
+    private readonly Func<ITMLinkGauge> _gaugeFactory;
+    private IGauge? _connectedGauge;
 
     public ConnectionService(
-        ILogger<IConnectionService> logger,
+        ILogger<ITMLinkConnectionService> logger,
         IPlatformService platformService,
         ITMLinkDeviceDiscoverer deviceDiscoverer,
-        Func<ITMLinkGaugeInternal> gaugeFactory)
+        Func<ITMLinkGauge> gaugeFactory)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _platformService = platformService ?? throw new ArgumentNullException(nameof(platformService));
@@ -26,7 +26,7 @@ internal class ConnectionService : ObservableModel<IConnectionMonitor>, IConnect
         _gaugeFactory = gaugeFactory ?? throw new ArgumentNullException(nameof(gaugeFactory));
     }
 
-    public ITMLinkGauge? ConnectedGauge
+    public IGauge? ConnectedGauge
     {
         get => _connectedGauge;
         set
@@ -36,7 +36,7 @@ internal class ConnectionService : ObservableModel<IConnectionMonitor>, IConnect
         }
     }
 
-    public async Task ConnectToGauge(ITMLinkGauge gauge)
+    public async Task ConnectToGauge(IGauge gauge)
     {
         _logger.LogInformation("Connecting to device {Name}", gauge.Name);
 
@@ -46,7 +46,7 @@ internal class ConnectionService : ObservableModel<IConnectionMonitor>, IConnect
 
             ConnectedGauge?.Disconnect();
 
-            var internalGauge = gauge as ITMLinkGaugeInternal;
+            var internalGauge = gauge as ITMLinkGauge;
             if (internalGauge != null && (internalGauge.IsConnected == true || await internalGauge.Connect()))
             {
                 ConnectedGauge = gauge;
@@ -112,7 +112,7 @@ internal class ConnectionService : ObservableModel<IConnectionMonitor>, IConnect
 
     public void GaugeIsDisconnected(string deviceIdentifier)
     {
-        var connectedGauge = ConnectedGauge as ITMLinkGaugeInternal;
+        var connectedGauge = ConnectedGauge as ITMLinkGauge;
         if (connectedGauge != null && connectedGauge.DeviceIdentifier == deviceIdentifier)
         {
             _logger.LogInformation("Device {Name} disconnected", connectedGauge.Name);

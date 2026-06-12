@@ -3,6 +3,7 @@ using Cygnus.TMLink.API.Interfaces;
 using Cygnus.TMLink.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Cygnus.Interfaces;
 
 namespace Cygnus.TMLink.API.Tests.Services.ConnectionServiceTests;
 internal class TestBed
@@ -15,12 +16,12 @@ internal class TestBed
         GaugeFactory = () => CreateMockGauge(_gaugesConnect, _gaugesHaveSerialNumber);
     }
 
-    public ILogger<IConnectionService> Logger { get; set; } = Mock.Of<ILogger<IConnectionService>>();
+    public ILogger<ITMLinkConnectionService> Logger { get; set; } = Mock.Of<ILogger<ITMLinkConnectionService>>();
     public Mock<IPlatformService> PlatformService { get; set; } = new Mock<IPlatformService>(MockBehavior.Strict);
     public Mock<ITMLinkDeviceDiscoverer> DeviceDiscoverer { get; set; } = new Mock<ITMLinkDeviceDiscoverer>(MockBehavior.Strict);
     public Mock<IConnectionMonitor> Observer { get; private set; }
-    public List<Mock<ITMLinkGaugeInternal>> Gauges { get; set; } = [];
-    public Func<ITMLinkGaugeInternal> GaugeFactory { get; set; }
+    public List<Mock<ITMLinkGauge>> Gauges { get; set; } = [];
+    public Func<ITMLinkGauge> GaugeFactory { get; set; }
 
     internal ConnectionService CreateSUT(bool configureObserver = false, bool bluetoothEnabled = true, bool gaugesConnect = true, bool gaugesHaveSerialNumber = true)
     {
@@ -42,9 +43,9 @@ internal class TestBed
         return connectionService;
     }
 
-    private ITMLinkGaugeInternal CreateMockGauge(bool gaugeConnected, bool gaugesHasSerialNumber)
+    private ITMLinkGauge CreateMockGauge(bool gaugeConnected, bool gaugesHasSerialNumber)
     {
-        var mockGauge = new Mock<ITMLinkGaugeInternal>(MockBehavior.Strict);
+        var mockGauge = new Mock<ITMLinkGauge>(MockBehavior.Strict);
         mockGauge.Setup(g => g.Connect()).ReturnsAsync(gaugeConnected);
         mockGauge.Setup(g => g.SetDevice(It.IsAny<ITMLinkDevice>()));
         mockGauge.SetupGet(g => g.Name).Returns(mockGauge.ToString());

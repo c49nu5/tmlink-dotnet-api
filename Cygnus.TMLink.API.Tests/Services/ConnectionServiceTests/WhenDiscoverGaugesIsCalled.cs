@@ -1,4 +1,5 @@
-﻿using Cygnus.TMLink.Interfaces;
+﻿using Cygnus.Interfaces;
+using Cygnus.TMLink.Interfaces;
 using Moq;
 
 namespace Cygnus.TMLink.API.Tests.Services.ConnectionServiceTests;
@@ -96,7 +97,7 @@ internal class WhenDiscoverGaugesIsCalled
         await sut.DiscoverGauges();
 
         // Assert
-        testBed.Observer.Verify(o => o.GaugeDiscovered(It.IsAny<ITMLinkGauge>()), Times.Never);
+        testBed.Observer.Verify(o => o.GaugeDiscovered(It.IsAny<IGauge>()), Times.Never);
     }
 
     [Test]
@@ -113,7 +114,7 @@ internal class WhenDiscoverGaugesIsCalled
         await sut.DiscoverGauges();
 
         // Assert
-        testBed.Observer.Verify(o => o.GaugeDiscovered(It.IsAny<ITMLinkGauge>()), Times.Never);
+        testBed.Observer.Verify(o => o.GaugeDiscovered(It.IsAny<IGauge>()), Times.Never);
     }
 
     [Test]
@@ -125,7 +126,7 @@ internal class WhenDiscoverGaugesIsCalled
         testBed.DeviceDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
         var sut = testBed.CreateSUT(true, true);
         testBed.Observer.SetupSet(o => o.IsScanning = It.IsAny<bool>());
-        testBed.Observer.Setup(o => o.GaugeDiscovered(It.IsAny<ITMLinkGauge>()));
+        testBed.Observer.Setup(o => o.GaugeDiscovered(It.IsAny<IGauge>()));
 
         // Act
         await sut.DiscoverGauges();

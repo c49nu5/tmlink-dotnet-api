@@ -1,8 +1,8 @@
 ﻿using Cygnus.Models;
 
-namespace Cygnus.TMLink.Interfaces
+namespace Cygnus.Interfaces
 {
-    public interface ITMLinkGaugeMonitor
+    public interface IGaugeMonitor
     {
         void OnLiveMeasurementReceived(LiveMeasurement liveMeasurement);
     }

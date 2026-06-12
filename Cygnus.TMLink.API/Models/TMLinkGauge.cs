@@ -8,18 +8,18 @@ using Cygnus.TMLink.API.Interfaces;
 
 namespace Cygnus.TMLink.API.Models
 {
-    internal class TMLinkGauge : ObservableModel<ITMLinkGaugeMonitor>, ITMLinkGaugeInternal, ITMLinkDeviceMonitor, ILiveMeasurementObserver
+    internal class TMLinkGauge : ObservableModel<IGaugeMonitor>, ITMLinkGauge, ITMLinkDeviceMonitor, ILiveMeasurementObserver
     {
         private readonly ILogger _logger;
         private readonly Func<byte, IProtobufChannel?> _protobufChannelFactory;
-        private readonly IConnectionService _connectionService;
+        private readonly ITMLinkConnectionService _connectionService;
         private IProtobufChannel _protobufChannel = new ProtobufNullChannel();
         private ITMLinkDevice? _device;
         private bool _isDisposed;
 
         public TMLinkGauge(ILogger<TMLinkGauge> logger,
                         Func<byte, IProtobufChannel?> protobufChannelFactory,
-                        IConnectionService connectionService)
+                        ITMLinkConnectionService connectionService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _protobufChannelFactory = protobufChannelFactory ?? throw new ArgumentNullException(nameof(protobufChannelFactory));

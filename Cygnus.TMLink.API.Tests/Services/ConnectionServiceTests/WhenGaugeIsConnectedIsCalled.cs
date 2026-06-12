@@ -28,7 +28,7 @@ internal class WhenGaugeIsDisconnectedIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        var gauge = Mock.Of<ITMLinkGaugeInternal>(g=> g.DeviceIdentifier == "TestGauge");        
+        var gauge = Mock.Of<ITMLinkGauge>(g=> g.DeviceIdentifier == "TestGauge");        
         var sut = testBed.CreateSUT();
         sut.ConnectedGauge = gauge;
 
@@ -44,7 +44,7 @@ internal class WhenGaugeIsDisconnectedIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        var gauge = Mock.Of<ITMLinkGaugeInternal>(g => g.DeviceIdentifier == "TestGauge" && g.IsConnected == true);
+        var gauge = Mock.Of<ITMLinkGauge>(g => g.DeviceIdentifier == "TestGauge" && g.IsConnected == true);
         var sut = testBed.CreateSUT();
         sut.ConnectedGauge = gauge;
 

@@ -1,5 +1,5 @@
-﻿using Cygnus.TMLink.API.Interfaces;
-using Cygnus.TMLink.Interfaces;
+﻿using Cygnus.Interfaces;
+using Cygnus.TMLink.API.Interfaces;
 using Moq;
 using Shouldly;
 
@@ -12,7 +12,7 @@ internal class WhenConnectToGaugeIsCalled
         // Arrange
         var testBed = new TestBed();
         testBed.DeviceDiscoverer.Setup(g => g.Cancel());
-        var gauge = Mock.Of<ITMLinkGauge>();
+        var gauge = Mock.Of<IGauge>();
         var sut = testBed.CreateSUT();
 
         // Act
@@ -28,7 +28,7 @@ internal class WhenConnectToGaugeIsCalled
         // Arrange
         var testBed = new TestBed();
         testBed.DeviceDiscoverer.Setup(g => g.Cancel());
-        var gauge = new Mock<ITMLinkGaugeInternal>();
+        var gauge = new Mock<ITMLinkGauge>();
         gauge.Setup(g => g.Connect()).ReturnsAsync(true);
         var sut = testBed.CreateSUT();
 
@@ -45,7 +45,7 @@ internal class WhenConnectToGaugeIsCalled
         // Arrange
         var testBed = new TestBed();
         testBed.DeviceDiscoverer.Setup(g => g.Cancel());
-        var gauge = new Mock<ITMLinkGaugeInternal>();
+        var gauge = new Mock<ITMLinkGauge>();
         gauge.Setup(g => g.Connect()).ReturnsAsync(true);
         var sut = testBed.CreateSUT();
 
@@ -62,7 +62,7 @@ internal class WhenConnectToGaugeIsCalled
         // Arrange
         var testBed = new TestBed();
         testBed.DeviceDiscoverer.Setup(g => g.Cancel());
-        var gauge = new Mock<ITMLinkGaugeInternal>();
+        var gauge = new Mock<ITMLinkGauge>();
         gauge.Setup(g => g.Connect()).ReturnsAsync(false);
         var sut = testBed.CreateSUT();
 
@@ -78,7 +78,7 @@ internal class WhenConnectToGaugeIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        var gauge = Mock.Of<ITMLinkGaugeInternal>(g => g.IsConnected == true);
+        var gauge = Mock.Of<ITMLinkGauge>(g => g.IsConnected == true);
         testBed.DeviceDiscoverer.Setup(g => g.Cancel());
         var sut = testBed.CreateSUT();
 
