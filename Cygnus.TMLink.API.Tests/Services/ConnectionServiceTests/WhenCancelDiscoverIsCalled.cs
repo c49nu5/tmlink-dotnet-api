@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using Cygnus.Models;
+using Moq;
 
 namespace Cygnus.TMLink.API.Tests.Services.ConnectionServiceTests;
 internal class WhenCancelDiscoverIsCalled
@@ -24,13 +25,13 @@ internal class WhenCancelDiscoverIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = testBed.CreateSUT(true, false);
-        testBed.Observer.SetupSet(o => o.IsScanning = It.IsAny<bool>());
+        testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
         testBed.DeviceDiscoverer.Setup(d => d.Cancel());
 
         // Act
         sut.CancelDiscover();
 
         // Assert
-        testBed.Observer.VerifySet(o => o.IsScanning = false, Times.Once);
+        testBed.Observer.VerifySet(o => o.ConnectionState = ConnectionState.Disconnected, Times.Once);
     }
 }

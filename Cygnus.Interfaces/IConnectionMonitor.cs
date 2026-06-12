@@ -1,8 +1,11 @@
-﻿namespace Cygnus.Interfaces
+﻿using Cygnus.Models;
+
+namespace Cygnus.Interfaces
 {
     public interface IConnectionMonitor
     {
-        bool IsScanning { get; set; }
+        ConnectionState ConnectionState { get; set; }
+        void ConnectionMessagesChanged(string[] message);
         void GaugeDiscovered(IGauge gauge);
         void GaugeConnected(IGauge? gauge);
     }

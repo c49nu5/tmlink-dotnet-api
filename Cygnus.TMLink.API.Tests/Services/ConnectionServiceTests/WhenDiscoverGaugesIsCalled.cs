@@ -1,4 +1,5 @@
 ﻿using Cygnus.Interfaces;
+using Cygnus.Models;
 using Cygnus.TMLink.Interfaces;
 using Moq;
 
@@ -11,13 +12,13 @@ internal class WhenDiscoverGaugesIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = testBed.CreateSUT(true, false);
-        testBed.Observer.SetupSet(o => o.IsScanning = It.IsAny<bool>());
+        testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
 
         // Act
         await sut.DiscoverGauges();
 
         // Assert
-        testBed.Observer.VerifySet(o => o.IsScanning = true, Times.Once);
+        testBed.Observer.VerifySet(o => o.ConnectionState = ConnectionState.Connecting, Times.Once);
     }
 
     [Test]
@@ -40,13 +41,13 @@ internal class WhenDiscoverGaugesIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = testBed.CreateSUT(true, false);
-        testBed.Observer.SetupSet(o => o.IsScanning = It.IsAny<bool>());
+        testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
 
         // Act
         await sut.DiscoverGauges();
 
         // Assert
-        testBed.Observer.VerifySet(o => o.IsScanning = false, Times.Once);
+        testBed.Observer.VerifySet(o => o.ConnectionState = ConnectionState.Disconnected, Times.Once);
     }
 
     [Test]
@@ -91,7 +92,7 @@ internal class WhenDiscoverGaugesIsCalled
         var devices = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(i => Mock.Of<ITMLinkDevice>()).ToList();
         testBed.DeviceDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
         var sut = testBed.CreateSUT(true, true, false);
-        testBed.Observer.SetupSet(o => o.IsScanning = It.IsAny<bool>());
+        testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
 
         // Act
         await sut.DiscoverGauges();
@@ -108,7 +109,7 @@ internal class WhenDiscoverGaugesIsCalled
         var devices = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(i => Mock.Of<ITMLinkDevice>()).ToList();
         testBed.DeviceDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
         var sut = testBed.CreateSUT(true, true, true, false);
-        testBed.Observer.SetupSet(o => o.IsScanning = It.IsAny<bool>());
+        testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
 
         // Act
         await sut.DiscoverGauges();
@@ -125,7 +126,7 @@ internal class WhenDiscoverGaugesIsCalled
         var devices = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(i => Mock.Of<ITMLinkDevice>()).ToList();
         testBed.DeviceDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
         var sut = testBed.CreateSUT(true, true);
-        testBed.Observer.SetupSet(o => o.IsScanning = It.IsAny<bool>());
+        testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
         testBed.Observer.Setup(o => o.GaugeDiscovered(It.IsAny<IGauge>()));
 
         // Act

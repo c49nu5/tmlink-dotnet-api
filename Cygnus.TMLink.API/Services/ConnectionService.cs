@@ -32,7 +32,11 @@ internal class ConnectionService : ObservableModel<IConnectionMonitor>, ITMLinkC
         set
         {
             _connectedGauge = value;
-            NotifyObservers(o => o.GaugeConnected(value));
+            NotifyObservers(o =>
+            {
+                o.GaugeConnected(value);
+                o.ConnectionState = value != null ? ConnectionState.Connected : ConnectionState.Disconnected;
+            });
         }
     }
 
@@ -71,12 +75,13 @@ internal class ConnectionService : ObservableModel<IConnectionMonitor>, ITMLinkC
 
     public async Task DiscoverGauges()
     {
-        NotifyObservers(o => o.IsScanning = true);
+        NotifyObservers(o => o.ConnectionState = ConnectionState.Connecting);
 
         if (!await _platformService.CheckBluetoothConfiguration())
         {
             _logger.LogInformation("Aborting scan attempt");
             await _platformService.ShowMessage("Please enable bluetooth and give the app the required permissions");
+            NotifyObservers(o => o.ConnectionState = ConnectionState.Errored);
         }
         else
         {
@@ -101,13 +106,13 @@ internal class ConnectionService : ObservableModel<IConnectionMonitor>, ITMLinkC
             }
         }
 
-        NotifyObservers(o => o.IsScanning = false);
+        NotifyObservers(o => o.ConnectionState = ConnectionState.Disconnected);
     }
 
     public void CancelDiscover()
     {
         _deviceDiscoverer.Cancel();
-        NotifyObservers(o => o.IsScanning = false);
+        NotifyObservers(o => o.ConnectionState = ConnectionState.Disconnected);
     }
 
     public void GaugeIsDisconnected(string deviceIdentifier)
