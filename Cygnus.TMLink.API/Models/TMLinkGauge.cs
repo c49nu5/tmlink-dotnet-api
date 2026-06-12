@@ -40,6 +40,8 @@ namespace Cygnus.TMLink.API.Models
         public string SerialNumber { get; set; } = string.Empty;
         public Version? FirmwareVersion { get; set; }
         public bool IsConnected { get; set; }
+        public GaugeType GaugeType => GaugeType.M5EX; // TODO : Only one gauge type for now, but may need to be dynamic if we support more in the future
+        public string Port => "BLE";
 
         public async Task<bool> Connect()
         {

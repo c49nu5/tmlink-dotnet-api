@@ -9,6 +9,8 @@ namespace Cygnus.Interfaces
         string Model { get; }
         Version? FirmwareVersion { get; }
         string SerialNumber { get; }
+        GaugeType GaugeType { get; }
+        string Port { get; }
 
         void AddObserver(IGaugeMonitor observer);
 
