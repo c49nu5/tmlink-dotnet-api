@@ -1,5 +1,4 @@
-﻿
-namespace Cygnus.Models
+﻿namespace Cygnus.Models
 {
     public record struct GaugeInformation(
         uint SerialNumber,
@@ -11,9 +10,8 @@ namespace Cygnus.Models
         ProbeType ProbeType,
         GaugeFeatures SupportedFeatures,
         DateTime? GaugeTime,
-        GaugeVariant GaugeVariant,
-        uint SoftwareVersionNumber
-    )
+        GaugeVariant? GaugeVariant,
+        uint SoftwareVersionNumber)
     {
     }
 }
