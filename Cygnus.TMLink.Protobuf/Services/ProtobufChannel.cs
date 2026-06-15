@@ -111,7 +111,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                         {
                             recordTransferCts.Token.ThrowIfCancellationRequested();
                             _logger.LogInformation("Transferring point {PointIndex} of {TotalPoints} for record {RecordName}", i + 1, gaugeRecord.NumberOfPointsTaken, gaugeRecord.Name);
-                            Measurement? measurement = transferRequest.RecordType == RecordType.BScan
+                            GaugeMeasurement? measurement = transferRequest.RecordType == RecordType.BScan
                                 ? await GetBScanPoint(transferRequest.Name, withAScans)
                                 : await GetMeasurementPoint(transferRequest.Name, withAScans);
                             if (measurement != null)
@@ -151,11 +151,11 @@ namespace Cygnus.TMLink.Protobuf.Services
         
         protected abstract Task<GaugeRecord?> GetGaugeRecord(IFileTransferRequest transferRequest);
 
-        protected abstract Task<Measurement?> GetMeasurementPoint(string name, bool withAScans);
+        protected abstract Task<GaugeMeasurement?> GetMeasurementPoint(string name, bool withAScans);
 
         protected abstract Task<GaugeRecord?> GetGaugeBScan(IFileTransferRequest transferRequest);
 
-        protected abstract Task<Measurement?> GetBScanPoint(string name, bool withAScans);
+        protected abstract Task<GaugeMeasurement?> GetBScanPoint(string name, bool withAScans);
 
         protected abstract Task<GaugeInformation> GetGaugeInformation();
 

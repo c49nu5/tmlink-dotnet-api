@@ -1,6 +1,6 @@
 ﻿namespace Cygnus.Models
 {
-    public record struct AScan
+    public record struct GaugeAScan
     {
         public uint StartTime;
         public uint WidthTime;

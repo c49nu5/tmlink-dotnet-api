@@ -1,10 +1,10 @@
 ﻿namespace Cygnus.Models;
 
-public record Measurement
+public record GaugeMeasurement
 {
     public Guid Id;
     public string Name = string.Empty;
-    public GridCoordinate GridCoordinate;
+    public GaugeGridCoordinate GridCoordinate;
     public uint ThicknessTime;
     public MeasurementUnits Units;
     public DateTimeOffset? Time;
@@ -21,14 +21,14 @@ public record Measurement
     public bool HasAScan;
     public bool IsRadial;
     public MeasurementType Type;
-    public AScan AScan;
-    public EchoPoint[] EchoPoints = [];
+    public GaugeAScan AScan;
+    public GaugeEchoPoint[] EchoPoints = [];
     public uint BlankingTime;
     public ushort NumberOfEchoPoints;
     public int DepthCentimetres;
     public int SurfaceTemperatureCelsius;
     public uint PointIndex;
-    public Measurement[] Radials = [];
+    public GaugeMeasurement[] Radials = [];
     public uint RecordId;
     public uint Key;
     public Method Method;

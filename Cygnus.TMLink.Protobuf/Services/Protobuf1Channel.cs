@@ -120,7 +120,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             return null;
         }
 
-        protected override async Task<Measurement?> GetMeasurementPoint(string recordName, bool withAscans = false)
+        protected override async Task<GaugeMeasurement?> GetMeasurementPoint(string recordName, bool withAscans = false)
         {
             Command command = new()
             {
@@ -186,7 +186,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             return null;
         }
 
-        protected override async Task<Measurement?> GetBScanPoint(string recordName, bool withAscans = false)
+        protected override async Task<GaugeMeasurement?> GetBScanPoint(string recordName, bool withAscans = false)
         {
             Command command = new()
             {
@@ -219,11 +219,11 @@ namespace Cygnus.TMLink.Protobuf.Services
             return null;
         }
 
-        private Models.AScan GetAScan(V1.AScan? ascan)
+        private Models.GaugeAScan GetAScan(V1.AScan? ascan)
         {
             if (ascan == null)
             {
-                return new Models.AScan();
+                return new Models.GaugeAScan();
             }
 
             return new()
@@ -405,7 +405,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             }
         }
 
-        private IEnumerable<EchoPoint> GetEchoPoints(V1.AScan? ascan)
+        private IEnumerable<GaugeEchoPoint> GetEchoPoints(V1.AScan? ascan)
         {
             if (ascan == null)
             {
@@ -414,17 +414,17 @@ namespace Cygnus.TMLink.Protobuf.Services
 
             if (ascan.Echo1 > 0)
             {
-                yield return new EchoPoint { Time = ascan.Echo1 };
+                yield return new GaugeEchoPoint { Time = ascan.Echo1 };
             }
 
             if (ascan.Echo2 > 0)
             {
-                yield return new EchoPoint { Time = ascan.Echo2 };
+                yield return new GaugeEchoPoint { Time = ascan.Echo2 };
             }
 
             if (ascan.Echo3 > 0)
             {
-                yield return new EchoPoint { Time = ascan.Echo3 };
+                yield return new GaugeEchoPoint { Time = ascan.Echo3 };
             }
         }
 

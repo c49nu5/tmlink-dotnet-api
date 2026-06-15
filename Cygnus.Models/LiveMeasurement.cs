@@ -1,6 +1,6 @@
 ﻿namespace Cygnus.Models;
 
-public record LiveMeasurement : Measurement
+public record LiveMeasurement : GaugeMeasurement
 {    
     public bool ValidMeasurement;
     public bool StableMeasurement;

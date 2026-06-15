@@ -1,5 +1,5 @@
 ﻿namespace Cygnus.Models;
-public record struct GridCoordinate
+public record struct GaugeGridCoordinate
 {
     public ushort Column;
     public ushort Row;
