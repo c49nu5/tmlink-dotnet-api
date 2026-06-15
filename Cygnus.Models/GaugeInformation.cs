@@ -1,17 +1,17 @@
 ﻿namespace Cygnus.Models
 {
     public record struct GaugeInformation(
-        uint SerialNumber,
-        uint GaugeId,
-        uint BatteryLevel,
         string PortName,
         GaugeType GaugeType,
+        uint GaugeId,
+        uint SerialNumber,
         int StatusMessageCount,
         ProbeType ProbeType,
         GaugeFeatures SupportedFeatures,
+        uint BatteryLevel,
         DateTime? GaugeTime,
-        GaugeVariant? GaugeVariant,
-        uint SoftwareVersionNumber)
+        GaugeVariant? GaugeVariant = null,
+        uint SoftwareVersionNumber = 0)
     {
     }
 }
