@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Cygnus.Models;
+﻿namespace Cygnus.Models;
 
 public enum GridType : int
 {

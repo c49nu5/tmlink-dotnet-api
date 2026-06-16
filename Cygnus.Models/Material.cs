@@ -1,5 +1,5 @@
-﻿
-namespace Cygnus.Models;
+﻿namespace Cygnus.Models;
+
 public class Material
 {
     public string? Name { get; set; }
