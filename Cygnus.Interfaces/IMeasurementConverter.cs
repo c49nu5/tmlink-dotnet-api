@@ -38,6 +38,7 @@ public interface IMeasurementConverter
     string GetRelayVelocity(uint velocity, MeasurementUnits units);
     double GetThicknessFromDisplayedThickness(string value, MeasurementUnits measurementUnits);
     double GetVelocityIncrement();
+    uint ConvertVelocity(CalibratedVelocity calibratedVelocity, MeasurementUnits destinationUnits);
     uint GetTargetVelocityForThicknessTime(double targetThickness, uint calibrationThicknessTime);
     double GetMinVelocity();
     double GetMaxVelocity();

@@ -343,6 +343,11 @@ internal partial class MeasurementConverter : IMeasurementConverter
         return velocity;
     }
 
+    public uint ConvertVelocity(CalibratedVelocity calibratedVelocity, MeasurementUnits destinationUnits)
+    {
+        return Convert.ToUInt32(GetMeasuredVelocityAdjustedForMeasurementUnits(calibratedVelocity.Velocity, calibratedVelocity.MeasurementUnits, destinationUnits));
+    }
+
     private double GetDisplayedVelocity(double displayedVelocity)
     {
         int decimalPlaces = 4;
