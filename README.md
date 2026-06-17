@@ -11,6 +11,9 @@ For more information on the TM-Link BLE API, see [TM-Link BLE SDK](https://githu
 
 The **Cygnus 1 Ex** is an Instrinsically Safe UTG certified for ATEX and IECEx.
 
+## The TM-Link .NET API NuGet Package
+The TM-Link .NET API is available as a NuGet package, just add https://nuget.pkg.github.com/c49nu5/index.json as source.
+
 ## TM-Link .NET API
 The API assumes that your code is using Microsoft.Extensions.DependencyInjection, you can register the TM-Link API services in your application's service collection as follows:
 ``` C#
