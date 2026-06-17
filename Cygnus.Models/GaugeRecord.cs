@@ -38,6 +38,8 @@
         public string Notes = string.Empty;
 
         public RecordCreator Creator = RecordCreator.Gauge;
+
+        public string[] Comments = [];
     }
 
     public record GaugeGridRecord : GaugeLinearRecord
