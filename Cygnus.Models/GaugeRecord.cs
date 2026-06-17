@@ -29,11 +29,13 @@
 
     public record GaugeLinearRecord : GaugeRecord
     {
+        public string Title = string.Empty;
+
         public MeasurementUnits Units;
 
-        public uint MinimumThickness;
+        public double MinimumThickness;
 
-        public uint ReferenceThickness;
+        public double ReferenceThickness;
 
         public string Notes = string.Empty;
 
