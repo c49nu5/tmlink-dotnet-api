@@ -8,7 +8,7 @@ using Cygnus.TMLink.API.Interfaces;
 
 namespace Cygnus.TMLink.API.Models
 {
-    internal class TMLinkGauge : ObservableModel<IGaugeMonitor>, ITMLinkGauge, ITMLinkDeviceMonitor, ILiveMeasurementObserver
+    internal class TMLinkGauge : ObservableModel<IGaugeObserver>, ITMLinkGauge, ITMLinkDeviceObserver, ILiveMeasurementObserver
     {
         private readonly ILogger _logger;
         private readonly Func<byte, IProtobufChannel?> _protobufChannelFactory;
@@ -42,6 +42,8 @@ namespace Cygnus.TMLink.API.Models
         public bool IsConnected { get; set; }
         public GaugeType GaugeType => GaugeType.M5EX; // TODO : Only one gauge type for now, but may need to be dynamic if we support more in the future
         public string Port => "BLE";
+        public int MaxMaterialCount => 100; // From the M5EX manual, the gauge supports up to 100 materials
+        public int MaxCommentCount => 8;
 
         public async Task<bool> Connect()
         {
@@ -241,6 +243,27 @@ namespace Cygnus.TMLink.API.Models
             return;
         }
 
+        public GaugeInformation GetConnectionInfo()
+        {
+            return new GaugeInformation
+            {
+                GaugeType = GaugeType,
+                PortName = Port,
+                SerialNumber = uint.TryParse(SerialNumber, out var serial) ? serial : 0,
+                SupportedFeatures = GaugeFeatures.CanCancelRecordTransfer | 
+                    GaugeFeatures.CanDeleteBScans |
+                    GaugeFeatures.CanDeleteRecords |
+                    GaugeFeatures.HasAScanCapability |
+                    GaugeFeatures.HasBScanCapability |
+                    GaugeFeatures.HasDeepCoat |
+                    GaugeFeatures.SendsAScans |
+                    GaugeFeatures.SendsBatteryLevel |
+                    GaugeFeatures.SendsLiveMeasurements |
+                    GaugeFeatures.CanSendBScanList |
+                    GaugeFeatures.CanSendRecordList,
+            };
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!_isDisposed)
@@ -265,5 +288,20 @@ namespace Cygnus.TMLink.API.Models
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
+
+        #region Methods only implemented in CygLink gauges at present, but not in TMLink gauges. These methods are here to satisfy the IGauge interface.
+        public ErrorCode DoProbeZero() => throw new NotImplementedException();
+
+        public void SendCommentList(string[] commentsList) => throw new NotImplementedException();
+
+        public void SendMaterialList(List<Material> materialList) => throw new NotImplementedException();
+
+        public ErrorCode SendMeasurementSetup(uint velocity, MeasurementUnits units) => throw new NotImplementedException();
+
+        public ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units) => throw new NotImplementedException();
+
+        public ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution) => throw new NotImplementedException();
+        #endregion
     }
 }

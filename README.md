@@ -29,11 +29,11 @@ An example of these implementations for Maui can be found here
 https://github.com/c49nu5/cygnus-tmlink-ble-sdk
 
 ### Connecting to gauges
-The entry point to the API is the `IConnectionService` interface, which provides methods to discover nearby TM-Link gauges, connect to them, and manage connections. Clients can implement the `IConnectionMonitor` interface to receive updates about discovered gauges and connection status.
+The entry point to the API is the `IConnectionService` interface, which provides methods to discover nearby TM-Link gauges, connect to them, and manage connections. Clients can implement the `IConnectionObserver` interface to receive updates about discovered gauges and connection status.
 
 An example of using the API in an MVVM application to connect to a TM-Link gauge and read data would look like this:
 ``` C#
-    public partial class ConnectionViewModel : IConnectionMonitor
+    public partial class ConnectionViewModel : IConnectionObserver
     {
         private readonly IConnectionService _connectionService;
 
@@ -61,7 +61,7 @@ An example of using the API in an MVVM application to connect to a TM-Link gauge
         public bool IsScanning { get; set; }
 ```
 
-The view model implements the `IConnectionMonitor` interface to receive updates about discovered gauges and connection status once it has added itself as an observer to the connection service. The `DiscoverGauges` method initiates a scan for nearby TM-Link gauges, and when a gauge is discovered the code attempts to connect to it. Once connected, the `ConnectedGauge` property is updated with the connected gauge instance, allowing the application to interact with it and read data.
+The view model implements the `IConnectionObserver` interface to receive updates about discovered gauges and connection status once it has added itself as an observer to the connection service. The `DiscoverGauges` method initiates a scan for nearby TM-Link gauges, and when a gauge is discovered the code attempts to connect to it. Once connected, the `ConnectedGauge` property is updated with the connected gauge instance, allowing the application to interact with it and read data.
 
 A view model can then use the following methods on the ITMLinkGauge interface to retrieve, delete or create records on the gauge.
 ``` C#
@@ -74,9 +74,9 @@ A view model can then use the following methods on the ITMLinkGauge interface to
 ```
 
 ### Live updates
-If clients wish to receive updates when the live and frozen measurements are updated then the view model can implement the ITMLinkGaugeMonitor interface and add itself to the ITMLinkGauge instance as an observer.
+If clients wish to receive updates when the live and frozen measurements are updated then the view model can implement the ITMLinkGaugeObserver interface and add itself to the ITMLinkGauge instance as an observer.
 ``` C#
-    public partial class GaugeViewModel : ITMLinkGaugeMonitor
+    public partial class GaugeViewModel : ITMLinkGaugeObserver
     {
         private readonly ITMLinkGauge _gauge;
 
@@ -105,7 +105,7 @@ If clients wish to receive updates when the live and frozen measurements are upd
         public LiveMeasurement? LiveMeasurement { get; set; }
     }
 ```
-In a similar way to the connection view model, the gauge view model can implement the `ITMLinkGaugeMonitor` interface to receive updates about live measurements after calling SubscribeToLiveUpdates, by adding itself to the ITMLinkGauge instance as an observer.
+In a similar way to the connection view model, the gauge view model can implement the `ITMLinkGaugeObserver` interface to receive updates about live measurements after calling SubscribeToLiveUpdates, by adding itself to the ITMLinkGauge instance as an observer.
 
 
 ### Measurement display

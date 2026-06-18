@@ -6,7 +6,7 @@ using Cygnus.Interfaces;
 
 namespace Cygnus.TMLink.API.Services;
 
-internal class ConnectionService : ObservableModel<IConnectionMonitor>, ITMLinkConnectionService
+internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLinkConnectionService
 {
     private readonly ILogger<ITMLinkConnectionService> _logger;
     private readonly IPlatformService _platformService;

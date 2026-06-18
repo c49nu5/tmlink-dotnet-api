@@ -28,7 +28,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
         public Mock<IProtobufChannel> Protobuf1Channel { get; set; } = new Mock<IProtobufChannel>(MockBehavior.Strict);
         public Mock<IProtobufChannel> Protobuf2Channel { get; set; } = new Mock<IProtobufChannel>(MockBehavior.Strict);
         public Mock<ITMLinkConnectionService> ConnectionService { get; set; } = new Mock<ITMLinkConnectionService>(MockBehavior.Strict);
-        public Mock<IGaugeMonitor> Observer { get; private set; }
+        public Mock<IGaugeObserver> Observer { get; private set; }
         public Func<byte, IProtobufChannel> ProtobufChannelFactory { get; set; }
 
         internal TMLinkGauge CreateSUT(bool configureObserver = false)
@@ -38,7 +38,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
             TMLinkGauge gauge = new(Logger, ProtobufChannelFactory, ConnectionService?.Object);
             if (configureObserver)
             {
-                Observer = new Mock<IGaugeMonitor>(MockBehavior.Strict);
+                Observer = new Mock<IGaugeObserver>(MockBehavior.Strict);
                 gauge.AddObserver(Observer.Object);
             }
 
@@ -60,7 +60,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
         internal Mock<ITMLinkDevice> CreateDevice(bool isConnectable = false, byte protobufVersion = 1)
         {
             Mock<ITMLinkDevice> mock = new(MockBehavior.Strict);
-            mock.Setup(d => d.AddObserver(It.IsAny<ITMLinkDeviceMonitor>()));
+            mock.Setup(d => d.AddObserver(It.IsAny<ITMLinkDeviceObserver>()));
             mock.SetupGet(d => d.Id).Returns(Guid.NewGuid().ToString());
             mock.SetupGet(d => d.Name).Returns(Guid.NewGuid().ToString());
             if (isConnectable)

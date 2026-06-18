@@ -1,6 +1,6 @@
 ﻿namespace Cygnus.TMLink.Interfaces
 {
-    public interface ITMLinkDeviceMonitor
+    public interface ITMLinkDeviceObserver
     {
         void DeviceDisconnected(string deviceId);
     }

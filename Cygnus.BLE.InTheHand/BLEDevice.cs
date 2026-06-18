@@ -4,7 +4,7 @@ using InTheHand.Bluetooth;
 
 namespace Cygnus.BLE.InTheHand
 {
-    internal class BLEDevice : ObservableModel<ITMLinkDeviceMonitor>, ITMLinkDevice
+    internal class BLEDevice : ObservableModel<ITMLinkDeviceObserver>, ITMLinkDevice
     {
         private BluetoothDevice _device;
         private bool disposedValue;

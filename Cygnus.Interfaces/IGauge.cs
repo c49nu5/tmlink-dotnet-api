@@ -11,8 +11,10 @@ namespace Cygnus.Interfaces
         string SerialNumber { get; }
         GaugeType GaugeType { get; }
         string Port { get; }
+        int MaxMaterialCount { get; }
+        int MaxCommentCount { get; }
 
-        void AddObserver(IGaugeMonitor observer);
+        void AddObserver(IGaugeObserver observer);
 
         Task<List<GaugeRecordSummary>?> GetRecordList();
         Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans);
@@ -20,6 +22,15 @@ namespace Cygnus.Interfaces
         Task DeleteAllRecords();
         Task DeleteRecord(IFileTransferRequest deleteRequest);
         Task NewRecord(BlankRecord record);
+
+        ErrorCode DoProbeZero();
+        GaugeInformation GetConnectionInfo();
+        void SendCommentList(string[] commentsList);
+        void SendMaterialList(List<Material> materialList);
+        ErrorCode SendMeasurementSetup(uint velocity, MeasurementUnits units);
+        ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units);
+        ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution);
+
         Task SubscribeToLiveUpdates();
         void UnsubscribeFromLiveUpdates();
         void Disconnect();

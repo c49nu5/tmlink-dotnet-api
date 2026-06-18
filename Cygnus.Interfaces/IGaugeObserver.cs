@@ -2,7 +2,7 @@
 
 namespace Cygnus.Interfaces
 {
-    public interface IGaugeMonitor
+    public interface IGaugeObserver
     {
         void OnLiveMeasurementReceived(LiveMeasurement liveMeasurement);
     }

@@ -19,7 +19,7 @@ internal class TestBed
     public ILogger<ITMLinkConnectionService> Logger { get; set; } = Mock.Of<ILogger<ITMLinkConnectionService>>();
     public Mock<IPlatformService> PlatformService { get; set; } = new Mock<IPlatformService>(MockBehavior.Strict);
     public Mock<ITMLinkDeviceDiscoverer> DeviceDiscoverer { get; set; } = new Mock<ITMLinkDeviceDiscoverer>(MockBehavior.Strict);
-    public Mock<IConnectionMonitor> Observer { get; private set; }
+    public Mock<IConnectionObserver> Observer { get; private set; }
     public List<Mock<ITMLinkGauge>> Gauges { get; set; } = [];
     public Func<ITMLinkGauge> GaugeFactory { get; set; }
 
@@ -30,7 +30,7 @@ internal class TestBed
         ConnectionService connectionService = new(Logger, PlatformService?.Object, DeviceDiscoverer?.Object, GaugeFactory);
         if (configureObserver)
         {
-            Observer = new Mock<IConnectionMonitor>(MockBehavior.Strict);
+            Observer = new Mock<IConnectionObserver>(MockBehavior.Strict);
             connectionService.AddObserver(Observer.Object);
         }
 

@@ -2,7 +2,7 @@
 {
     public interface IConnectionService
     {
-        void AddObserver(IConnectionMonitor connectionMonitor);
+        void AddObserver(IConnectionObserver connectionObserver);
 
         Task DiscoverGauges();
         void CancelDiscover();

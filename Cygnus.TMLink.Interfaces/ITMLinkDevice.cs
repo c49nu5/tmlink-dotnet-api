@@ -8,6 +8,6 @@
 
         Task Connect();
         Task<ITMLinkCharacteristic[]?> GetCharacteristics(string serviceId);
-        void AddObserver(ITMLinkDeviceMonitor observer);
+        void AddObserver(ITMLinkDeviceObserver observer);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Cygnus.Interfaces
 {
-    public interface IConnectionMonitor
+    public interface IConnectionObserver
     {
         ConnectionState ConnectionState { get; set; }
         void ConnectionMessagesChanged(string[] message);
