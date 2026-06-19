@@ -43,7 +43,7 @@ namespace Cygnus.TMLink.API.Models
         public GaugeType GaugeType => GaugeType.M5EX; // TODO : Only one gauge type for now, but may need to be dynamic if we support more in the future
         public string Port => "BLE";
         public int MaxMaterialCount => 100; // From the M5EX manual, the gauge supports up to 100 materials
-        public int MaxCommentCount => 8;
+        public int MinCommentCount => 8;
 
         public async Task<bool> Connect()
         {

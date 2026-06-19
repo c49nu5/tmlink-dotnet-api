@@ -12,7 +12,7 @@ namespace Cygnus.Interfaces
         GaugeType GaugeType { get; }
         string Port { get; }
         int MaxMaterialCount { get; }
-        int MaxCommentCount { get; }
+        int MinCommentCount { get; }
 
         void AddObserver(IGaugeObserver observer);
 
