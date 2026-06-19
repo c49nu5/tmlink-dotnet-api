@@ -27,8 +27,8 @@ namespace Cygnus.Interfaces
         GaugeInformation GetConnectionInfo();
         void SendCommentList(string[] commentsList);
         void SendMaterialList(List<Material> materialList);
-        ErrorCode SendMeasurementSetup(uint velocity, MeasurementUnits units);
-        ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units);
+        ErrorCode SendVelocity(uint velocity, MeasurementUnits units);
+        ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units, MeasurementResolution resolution);
         ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution);
 
         Task SubscribeToLiveUpdates();

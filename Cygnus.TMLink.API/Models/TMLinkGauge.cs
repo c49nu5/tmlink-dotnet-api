@@ -289,7 +289,6 @@ namespace Cygnus.TMLink.API.Models
             GC.SuppressFinalize(this);
         }
 
-
         #region Methods only implemented in CygLink gauges at present, but not in TMLink gauges. These methods are here to satisfy the IGauge interface.
         public ErrorCode DoProbeZero() => throw new NotImplementedException();
 
@@ -297,9 +296,9 @@ namespace Cygnus.TMLink.API.Models
 
         public void SendMaterialList(List<Material> materialList) => throw new NotImplementedException();
 
-        public ErrorCode SendMeasurementSetup(uint velocity, MeasurementUnits units) => throw new NotImplementedException();
+        public ErrorCode SendVelocity(uint velocity, MeasurementUnits units) => throw new NotImplementedException();
 
-        public ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units) => throw new NotImplementedException();
+        public ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units, MeasurementResolution resolution) => throw new NotImplementedException();
 
         public ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution) => throw new NotImplementedException();
         #endregion
