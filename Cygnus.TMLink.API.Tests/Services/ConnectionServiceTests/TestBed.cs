@@ -50,7 +50,7 @@ internal class TestBed
         mockGauge.Setup(g => g.SetDevice(It.IsAny<ITMLinkDevice>()));
         mockGauge.SetupGet(g => g.Name).Returns(mockGauge.ToString());
         mockGauge.SetupGet(q => q.DeviceIdentifier).Returns(Guid.NewGuid().ToString());
-        mockGauge.SetupGet(q => q.SerialNumber).Returns( gaugesHasSerialNumber ? Guid.NewGuid().ToString() : null);
+        mockGauge.SetupGet(q => q.SerialNumber).Returns( gaugesHasSerialNumber ? (uint)Random.Shared.Next(1,int.MaxValue) : 0);
         Gauges.Add(mockGauge);
         return mockGauge.Object;
     }

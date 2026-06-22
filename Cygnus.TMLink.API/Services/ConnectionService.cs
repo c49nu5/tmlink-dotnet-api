@@ -93,7 +93,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
                     var gauge = _gaugeFactory();
                     gauge.SetDevice(device);
                     _logger.LogInformation("Found device: {Name} ({DeviceIdentifier})", gauge.Name, gauge.DeviceIdentifier);
-                    if (await gauge.Connect() && !string.IsNullOrWhiteSpace(gauge.SerialNumber))
+                    if (await gauge.Connect() && gauge.SerialNumber != 0)
                     {
                         NotifyObservers(o => o.GaugeDiscovered(gauge));
                     }

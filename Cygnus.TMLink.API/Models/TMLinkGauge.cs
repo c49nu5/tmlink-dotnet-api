@@ -37,11 +37,17 @@ namespace Cygnus.TMLink.API.Models
         public string DeviceIdentifier { get; private set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Model { get; set; } = string.Empty;
-        public string SerialNumber { get; set; } = string.Empty;
+        public uint SerialNumber { get; set; } = 0;
         public Version? FirmwareVersion { get; set; }
         public bool IsConnected { get; set; }
         public GaugeType GaugeType => GaugeType.M5EX; // TODO : Only one gauge type for now, but may need to be dynamic if we support more in the future
         public string Port => "BLE";
+        public uint SoftwareVersionNumber { get; set; } = 0;
+        public uint BatteryLevel { get; set; } = 0;
+        public GaugeVariant? GaugeVariant { get; set; }
+        public uint GaugeId { get; set; } = 0;
+        public uint StatusMessageCount { get; set; }
+
         public int MaxMaterialCount => 100; // From the M5EX manual, the gauge supports up to 100 materials
         public int MinCommentCount => 8;
 
@@ -73,7 +79,11 @@ namespace Cygnus.TMLink.API.Models
                         if (gaugeInformation != null)
                         {
                             IsConnected = true;
-                            SerialNumber = $"{gaugeInformation?.SerialNumber}";
+                            SerialNumber = gaugeInformation?.SerialNumber ?? 0;
+                            SoftwareVersionNumber = gaugeInformation?.SoftwareVersionNumber ?? 0;
+                            GaugeVariant = gaugeInformation?.GaugeVariant;
+                            BatteryLevel = gaugeInformation?.BatteryLevel ?? 0;
+                            GaugeId = gaugeInformation?.GaugeId ?? 0;
                         }
                         else
                         {
@@ -146,6 +156,11 @@ namespace Cygnus.TMLink.API.Models
 
         public void OnLiveMeasurementReceived(LiveMeasurement liveMeasurement)
         {
+            if (!liveMeasurement.IsFrozen)
+            {
+                StatusMessageCount = liveMeasurement.PointIndex;
+            }
+
             NotifyObservers(o => o.OnLiveMeasurementReceived(liveMeasurement));
         }
 
@@ -193,8 +208,8 @@ namespace Cygnus.TMLink.API.Models
 
                     var serialNumberCharacteristic = characteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.SerialNumberCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
                     SerialNumber = serialNumberCharacteristic != null
-                        ? System.Text.Encoding.UTF8.GetString((await serialNumberCharacteristic.ReadValue()) ?? [])
-                        : string.Empty;
+                        ? uint.TryParse(System.Text.Encoding.UTF8.GetString((await serialNumberCharacteristic.ReadValue()) ?? []), out var serialNumber) ? serialNumber : 0 
+                        : 0;
                     _logger.LogInformation("Device serial number {SerialNumber}", SerialNumber);
 
                     var firmwareCharacteristic = characteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.FirmwareRevisionCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
@@ -243,26 +258,18 @@ namespace Cygnus.TMLink.API.Models
             return;
         }
 
-        public GaugeInformation GetConnectionInfo()
-        {
-            return new GaugeInformation
-            {
-                GaugeType = GaugeType,
-                PortName = Port,
-                SerialNumber = uint.TryParse(SerialNumber, out var serial) ? serial : 0,
-                SupportedFeatures = GaugeFeatures.CanCancelRecordTransfer | 
-                    GaugeFeatures.CanDeleteBScans |
-                    GaugeFeatures.CanDeleteRecords |
-                    GaugeFeatures.HasAScanCapability |
-                    GaugeFeatures.HasBScanCapability |
-                    GaugeFeatures.HasDeepCoat |
-                    GaugeFeatures.SendsAScans |
-                    GaugeFeatures.SendsBatteryLevel |
-                    GaugeFeatures.SendsLiveMeasurements |
-                    GaugeFeatures.CanSendBScanList |
-                    GaugeFeatures.CanSendRecordList,
-            };
-        }
+        public GaugeFeatures SupportedFeatures => 
+            GaugeFeatures.CanCancelRecordTransfer | 
+            GaugeFeatures.CanDeleteBScans |
+            GaugeFeatures.CanDeleteRecords |
+            GaugeFeatures.HasAScanCapability |
+            GaugeFeatures.HasBScanCapability |
+            GaugeFeatures.HasDeepCoat |
+            GaugeFeatures.SendsAScans |
+            GaugeFeatures.SendsBatteryLevel |
+            GaugeFeatures.SendsLiveMeasurements |
+            GaugeFeatures.CanSendBScanList |
+            GaugeFeatures.CanSendRecordList;
 
         protected virtual void Dispose(bool disposing)
         {
@@ -290,6 +297,10 @@ namespace Cygnus.TMLink.API.Models
         }
 
         #region Methods only implemented in CygLink gauges at present, but not in TMLink gauges. These methods are here to satisfy the IGauge interface.
+        public ProbeType ProbeType => throw new NotImplementedException();
+
+        public DateTime? GaugeTime => throw new NotImplementedException();
+
         public ErrorCode DoProbeZero() => throw new NotImplementedException();
 
         public void SendCommentList(string[] commentsList) => throw new NotImplementedException();

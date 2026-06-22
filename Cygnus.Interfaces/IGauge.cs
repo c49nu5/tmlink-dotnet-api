@@ -8,9 +8,19 @@ namespace Cygnus.Interfaces
         string Name { get; }
         string Model { get; }
         Version? FirmwareVersion { get; }
-        string SerialNumber { get; }
+        uint SerialNumber { get; }
         GaugeType GaugeType { get; }
         string Port { get; }
+        GaugeFeatures SupportedFeatures { get; }
+        ProbeType ProbeType { get; }
+
+        uint GaugeId { get; }
+        uint StatusMessageCount { get; }
+        uint BatteryLevel { get; }
+        DateTime? GaugeTime { get; }
+        GaugeVariant? GaugeVariant { get; }
+        uint SoftwareVersionNumber { get; }
+
         int MaxMaterialCount { get; }
         int MinCommentCount { get; }
 
@@ -24,7 +34,6 @@ namespace Cygnus.Interfaces
         Task NewRecord(BlankRecord record);
 
         ErrorCode DoProbeZero();
-        GaugeInformation GetConnectionInfo();
         void SendCommentList(string[] commentsList);
         void SendMaterialList(List<Material> materialList);
         ErrorCode SendVelocity(uint velocity, MeasurementUnits units);

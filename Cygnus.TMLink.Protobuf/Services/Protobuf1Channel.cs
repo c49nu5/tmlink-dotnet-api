@@ -487,14 +487,14 @@ namespace Cygnus.TMLink.Protobuf.Services
             {
                 _logger.LogError("No gauge info returned for device {Device}", _device?.Name);
             }
-
+            
             return new GaugeInformation
             {
                 SerialNumber = gaugeInfo?.serialNumber ?? 0,
                 GaugeId = gaugeInfo?.gaugeUD ?? 0,
                 SoftwareVersionNumber = gaugeInfo?.versionNumber ?? 0,
                 BatteryLevel = gaugeInfo?.batteryLevel ?? 0,
-                GaugeVariant = (Models.GaugeVariant)(gaugeInfo?.gaugeVariant ?? V1.GaugeVariant.Test)
+                GaugeVariant = (Models.GaugeVariant)(gaugeInfo?.gaugeVariant ?? V1.GaugeVariant.Test),
             };
         }
     }
