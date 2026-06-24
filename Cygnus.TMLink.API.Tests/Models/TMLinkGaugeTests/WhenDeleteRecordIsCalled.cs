@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using Cygnus.TMLink.API.Models;
+using Moq;
 using Shouldly;
 
 namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests;
@@ -25,12 +26,12 @@ internal class WhenDeleteRecordIsCalled
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
         Cygnus.Interfaces.IFileTransferRequest deleteRequest = Mock.Of<Cygnus.Interfaces.IFileTransferRequest>();
-        testBed.Protobuf1Channel.Setup(p => p.DeleteRecord(deleteRequest)).Returns(Task.CompletedTask);
+        testBed.Protobuf1Channel.Setup(p => p.DeleteRecord(It.IsAny<TMLinkTransferMonitor>())).Returns(Task.CompletedTask);
 
         // Act
         await sut.DeleteRecord(deleteRequest);
 
         // Assert
-        testBed.Protobuf1Channel.Verify(p => p.DeleteRecord(deleteRequest), Times.Once);
+        testBed.Protobuf1Channel.Verify(p => p.DeleteRecord(It.IsAny<TMLinkTransferMonitor>()), Times.Once);
     }
 }

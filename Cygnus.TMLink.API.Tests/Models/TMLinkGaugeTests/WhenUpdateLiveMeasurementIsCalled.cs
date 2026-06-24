@@ -10,7 +10,7 @@ internal class WhenUpdateLiveMeasurementIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = testBed.CreateSUT(true);        
-        LiveMeasurement liveMeasurement = new();
+        LiveMeasurement liveMeasurement = new(){ IsFrozen = true };
         testBed.Observer.Setup(o => o.OnLiveMeasurementReceived(liveMeasurement));
 
         // Act

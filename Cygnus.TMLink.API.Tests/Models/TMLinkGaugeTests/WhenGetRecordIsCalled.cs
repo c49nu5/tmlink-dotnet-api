@@ -1,4 +1,5 @@
 ﻿using Cygnus.Models;
+using Cygnus.TMLink.API.Models;
 using Moq;
 using Shouldly;
 
@@ -26,13 +27,13 @@ internal class WhenGetRecordIsCalled
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
         Cygnus.Interfaces.IFileTransferRequest transferRequest = Mock.Of<Cygnus.Interfaces.IFileTransferRequest>();
-        testBed.Protobuf1Channel.Setup(p => p.GetRecord(transferRequest, withAScans)).ReturnsAsync(new GaugeRecord());
+        testBed.Protobuf1Channel.Setup(p => p.GetRecord(It.IsAny<TMLinkTransferMonitor>(), withAScans)).ReturnsAsync(new GaugeRecord());
 
         // Act
         await sut.GetRecord(transferRequest, withAScans);
 
         // Assert
-        testBed.Protobuf1Channel.Verify(p => p.GetRecord(transferRequest, withAScans), Times.Once);
+        testBed.Protobuf1Channel.Verify(p => p.GetRecord(It.IsAny<TMLinkTransferMonitor>(), withAScans), Times.Once);
     }
 
     [Test]
@@ -43,7 +44,7 @@ internal class WhenGetRecordIsCalled
         var sut = await testBed.CreateConnectedSUT();
         Cygnus.Interfaces.IFileTransferRequest transferRequest = Mock.Of<Cygnus.Interfaces.IFileTransferRequest>();
         GaugeRecord expected = new();
-        testBed.Protobuf1Channel.Setup(p => p.GetRecord(transferRequest, false)).ReturnsAsync(expected);
+        testBed.Protobuf1Channel.Setup(p => p.GetRecord(It.IsAny<TMLinkTransferMonitor>(), false)).ReturnsAsync(expected);
 
         // Act
         var record = await sut.GetRecord(transferRequest, false);
