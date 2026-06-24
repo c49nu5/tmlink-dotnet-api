@@ -21,6 +21,8 @@ namespace Cygnus.Interfaces
         GaugeVariant? GaugeVariant { get; }
         uint SoftwareVersionNumber { get; }
 
+        bool IsDataTransferInProgress { get; }
+
         int MaxMaterialCount { get; }
         int MinCommentCount { get; }
 

@@ -15,6 +15,7 @@ namespace Cygnus.TMLink.API.Models
         private readonly ITMLinkConnectionService _connectionService;
         private IProtobufChannel _protobufChannel = new ProtobufNullChannel();
         private ITMLinkDevice? _device;
+        private bool _isDataTransferInProgress;
         private bool _isDisposed;
 
         public TMLinkGauge(ILogger<TMLinkGauge> logger,
@@ -43,10 +44,23 @@ namespace Cygnus.TMLink.API.Models
         public GaugeType GaugeType => GaugeType.M5EX; // TODO : Only one gauge type for now, but may need to be dynamic if we support more in the future
         public string Port => "BLE";
         public uint SoftwareVersionNumber { get; set; } = 0;
-        public uint BatteryLevel { get; set; } = 0;
         public GaugeVariant? GaugeVariant { get; set; }
         public uint GaugeId { get; set; } = 0;
+        public uint BatteryLevel { get; set; } = 0;
         public uint StatusMessageCount { get; set; }
+
+        public bool IsDataTransferInProgress
+        {
+            get => _isDataTransferInProgress;
+            set
+            {
+                if (_isDataTransferInProgress != value)
+                {
+                    _isDataTransferInProgress = value;
+                    NotifyObservers(o => o.OnPropertiesUpdated(this));
+                }
+            }
+        }
 
         public int MaxMaterialCount => 100; // From the M5EX manual, the gauge supports up to 100 materials
         public int MinCommentCount => 8;
@@ -109,7 +123,7 @@ namespace Cygnus.TMLink.API.Models
 
         public async Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans)
         {
-            return await _protobufChannel.GetRecord(transferRequest, withAScans);
+            return await _protobufChannel.GetRecord(new TMLinkTransferMonitor(i => IsDataTransferInProgress = i, transferRequest), withAScans);
         }
 
         public async Task DeleteAllRecords()
@@ -119,7 +133,7 @@ namespace Cygnus.TMLink.API.Models
 
         public async Task DeleteRecord(IFileTransferRequest deleteRequest)
         {
-            await _protobufChannel.DeleteRecord(deleteRequest);
+            await _protobufChannel.DeleteRecord(new TMLinkTransferMonitor(i => IsDataTransferInProgress = i, deleteRequest));
         }
 
         public async Task NewRecord(BlankRecord record)
@@ -158,7 +172,9 @@ namespace Cygnus.TMLink.API.Models
         {
             if (!liveMeasurement.IsFrozen)
             {
+                BatteryLevel = liveMeasurement.BatteryLevel;
                 StatusMessageCount = liveMeasurement.PointIndex;
+                NotifyObservers(o => o.OnPropertiesUpdated(this));
             }
 
             NotifyObservers(o => o.OnLiveMeasurementReceived(liveMeasurement));
