@@ -7,8 +7,10 @@
 public abstract class ObservableModel<T> where T : class
 {
     private static readonly object s_notificationLock = new();
-    private readonly List<WeakReference<T>> _observers = [];
+    private List<WeakReference<T>> _observers = [];
 
+    public void RemoveAllObservers() { _observers = []; }
+    
     public void AddObservers(IEnumerable<T> registeredObservers)
     {
         foreach (T observer in registeredObservers)
