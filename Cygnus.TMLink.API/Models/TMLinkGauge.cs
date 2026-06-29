@@ -114,7 +114,7 @@ namespace Cygnus.TMLink.API.Models
 
                 return _protobufChannel.IsInitialized;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error connecting to gauge {DeviceIdentifier}", DeviceIdentifier);
                 return false;
@@ -224,7 +224,7 @@ namespace Cygnus.TMLink.API.Models
 
                     var serialNumberCharacteristic = characteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.SerialNumberCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
                     SerialNumber = serialNumberCharacteristic != null
-                        ? uint.TryParse(System.Text.Encoding.UTF8.GetString((await serialNumberCharacteristic.ReadValue()) ?? []), out var serialNumber) ? serialNumber : 0 
+                        ? uint.TryParse(System.Text.Encoding.UTF8.GetString((await serialNumberCharacteristic.ReadValue()) ?? []), out var serialNumber) ? serialNumber : 0
                         : 0;
                     _logger.LogInformation("Device serial number {SerialNumber}", SerialNumber);
 
@@ -264,7 +264,7 @@ namespace Cygnus.TMLink.API.Models
             if (protobufChannel != null)
             {
                 protobufChannel.AddObserver(this);
-                _protobufChannel = protobufChannel;                
+                _protobufChannel = protobufChannel;
             }
             else
             {
@@ -274,8 +274,8 @@ namespace Cygnus.TMLink.API.Models
             return;
         }
 
-        public GaugeFeatures SupportedFeatures => 
-            GaugeFeatures.CanCancelRecordTransfer | 
+        public GaugeFeatures SupportedFeatures =>
+            GaugeFeatures.CanCancelRecordTransfer |
             GaugeFeatures.CanDeleteBScans |
             GaugeFeatures.CanDeleteRecords |
             GaugeFeatures.HasAScanCapability |
@@ -329,7 +329,12 @@ namespace Cygnus.TMLink.API.Models
 
         public ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution) => throw new NotImplementedException();
 
-        public ErrorCode SetGaugeTime(DateTime gaugeTime) => throw new NotImplementedException();
+        public ErrorCode SetGaugeTime(DateTime gaugeTime) 
+        {
+            // When the gauge is connected it sends a get gauge information command with the current time,
+            // a side-effect of which is that the gauge time is automatically updated, so we don't need to set the time on the gauge.
+            return ErrorCode.Success; 
+        }
         #endregion
     }
 }
