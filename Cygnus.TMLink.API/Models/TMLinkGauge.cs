@@ -328,6 +328,8 @@ namespace Cygnus.TMLink.API.Models
         public ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units, MeasurementResolution resolution) => throw new NotImplementedException();
 
         public ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution) => throw new NotImplementedException();
+
+        public ErrorCode SetGaugeTime(DateTime gaugeTime) => throw new NotImplementedException();
         #endregion
     }
 }

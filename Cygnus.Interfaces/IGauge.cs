@@ -41,9 +41,11 @@ namespace Cygnus.Interfaces
         ErrorCode SendVelocity(uint velocity, MeasurementUnits units);
         ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units, MeasurementResolution resolution);
         ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution);
+        ErrorCode SetGaugeTime(DateTime gaugeTime);
 
         Task SubscribeToLiveUpdates();
         void UnsubscribeFromLiveUpdates();
+
         void Disconnect();
     }
 }
