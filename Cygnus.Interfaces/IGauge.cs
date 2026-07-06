@@ -2,15 +2,11 @@
 
 namespace Cygnus.Interfaces
 {
-    public interface IGauge : IDisposable
+    public interface IGauge : IConnectionInformation, IDisposable
     {
         bool IsConnected { get; }
-        string Name { get; }
         string Model { get; }
         Version? FirmwareVersion { get; }
-        uint SerialNumber { get; }
-        GaugeType GaugeType { get; }
-        string Port { get; }
         GaugeFeatures SupportedFeatures { get; }
         ProbeType ProbeType { get; }
 

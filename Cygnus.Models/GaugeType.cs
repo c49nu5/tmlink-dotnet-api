@@ -1,5 +1,4 @@
 ﻿namespace Cygnus.Models;
-
 public enum GaugeType
 {
     None = 0,

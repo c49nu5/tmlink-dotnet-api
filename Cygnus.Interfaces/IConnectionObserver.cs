@@ -6,7 +6,7 @@ namespace Cygnus.Interfaces
     {
         ConnectionState ConnectionState { get; set; }
         void ConnectionMessagesChanged(string[] message);
-        void GaugeDiscovered(IGauge gauge);
+        void GaugeDiscovered(IConnectionInformation gauge);
         void GaugeConnected(IGauge? gauge);
     }
 }

@@ -35,6 +35,8 @@ namespace Cygnus.TMLink.API.Models
             _device.AddObserver(this);
         }
 
+        public ConnectionType ConnectionType => ConnectionType.TMLink;
+
         public string DeviceIdentifier { get; private set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Model { get; set; } = string.Empty;

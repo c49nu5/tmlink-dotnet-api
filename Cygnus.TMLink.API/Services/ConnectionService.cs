@@ -40,9 +40,9 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
         }
     }
 
-    public async Task ConnectToGauge(IGauge gauge)
+    public async Task ConnectToGauge(IConnectionInformation connectionInformation)
     {
-        _logger.LogInformation("Connecting to device {Name}", gauge.Name);
+        _logger.LogInformation("Connecting to device {Name}", connectionInformation.Name);
 
         try
         {
@@ -50,25 +50,25 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
 
             ConnectedGauge?.Disconnect();
 
-            var internalGauge = gauge as ITMLinkGauge;
+            var internalGauge = connectionInformation as ITMLinkGauge;
             if (internalGauge != null && (internalGauge.IsConnected == true || await internalGauge.Connect()))
             {
-                ConnectedGauge = gauge;
+                ConnectedGauge = internalGauge;
 
-                _logger.LogInformation("Connected to gauge {Name}", gauge.Name);
+                _logger.LogInformation("Connected to gauge {Name}", connectionInformation.Name);
             }
             else
             {
-                _logger.LogInformation("Connect to gauge {Name} failed", gauge.Name);
+                _logger.LogInformation("Connect to gauge {Name} failed", connectionInformation.Name);
             }
         }
         catch (OperationCanceledException)
         {
-            _logger.LogInformation("Connection to gauge {Name} cancelled", gauge.Name);
+            _logger.LogInformation("Connection to gauge {Name} cancelled", connectionInformation.Name);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Problem connecting to {Name}", gauge.Name);
+            _logger.LogError(ex, "Problem connecting to {Name}", connectionInformation.Name);
             ConnectedGauge = null;
         }
     }

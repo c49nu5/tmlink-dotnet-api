@@ -7,7 +7,7 @@
         Task DiscoverGauges();
         void CancelDiscover();
 
-        Task ConnectToGauge(IGauge gauge);
+        Task ConnectToGauge(IConnectionInformation gauge);
         IGauge? ConnectedGauge { get; }
     }
 }

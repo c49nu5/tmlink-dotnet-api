@@ -1,7 +1,8 @@
-﻿using Cygnus.TMLink.API.Interfaces;
+﻿using Cygnus.BLE.InTheHand;
+using Cygnus.Interfaces;
+using Cygnus.TMLink.API.Interfaces;
 using Cygnus.TMLink.API.Models;
 using Cygnus.TMLink.API.Services;
-using Cygnus.BLE.InTheHand;
 using Cygnus.TMLink.Protobuf;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
@@ -17,6 +18,8 @@ public static class ServiceCollectionsExtensions
     public static void AddTMLinkServices(this IServiceCollection services, bool withInTheHandBLE = true)
     {
         services.AddSingleton<ITMLinkConnectionService, ConnectionService>();
+        services.AddSingleton<IConnectionService>(s => s.GetRequiredService<ITMLinkConnectionService>());
+
         services.AddTransient<ITMLinkGauge, TMLinkGauge>();
         services.AddSingleton<Func<ITMLinkGauge>>(s => s.GetRequiredService<ITMLinkGauge>);
         services.AddProtobufServices();
