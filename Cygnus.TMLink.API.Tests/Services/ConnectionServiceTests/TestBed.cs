@@ -37,7 +37,8 @@ internal class TestBed
         PlatformService?.Setup(p => p.CheckBluetoothConfiguration()).ReturnsAsync(bluetoothEnabled);
         if (!bluetoothEnabled)
         {
-            PlatformService?.Setup(p => p.ShowMessage("Please enable bluetooth and give the app the required permissions", "")).Returns(Task.CompletedTask);
+            Observer?.SetupSet(p => p.ConnectionState = Cygnus.Models.ConnectionState.Errored);
+            Observer?.Setup(p => p.AddConnectionMessage("Please enable bluetooth and give the app the required permissions"));
         }
 
         return connectionService;

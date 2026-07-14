@@ -80,8 +80,11 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
         if (!await _platformService.CheckBluetoothConfiguration())
         {
             _logger.LogInformation("Aborting scan attempt");
-            await _platformService.ShowMessage("Please enable bluetooth and give the app the required permissions");
-            NotifyObservers(o => o.ConnectionState = ConnectionState.Errored);
+            NotifyObservers(o =>
+            {
+                o.AddConnectionMessage("Please enable bluetooth and give the app the required permissions");
+                o.ConnectionState = ConnectionState.Errored;
+            });
         }
         else
         {
@@ -93,6 +96,11 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
                     var gauge = _gaugeFactory();
                     gauge.SetDevice(device);
                     _logger.LogInformation("Found device: {Name} ({DeviceIdentifier})", gauge.Name, gauge.DeviceIdentifier);
+                    NotifyObservers(o =>
+                    {
+                        o.AddConnectionMessage($"Checking device {gauge.Name}...");
+                    });
+
                     if (await gauge.Connect() && gauge.SerialNumber != 0)
                     {
                         NotifyObservers(o => o.GaugeDiscovered(gauge));
@@ -102,11 +110,17 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Problem discovering devices");
-                await _platformService.ShowMessage($"An error occurred while scanning for devices. Please try again. ({ex.Message})");
-            }
-        }
+                NotifyObservers(o =>
+                {
+                    o.AddConnectionMessage($"An error occurred while scanning for devices. Please try again. ({ex.Message})");
+                    o.ConnectionState = ConnectionState.Errored;
+                });
 
-        NotifyObservers(o => o.ConnectionState = ConnectionState.Disconnected);
+                return;
+            }
+
+            NotifyObservers(o => o.ConnectionState = ConnectionState.Disconnected);
+        }
     }
 
     public void CancelDiscover()

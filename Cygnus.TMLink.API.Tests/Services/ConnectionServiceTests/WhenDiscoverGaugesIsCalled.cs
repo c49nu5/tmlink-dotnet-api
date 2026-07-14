@@ -47,7 +47,7 @@ internal class WhenDiscoverGaugesIsCalled
         await sut.DiscoverGauges();
 
         // Assert
-        testBed.Observer.VerifySet(o => o.ConnectionState = ConnectionState.Disconnected, Times.Once);
+        testBed.Observer.VerifySet(o => o.ConnectionState = ConnectionState.Errored, Times.Once);
     }
 
     [Test]
@@ -92,6 +92,7 @@ internal class WhenDiscoverGaugesIsCalled
         var devices = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(i => Mock.Of<ITMLinkDevice>()).ToList();
         testBed.DeviceDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
         var sut = testBed.CreateSUT(true, true, false);
+        testBed.Observer.Setup(o => o.AddConnectionMessage(It.IsAny<string>()));
         testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
 
         // Act
@@ -109,6 +110,7 @@ internal class WhenDiscoverGaugesIsCalled
         var devices = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(i => Mock.Of<ITMLinkDevice>()).ToList();
         testBed.DeviceDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
         var sut = testBed.CreateSUT(true, true, true, false);
+        testBed.Observer.Setup(o => o.AddConnectionMessage(It.IsAny<string>()));
         testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
 
         // Act
@@ -127,6 +129,7 @@ internal class WhenDiscoverGaugesIsCalled
         testBed.DeviceDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
         var sut = testBed.CreateSUT(true, true);
         testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
+        testBed.Observer.Setup(o => o.AddConnectionMessage(It.IsAny<string>()));
         testBed.Observer.Setup(o => o.GaugeDiscovered(It.IsAny<IGauge>()));
 
         // Act
