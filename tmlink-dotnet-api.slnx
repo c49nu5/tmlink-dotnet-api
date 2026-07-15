@@ -6,14 +6,15 @@
     <File Path="README.md" />
     <File Path="THIRD-PARTY-NOTICES.txt" />
   </Folder>
-  <Project Path="Cygnus.TMLink.API.Tests/Cygnus.TMLink.API.Tests.csproj" Id="fcf116db-1577-44c3-9586-f5fddada2325" />
-  <Project Path="Cygnus.TMLink.API/Cygnus.TMLink.API.csproj" />
-  <Project Path="Cygnus.TMLink.Interfaces/Cygnus.TMLink.Interfaces.csproj" Id="1786689f-bd48-44f1-b4bf-3bacf6c92965" />
   <Project Path="Cygnus.BLE.InTheHand/Cygnus.BLE.InTheHand.csproj" Id="dd5f3784-a3c6-402d-bb78-8126018f823c" />
-  <Project Path="Cygnus.TMLink.Protobuf.Tests/Cygnus.TMLink.Protobuf.Tests.csproj" Id="9003a4f3-9d6a-4531-93de-51e58ef14f44" />
-  <Project Path="Cygnus.TMLink.Protobuf/Cygnus.TMLink.Protobuf.csproj" />
   <Project Path="Cygnus.Interfaces/Cygnus.Interfaces.csproj" Id="3fcfd7f1-cb87-465e-b4f2-622e84899088" />
   <Project Path="Cygnus.Models/Cygnus.Models.csproj" />
   <Project Path="Cygnus.Services.Tests/Cygnus.Services.Tests.csproj" Id="afe35387-a6d4-46c5-b5ee-d87239a92a99" />
   <Project Path="Cygnus.Services/Cygnus.Services.csproj" />
+  <Project Path="Cygnus.TMLink.API.Interfaces/Cygnus.TMLink.API.Interfaces.csproj" Id="5bb0d0ca-4d62-42f7-87b8-7a0192558026" />
+  <Project Path="Cygnus.TMLink.API.Tests/Cygnus.TMLink.API.Tests.csproj" Id="fcf116db-1577-44c3-9586-f5fddada2325" />
+  <Project Path="Cygnus.TMLink.API/Cygnus.TMLink.API.csproj" />
+  <Project Path="Cygnus.TMLink.Interfaces/Cygnus.TMLink.Interfaces.csproj" Id="1786689f-bd48-44f1-b4bf-3bacf6c92965" />
+  <Project Path="Cygnus.TMLink.Protobuf.Tests/Cygnus.TMLink.Protobuf.Tests.csproj" Id="9003a4f3-9d6a-4531-93de-51e58ef14f44" />
+  <Project Path="Cygnus.TMLink.Protobuf/Cygnus.TMLink.Protobuf.csproj" />
 </Solution>

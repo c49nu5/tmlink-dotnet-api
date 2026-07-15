@@ -47,6 +47,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cygnus.BLE.InTheHand\Cygnus.BLE.InTheHand.csproj" />
+    <ProjectReference Include="..\Cygnus.TMLink.API.Interfaces\Cygnus.TMLink.API.Interfaces.csproj" />
     <ProjectReference Include="..\Cygnus.TMLink.Protobuf\Cygnus.TMLink.Protobuf.csproj" />
   </ItemGroup>
 
