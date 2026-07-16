@@ -315,21 +315,21 @@ namespace Cygnus.TMLink.API.Models
         }
 
         #region Methods only implemented in CygLink gauges at present, but not in TMLink gauges. These methods are here to satisfy the IGauge interface.
-        public ProbeType ProbeType => throw new NotImplementedException();
+        public ProbeType ProbeType => ProbeType.None;
 
-        public DateTime? GaugeTime => throw new NotImplementedException();
+        public DateTime? GaugeTime => throw new NotSupportedException();
 
-        public ErrorCode DoProbeZero() => throw new NotImplementedException();
+        public ErrorCode DoProbeZero() => throw new NotSupportedException();
 
-        public void SendCommentList(string[] commentsList) => throw new NotImplementedException();
+        public void SendCommentList(string[] commentsList) => throw new NotSupportedException();
 
-        public void SendMaterialList(List<Material> materialList) => throw new NotImplementedException();
+        public void SendMaterialList(List<Material> materialList) => throw new NotSupportedException();
 
-        public ErrorCode SendVelocity(uint velocity, MeasurementUnits units) => throw new NotImplementedException();
+        public ErrorCode SendVelocity(uint velocity, MeasurementUnits units) => throw new NotSupportedException();
 
-        public ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units, MeasurementResolution resolution) => throw new NotImplementedException();
+        public ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units, MeasurementResolution resolution) => throw new NotSupportedException();
 
-        public ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution) => throw new NotImplementedException();
+        public ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution) => throw new NotSupportedException();
 
         public ErrorCode SetGaugeTime(DateTime gaugeTime) 
         {

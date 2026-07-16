@@ -15,7 +15,7 @@ namespace Cygnus.TMLink.API;
 public static class ServiceCollectionsExtensions
 {
     [ExcludeFromCodeCoverage]
-    public static void AddTMLinkServices(this IServiceCollection services, bool withInTheHandBLE = true)
+    public static void AddTMLinkAPIServices(this IServiceCollection services, bool withInTheHandBLE = true)
     {
         services.AddSingleton<ITMLinkConnectionService, ConnectionService>();
         services.AddSingleton<IConnectionService>(s => s.GetRequiredService<ITMLinkConnectionService>());
