@@ -1,7 +1,7 @@
-﻿using Cygnus.TMLink.Interfaces;
-using Cygnus.TMLink.Protobuf.Interfaces;
-using Cygnus.Interfaces;
+﻿using Cygnus.Interfaces;
 using Cygnus.Models;
+using Cygnus.TMLink.Interfaces;
+using Cygnus.TMLink.Protobuf.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Cygnus.TMLink.Protobuf.Services
@@ -180,6 +180,17 @@ namespace Cygnus.TMLink.Protobuf.Services
                     _logger.LogError(ex, "Problem with live measurement characteristic");
                 }
             }
+        }
+
+        protected uint GetThicknessTime(uint thickness, uint velocity, MeasurementUnits measurementUnits)
+        {
+            if (velocity == 0)
+            {
+                return 0;
+            }
+
+            var thicknessTime = thickness / (velocity / (measurementUnits == MeasurementUnits.Imperial ? 2e4 : 2e3));
+            return Convert.ToUInt32(thicknessTime);
         }
 
         protected virtual void Dispose(bool disposing)

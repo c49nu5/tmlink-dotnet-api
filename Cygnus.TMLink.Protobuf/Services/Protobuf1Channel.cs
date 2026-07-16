@@ -1,8 +1,10 @@
-﻿using Cygnus.TMLink.Protobuf.Interfaces;
-using Cygnus.TMLink.Protobuf.V1;
-using Cygnus.Interfaces;
+﻿using Cygnus.Interfaces;
 using Cygnus.Models;
+using Cygnus.Models.Constants;
+using Cygnus.TMLink.Protobuf.Interfaces;
+using Cygnus.TMLink.Protobuf.V1;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.Metrics;
 using static Cygnus.TMLink.Protobuf.V1.Constants;
 
 namespace Cygnus.TMLink.Protobuf.Services
@@ -148,7 +150,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                     Velocity = measurement.Velocity,
                     AScan = GetAScan(measurement.Ascan),
                     EchoPoints = [.. GetEchoPoints(measurement.Ascan)],
-                    HasAScan = measurement.Ascan?.ascanPoints?.Length > 0
+                    HasAScan = measurement.Ascan?.ascanPoints?.Length > 0,
+                    ThicknessTime = GetThicknessTime(measurement.Thickness, measurement.Velocity, (MeasurementUnits)measurement.Uom)
                 };
             }
 
@@ -211,7 +214,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                     Velocity = measurement.Velocity,
                     AScan = GetAScan(measurement.Ascan),
                     EchoPoints = [.. GetEchoPoints(measurement.Ascan)],
-                    HasAScan = measurement.Ascan?.ascanPoints?.Length > 0
+                    HasAScan = measurement.Ascan?.ascanPoints?.Length > 0,
+                    ThicknessTime = GetThicknessTime(measurement.Thickness, measurement.Velocity, (MeasurementUnits)measurement.Uom)
                 };
             }
 
@@ -374,6 +378,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                                     AScan = GetAScan(frozenMeasurement.Ascan),
                                     EchoPoints = [.. GetEchoPoints(frozenMeasurement.Ascan)],
                                     Type = frozenMeasurement.Thickness > 0 ? MeasurementType.Valid : MeasurementType.None,
+                                    ThicknessTime = GetThicknessTime(frozenMeasurement.Thickness, frozenMeasurement.Velocity, (MeasurementUnits)frozenMeasurement.Uom)
                                 }));
                             }
                             else
@@ -385,22 +390,27 @@ namespace Cygnus.TMLink.Protobuf.Services
                 }
                 else
                 {
-                    NotifyObservers(o => o.OnLiveMeasurementReceived(new LiveMeasurement
+                    NotifyObservers(o =>
                     {
-                        BatteryLevel = liveMeasurement.batteryLevel,
-                        GaindB = liveMeasurement.gaindB,
-                        PointIndex = liveMeasurement.Index,
-                        Units = (liveMeasurement.statusBits & IsImperialUnits) == IsImperialUnits ? MeasurementUnits.Imperial : MeasurementUnits.Metric,
-                        SurfaceTemperatureCelsius = (int)liveMeasurement.surfaceTemp,
-                        Thickness = liveMeasurement.Thickness,
-                        Mode = ConvertToMeasureMode(liveMeasurement.UTMode),
-                        Velocity = liveMeasurement.Velocity,
-                        DeepCoatOn = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
-                        IsFrozen = (liveMeasurement.statusBits & IsFrozenFlag) == IsFrozenFlag,
-                        StableMeasurement = (liveMeasurement.statusBits & IsStableFlag) == IsStableFlag,
-                        ValidMeasurement = (liveMeasurement.statusBits & IsValidFlag) == IsValidFlag,
-                        Type = liveMeasurement.Thickness > 0 ? MeasurementType.Valid : MeasurementType.None,
-                    }));
+                        MeasurementUnits measurementUnits = (liveMeasurement.statusBits & IsImperialUnits) == IsImperialUnits ? MeasurementUnits.Imperial : MeasurementUnits.Metric;
+                        o.OnLiveMeasurementReceived(new LiveMeasurement
+                        {
+                            BatteryLevel = liveMeasurement.batteryLevel,
+                            GaindB = liveMeasurement.gaindB,
+                            PointIndex = liveMeasurement.Index,
+                            Units = measurementUnits,
+                            SurfaceTemperatureCelsius = (int)liveMeasurement.surfaceTemp,
+                            Thickness = liveMeasurement.Thickness,
+                            Mode = ConvertToMeasureMode(liveMeasurement.UTMode),
+                            Velocity = liveMeasurement.Velocity,
+                            DeepCoatOn = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
+                            IsFrozen = (liveMeasurement.statusBits & IsFrozenFlag) == IsFrozenFlag,
+                            StableMeasurement = (liveMeasurement.statusBits & IsStableFlag) == IsStableFlag,
+                            ValidMeasurement = (liveMeasurement.statusBits & IsValidFlag) == IsValidFlag,
+                            Type = liveMeasurement.Thickness > 0 ? MeasurementType.Valid : MeasurementType.None,
+                            ThicknessTime = GetThicknessTime(liveMeasurement.Thickness, liveMeasurement.Velocity, measurementUnits),
+                        });
+                    });
                 }
             }
         }
