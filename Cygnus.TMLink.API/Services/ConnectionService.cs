@@ -14,6 +14,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
     private readonly Func<ITMLinkGauge> _gaugeFactory;
     private IGauge? _connectedGauge;
 
+    #region Constructor
     public ConnectionService(
         ILogger<ITMLinkConnectionService> logger,
         IPlatformService platformService,
@@ -25,7 +26,9 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
         _deviceDiscoverer = deviceDiscoverer ?? throw new ArgumentNullException(nameof(deviceDiscoverer));
         _gaugeFactory = gaugeFactory ?? throw new ArgumentNullException(nameof(gaugeFactory));
     }
+    #endregion
 
+    #region Properties
     public IGauge? ConnectedGauge
     {
         get => _connectedGauge;
@@ -40,6 +43,14 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
         }
     }
 
+    public string NoBluetoothMessage { private get; set; } = "For TM-Link gauges, enable bluetooth and give the app the required permissions.";
+    public string CheckingDeviceMessageFormat { private get; set; } = "Checking device {0}...";
+    public string NoTMLinkGaugesMessage { private get; set; } = "No TM-Link gauges found.";
+    public string ScanningErrorMessageFormat { private get; set; } = "An error occurred while scanning for TM-Link gauges. ({0})";
+    #endregion
+
+
+    #region Methods
     public async Task ConnectToGauge(IConnectionInformation connectionInformation)
     {
         _logger.LogInformation("Connecting to device {Name}", connectionInformation.Name);
@@ -82,7 +93,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
             _logger.LogInformation("Aborting scan attempt");
             NotifyObservers(o =>
             {
-                o.AddConnectionMessage("For TM-Link gauges, enable bluetooth and give the app the required permissions.");
+                o.AddConnectionMessage(NoBluetoothMessage);
                 o.ConnectionState = ConnectionState.Errored;
             });
         }
@@ -99,7 +110,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
                     _logger.LogInformation("Found device: {Name} ({DeviceIdentifier})", gauge.Name, gauge.DeviceIdentifier);
                     NotifyObservers(o =>
                     {
-                        o.AddConnectionMessage($"Checking device {gauge.Name}...");
+                        o.AddConnectionMessage(string.Format(CheckingDeviceMessageFormat, gauge.Name));
                     });
 
                     if (await gauge.Connect() && gauge.SerialNumber != 0)
@@ -113,7 +124,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
                 {
                     NotifyObservers(o =>
                     {
-                        o.AddConnectionMessage("No TM-Link gauges found.");
+                        o.AddConnectionMessage(NoTMLinkGaugesMessage);
                         o.ConnectionState = ConnectionState.Errored;
                     });
                 }
@@ -127,7 +138,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
                 _logger.LogError(ex, "Problem discovering devices");
                 NotifyObservers(o =>
                 {
-                    o.AddConnectionMessage($"An error occurred while scanning for TM-Link gauges. ({ex.Message})");
+                    o.AddConnectionMessage(string.Format(ScanningErrorMessageFormat, ex.Message));
                     o.ConnectionState = ConnectionState.Errored;
                 });
             }
@@ -149,6 +160,5 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
             ConnectedGauge = null;
         }
     }
+    #endregion
 }
-
-
