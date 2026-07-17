@@ -38,7 +38,7 @@ internal class TestBed
         if (!bluetoothEnabled)
         {
             Observer?.SetupSet(p => p.ConnectionState = Cygnus.Models.ConnectionState.Errored);
-            Observer?.Setup(p => p.AddConnectionMessage("Please enable bluetooth and give the app the required permissions"));
+            Observer?.Setup(p => p.AddConnectionMessage("For TM-Link gauges, enable bluetooth and give the app the required permissions"));
         }
 
         return connectionService;

@@ -82,7 +82,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
             _logger.LogInformation("Aborting scan attempt");
             NotifyObservers(o =>
             {
-                o.AddConnectionMessage("Please enable bluetooth and give the app the required permissions");
+                o.AddConnectionMessage("For TM-Link gauges, enable bluetooth and give the app the required permissions");
                 o.ConnectionState = ConnectionState.Errored;
             });
         }
@@ -90,6 +90,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
         {
             try
             {
+                bool gaugeDiscovered = false;
                 var discoveredDevices = await _deviceDiscoverer.FindDevices();
                 foreach (var device in discoveredDevices)
                 {
@@ -103,8 +104,22 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
 
                     if (await gauge.Connect() && gauge.SerialNumber != 0)
                     {
+                        gaugeDiscovered = true;
                         NotifyObservers(o => o.GaugeDiscovered(gauge));
                     }
+                }
+
+                if (!gaugeDiscovered)
+                {
+                    NotifyObservers(o =>
+                    {
+                        o.AddConnectionMessage("No TM-Link gauges found. Please ensure the gauge is powered on and in range.");
+                        o.ConnectionState = ConnectionState.Errored;
+                    });
+                }
+                else
+                {
+                    NotifyObservers(o => o.ConnectionState = ConnectionState.Disconnected);
                 }
             }
             catch (Exception ex)
@@ -112,14 +127,10 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
                 _logger.LogError(ex, "Problem discovering devices");
                 NotifyObservers(o =>
                 {
-                    o.AddConnectionMessage($"An error occurred while scanning for devices. Please try again. ({ex.Message})");
+                    o.AddConnectionMessage($"An error occurred while scanning for TM-Link gauges. Please try again. ({ex.Message})");
                     o.ConnectionState = ConnectionState.Errored;
                 });
-
-                return;
             }
-
-            NotifyObservers(o => o.ConnectionState = ConnectionState.Disconnected);
         }
     }
 
