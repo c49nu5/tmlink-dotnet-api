@@ -112,6 +112,7 @@ namespace Cygnus.TMLink.API.Models
                 else
                 {
                     _logger.LogError("Called Connect but {Device} still not connected", Name);
+                    return false;
                 }
 
                 return _protobufChannel.IsInitialized;
