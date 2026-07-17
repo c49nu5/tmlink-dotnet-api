@@ -82,7 +82,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
             _logger.LogInformation("Aborting scan attempt");
             NotifyObservers(o =>
             {
-                o.AddConnectionMessage("For TM-Link gauges, enable bluetooth and give the app the required permissions");
+                o.AddConnectionMessage("For TM-Link gauges, enable bluetooth and give the app the required permissions.");
                 o.ConnectionState = ConnectionState.Errored;
             });
         }
@@ -113,7 +113,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
                 {
                     NotifyObservers(o =>
                     {
-                        o.AddConnectionMessage("No TM-Link gauges found. Please ensure the gauge is powered on and in range.");
+                        o.AddConnectionMessage("No TM-Link gauges found.");
                         o.ConnectionState = ConnectionState.Errored;
                     });
                 }
@@ -127,7 +127,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
                 _logger.LogError(ex, "Problem discovering devices");
                 NotifyObservers(o =>
                 {
-                    o.AddConnectionMessage($"An error occurred while scanning for TM-Link gauges. Please try again. ({ex.Message})");
+                    o.AddConnectionMessage($"An error occurred while scanning for TM-Link gauges. ({ex.Message})");
                     o.ConnectionState = ConnectionState.Errored;
                 });
             }
