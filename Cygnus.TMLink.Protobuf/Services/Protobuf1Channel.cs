@@ -107,7 +107,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                     Key = record.Key,
                     Location = record.Location,
                     RecordID = record.recordID,
-                    RecordType = ConvertToRecordType(record.recordType),
+                    RecordType = transferRequest.RecordType, //TODO ConvertToRecordType(record.recordType) this is always Grid2D on the wire,
                     Surveyor = record.Surveyor,
                     Created = record.Created,
                     Updated = record.Updated,
