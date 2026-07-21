@@ -18,12 +18,12 @@ The TM-Link .NET API is available as a NuGet package, just add https://nuget.pkg
 The API assumes that your code is using Microsoft.Extensions.DependencyInjection, you can register the TM-Link API services in your application's service collection as follows:
 ``` C#
 services.AddSingleton<IPlatformService, PlatformService>();
-services.AddTMLinkServices();
+services.AddTMLinkAPIServices();
 ```
 
-By default the call to AddTMLinkServices registers an implementation of the ITMLinkDeviceDiscoverer interface based on the [InTheHand.BluetoothLE package](https://github.com/inthehand/32feet). If you want to use a different BLE library, you can register your own implementation of ITMLinkDeviceDiscoverer in DI after calling AddTMLinkServices(false) which will prevent the default implementation from being registered.
+By default the call to AddTMLinkAPIServices registers an implementation of the ITMLinkDeviceDiscoverer interface based on the [InTheHand.BluetoothLE package](https://github.com/inthehand/32feet). If you want to use a different BLE library, you can register your own implementation of ITMLinkDeviceDiscoverer in DI after calling AddTMLinkServices(false) which will prevent the default implementation from being registered.
 
-Clients need to implement the `IPlatformService` interface to provide platform-specific functionality such as checking that BLE is configured correctly and displaying messages to the end user. 
+Clients need to implement the `IPlatformService` interface to provide platform-specific functionality such as checking that BLE is configured correctly. 
 
 An example of these implementations for Maui can be found here
 https://github.com/c49nu5/cygnus-tmlink-ble-sdk
@@ -45,25 +45,27 @@ An example of using the API in an MVVM application to connect to a TM-Link gauge
             _connectionService.DiscoverGauges();
         }
 
-        public void GaugeDiscovered(ITMLinkGauge gauge)
+        public void GaugeDiscovered(IConnectionInformation gauge)
         {
             // This instance would usually be stored and displayed to the user to allow them to choose when to connect
             _connectionService.ConnectToGauge(gauge);
         }
 
-        public void GaugeConnected(ITMLinkGauge? gauge)
+        public void GaugeConnected(IGauge? gauge)
         {
             ConnectedGauge = gauge;
         }
 
-        public ITMLinkGauge? ConnectedGauge { get; set; }
+        public IGauge? ConnectedGauge { get; set; }
 
-        public bool IsScanning { get; set; }
+        public ConnectionState ConnectionState { get; set; }
+
+        public void AddConnectionMessage(string message);
 ```
 
 The view model implements the `IConnectionObserver` interface to receive updates about discovered gauges and connection status once it has added itself as an observer to the connection service. The `DiscoverGauges` method initiates a scan for nearby TM-Link gauges, and when a gauge is discovered the code attempts to connect to it. Once connected, the `ConnectedGauge` property is updated with the connected gauge instance, allowing the application to interact with it and read data.
 
-A view model can then use the following methods on the ITMLinkGauge interface to retrieve, delete or create records on the gauge.
+A view model can then use the following methods on the IGauge interface to retrieve, delete or create records on the gauge.
 ``` C#
     Task<List<GaugeRecordSummary>?> GetRecordList();
     Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans);
@@ -72,20 +74,23 @@ A view model can then use the following methods on the ITMLinkGauge interface to
     Task DeleteRecord(IFileTransferRequest deleteRequest);
     Task NewRecord(BlankRecord record);
 ```
+other methods on the IGauge interface are not supported by the TM-Link BLE API, and will throw a NotSupportedException if called.
 
 ### Live updates
-If clients wish to receive updates when the live and frozen measurements are updated then the view model can implement the ITMLinkGaugeObserver interface and add itself to the ITMLinkGauge instance as an observer.
+If clients wish to receive updates when the live and frozen measurements are updated then the view model can implement the IGaugeObserver interface and add itself to the IGauge instance as an observer.
 ``` C#
-    public partial class GaugeViewModel : ITMLinkGaugeObserver
+    public partial class GaugeViewModel : IGaugeObserver
     {
-        private readonly ITMLinkGauge _gauge;
+        private readonly IGauge _gauge;
 
         public GaugeViewModel(
-            ITMLinkGauge gauge)
+            IGauge gauge)
         {
             _gauge = gauge;
             _gauge.AddObserver(this);
         }
+
+        public uint BatteryLevel { get; set; }
 
         public Task SubscribeToLiveUpdates()
         {
@@ -102,10 +107,15 @@ If clients wish to receive updates when the live and frozen measurements are upd
             LiveMeasurement = liveMeasurement;
         }
 
+        public void OnPropertiesUpdated(IGauge gauge)
+        {
+            BatteryLevel = gauge.BatteryLevel;
+        }
+
         public LiveMeasurement? LiveMeasurement { get; set; }
     }
 ```
-In a similar way to the connection view model, the gauge view model can implement the `ITMLinkGaugeObserver` interface to receive updates about live measurements after calling SubscribeToLiveUpdates, by adding itself to the ITMLinkGauge instance as an observer.
+In a similar way to the connection view model, the gauge view model can implement the `IGaugeObserver` interface to receive updates about live measurements after calling SubscribeToLiveUpdates, by adding itself to the IGauge instance as an observer.
 
 
 ### Measurement display

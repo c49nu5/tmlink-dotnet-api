@@ -318,7 +318,7 @@ namespace Cygnus.TMLink.API.Models
         #region Methods only implemented in CygLink gauges at present, but not in TMLink gauges. These methods are here to satisfy the IGauge interface.
         public ProbeType ProbeType => ProbeType.None;
 
-        public DateTime? GaugeTime => throw new NotSupportedException();
+        public DateTime? GaugeTime => null;
 
         public ErrorCode DoProbeZero() => throw new NotSupportedException();
 

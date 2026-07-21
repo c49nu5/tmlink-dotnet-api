@@ -22,15 +22,23 @@ namespace Cygnus.Interfaces
         int MaxMaterialCount { get; }
         int MinCommentCount { get; }
 
+        // Shared methods for all gauge types
         void AddObserver(IGaugeObserver observer);
-
         Task<List<GaugeRecordSummary>?> GetRecordList();
         Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans);
         Task CancelRecordTransfer();
         Task DeleteAllRecords();
         Task DeleteRecord(IFileTransferRequest deleteRequest);
+
+        Task SubscribeToLiveUpdates();
+        void UnsubscribeFromLiveUpdates();
+
+        void Disconnect();
+
+        // TM-Link specific methods
         Task NewRecord(BlankRecord record);
 
+        // Cyglink specific methods
         ErrorCode DoProbeZero();
         void SendCommentList(string[] commentsList);
         void SendMaterialList(List<Material> materialList);
@@ -38,10 +46,5 @@ namespace Cygnus.Interfaces
         ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units, MeasurementResolution resolution);
         ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution);
         ErrorCode SetGaugeTime(DateTime gaugeTime);
-
-        Task SubscribeToLiveUpdates();
-        void UnsubscribeFromLiveUpdates();
-
-        void Disconnect();
     }
 }
