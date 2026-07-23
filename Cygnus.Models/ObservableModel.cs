@@ -29,23 +29,19 @@ public abstract class ObservableModel<T> where T : class
 
     protected static void NotifyObservers<A>(Action<A> action, List<WeakReference<A>> observers) where A : class
     {
-        List<WeakReference<A>> expiredObservers = [];
         lock (s_notificationLock)
         {
-            foreach (WeakReference<A> observerRef in observers)
+            for (int i = observers.Count - 1; i >= 0; i--)
             {
+                WeakReference<A> observerRef = observers[i];
                 if (observerRef.TryGetTarget(out A? observer) == true)
                 {
                     action(observer);
                 }
                 else
                 {
-                    expiredObservers.Add(observerRef);
+                    observers.RemoveAt(i);
                 }
-            }
-            foreach (WeakReference<A> observer in expiredObservers)
-            {
-                observers.Remove(observer);
             }
         }
     }
