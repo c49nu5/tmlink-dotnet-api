@@ -20,6 +20,7 @@ public interface ITMLinkConnectionService : IConnectionService
     /// Localization property for the message displayed when an error occurs during scanning for TM-Link gauges.
     /// </summary>
     string ScanningErrorMessageFormat { set; }
+    string ScanningMessage { set; }
 
     internal void GaugeIsDisconnected(string deviceIdentifier);
 }

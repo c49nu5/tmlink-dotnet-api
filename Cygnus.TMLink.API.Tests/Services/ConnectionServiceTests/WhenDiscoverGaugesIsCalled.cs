@@ -12,6 +12,7 @@ internal class WhenDiscoverGaugesIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = testBed.CreateSUT(true, false);
+        testBed.Observer.Setup(o => o.AddConnectionMessage("Scanning for TM-Link gauges."));
         testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
 
         // Act
@@ -41,6 +42,7 @@ internal class WhenDiscoverGaugesIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = testBed.CreateSUT(true, false);
+        testBed.Observer.Setup(o => o.AddConnectionMessage("Scanning for TM-Link gauges."));
         testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
 
         // Act

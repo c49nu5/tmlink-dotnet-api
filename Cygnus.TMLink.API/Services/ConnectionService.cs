@@ -1,8 +1,8 @@
-﻿using Cygnus.TMLink.API.Interfaces;
+﻿using Cygnus.Interfaces;
+using Cygnus.Models;
+using Cygnus.TMLink.API.Interfaces;
 using Cygnus.TMLink.Interfaces;
 using Microsoft.Extensions.Logging;
-using Cygnus.Models;
-using Cygnus.Interfaces;
 
 namespace Cygnus.TMLink.API.Services;
 
@@ -43,6 +43,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
         }
     }
 
+    public string ScanningMessage { private get; set; } = "Scanning for TM-Link gauges.";
     public string NoBluetoothMessage { private get; set; } = "For TM-Link gauges, enable bluetooth and give the app the required permissions.";
     public string CheckingDeviceMessageFormat { private get; set; } = "Checking device {0}...";
     public string NoTMLinkGaugesMessage { private get; set; } = "No TM-Link gauges found.";
@@ -53,6 +54,8 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
     #region Methods
     public async Task ConnectToGauge(IConnectionInformation connectionInformation)
     {
+        NotifyObservers(o => o.ConnectionState = ConnectionState.Connecting);
+        NotifyObservers(o => o.AddConnectionMessage(string.Format(CheckingDeviceMessageFormat, connectionInformation.Name)));
         _logger.LogInformation("Connecting to device {Name}", connectionInformation.Name);
 
         try
@@ -87,6 +90,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
     public async Task DiscoverGauges()
     {
         NotifyObservers(o => o.ConnectionState = ConnectionState.Connecting);
+        NotifyObservers(o => o.AddConnectionMessage(ScanningMessage));
 
         if (!await _platformService.CheckBluetoothConfiguration())
         {
