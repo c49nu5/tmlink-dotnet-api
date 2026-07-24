@@ -37,4 +37,5 @@ public enum GaugeFeatures : long
     SendsBatteryLevel =         0b1000000000000000000000000000000,
     SendsDepth =                0b10000000000000000000000000000000,
     SendsLiveMeasurements =     0b100000000000000000000000000000000,
+    HasFreezeCapability =       0b1000000000000000000000000000000000,
 }

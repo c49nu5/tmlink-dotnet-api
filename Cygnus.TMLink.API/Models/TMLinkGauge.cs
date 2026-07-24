@@ -287,6 +287,7 @@ namespace Cygnus.TMLink.API.Models
             GaugeFeatures.SendsAScans |
             GaugeFeatures.SendsBatteryLevel |
             GaugeFeatures.SendsLiveMeasurements |
+            GaugeFeatures.HasFreezeCapability |
             GaugeFeatures.CanSendBScanList |
             GaugeFeatures.CanSendRecordList;
 
