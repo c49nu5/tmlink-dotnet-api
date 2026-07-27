@@ -101,19 +101,26 @@ namespace Cygnus.TMLink.Protobuf.Services
             if (record != null)
             {
                 _logger.LogInformation("Received record from gauge {RecordName}: {RequiredPoints} {PointsTaken}", record.Name, record.numPointsRequired, record.numPointsTaken);
-                GaugeRecord gaugeRecord = new()
+                GaugeRecord gaugeRecord = new();
+                if (record.recordType == V1.RecordType.Grid)
                 {
-                    Name = record.Name,
-                    Key = record.Key,
-                    Location = record.Location,
-                    RecordID = record.recordID,
-                    RecordType = transferRequest.RecordType, //TODO ConvertToRecordType(record.recordType) this is always Grid2D on the wire,
-                    Surveyor = record.Surveyor,
-                    Created = record.Created,
-                    Updated = record.Updated,
-                    NumberPointsRequired = record.numPointsRequired,
-                    NumberOfPointsTaken = record.numPointsTaken
-                };
+                    gaugeRecord = new GaugeGridRecord
+                    {
+                        ColumnCount = (int)record.numColums,
+                        RowCount = (int)record.numRows,
+                    };
+                }
+
+                gaugeRecord.Name = record.Name;
+                gaugeRecord.Key = record.Key;
+                gaugeRecord.Location = record.Location;
+                gaugeRecord.RecordID = record.recordID;
+                gaugeRecord.RecordType = ConvertToRecordType(record.recordType);
+                gaugeRecord.Surveyor = record.Surveyor;
+                gaugeRecord.Created = record.Created;
+                gaugeRecord.Updated = record.Updated;
+                gaugeRecord.NumberPointsRequired = record.numPointsRequired;
+                gaugeRecord.NumberOfPointsTaken = record.numPointsTaken;
 
                 return gaugeRecord;
             }
@@ -142,7 +149,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                     Key = measurement.Key,
                     Method = (Models.Method)measurement.Method,
                     Mode = ConvertToMeasureMode(measurement.UTMode),
-                    //Probe = (Models.ProbeType)measurement.probeType,                   
+                    Probe = (int)measurement.probeType > 1 ? (Models.ProbeType)measurement.probeType : Models.ProbeType.None,
                     Time = measurement.Taken,
                     GridCoordinate = new() { Column = (ushort)measurement.colNumX, Row = (ushort)measurement.rowNumY },
                     Units = (MeasurementUnits)measurement.Uom,
@@ -208,7 +215,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                     RecordId = measurement.BScanID,
                     Method = Models.Method.Scan,
                     Mode = ConvertToMeasureMode(measurement.UTMode),
-                    //Probe = (Models.ProbeType)measurement.probeType,
+                    Probe = (int)measurement.probeType > 1 ? (Models.ProbeType)measurement.probeType : Models.ProbeType.None,
                     Units = (MeasurementUnits)measurement.Uom,
                     Thickness = measurement.Thickness,
                     Velocity = measurement.Velocity,
