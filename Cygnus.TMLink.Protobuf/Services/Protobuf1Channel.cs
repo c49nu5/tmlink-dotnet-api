@@ -149,7 +149,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                     Key = measurement.Key,
                     Method = (Models.Method)measurement.Method,
                     Mode = ConvertToMeasureMode(measurement.UTMode),
-                    Probe = (int)measurement.probeType > 1 ? (Models.ProbeType)measurement.probeType : Models.ProbeType.None,
+                    Probe = ConvertToProbeType(measurement.probeType),
                     Time = measurement.Taken,
                     GridCoordinate = new() { Column = (ushort)measurement.colNumX, Row = (ushort)measurement.rowNumY },
                     Units = (MeasurementUnits)measurement.Uom,
@@ -215,7 +215,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                     RecordId = measurement.BScanID,
                     Method = Models.Method.Scan,
                     Mode = ConvertToMeasureMode(measurement.UTMode),
-                    Probe = (int)measurement.probeType > 1 ? (Models.ProbeType)measurement.probeType : Models.ProbeType.None,
+                    Probe = ConvertToProbeType(measurement.probeType),
                     Units = (MeasurementUnits)measurement.Uom,
                     Thickness = measurement.Thickness,
                     Velocity = measurement.Velocity,
@@ -376,6 +376,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                                     SurfaceTemperatureCelsius = (int)frozenMeasurement.surfaceTemp,
                                     Thickness = frozenMeasurement.Thickness,
                                     Mode = ConvertToMeasureMode(frozenMeasurement.UTMode),
+                                    Probe = ConvertToProbeType(frozenMeasurement.probeType),
                                     Velocity = frozenMeasurement.Velocity,
                                     DeepCoatOn = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
                                     HasAScan = frozenMeasurement.Ascan?.ascanPoints?.Length > 0,
@@ -457,6 +458,36 @@ namespace Cygnus.TMLink.Protobuf.Services
             };
         }
 
+        private Models.ProbeType ConvertToProbeType(V1.ProbeType probeType)
+        {
+            return probeType switch
+            {
+                V1.ProbeType.S2c => Models.ProbeType.S2C,
+                V1.ProbeType.S2d => Models.ProbeType.S2D,
+                V1.ProbeType.S3c => Models.ProbeType.S3C,
+                V1.ProbeType.S5c => Models.ProbeType.S5C,
+                V1.ProbeType.S5a => Models.ProbeType.S5A,
+                V1.ProbeType.T2c => Models.ProbeType.T2C,
+                V1.ProbeType.T5b => Models.ProbeType.T5B,
+                V1.ProbeType.T7a => Models.ProbeType.T7A,
+                V1.ProbeType.T5bh => Models.ProbeType.T5BH,
+                V1.ProbeType.D790 => Models.ProbeType.D790,
+                V1.ProbeType.Ts2 => Models.ProbeType.TS2,
+                V1.ProbeType.Ts4 => Models.ProbeType.TS4,
+                V1.ProbeType.T5a => Models.ProbeType.T5A,
+                V1.ProbeType.T2a => Models.ProbeType.T2A,
+                V1.ProbeType.T5bCawg2 => Models.ProbeType.T5B_CAWG2,
+                V1.ProbeType.Sd2c => Models.ProbeType.SD2C,
+                V1.ProbeType.Sd2cCawdg2 => Models.ProbeType.SD2C_CAWDG2,
+                V1.ProbeType.Hs38025 => Models.ProbeType.HS380_25,
+                V1.ProbeType.Hsuht50 => Models.ProbeType.HSUHT_50,
+                V1.ProbeType.Hsuht75 => Models.ProbeType.HSUHT_75,
+                V1.ProbeType.Hs150de => Models.ProbeType.HS150DE,
+                V1.ProbeType.S2cCawi => Models.ProbeType.S2C_CAWI,
+                V1.ProbeType.S2cCawg2 => Models.ProbeType.S2C_CAWG2,
+                _ => Models.ProbeType.None
+            };
+        }
         private Models.RecordType ConvertToRecordType(V1.RecordType recordType)
         {
             return recordType switch

@@ -48,6 +48,7 @@ namespace Cygnus.TMLink.API.Models
         public uint SoftwareVersionNumber { get; set; } = 0;
         public GaugeVariant? GaugeVariant { get; set; }
         public uint GaugeId { get; set; } = 0;
+        public ProbeType Probe { get; private set; }
         public uint BatteryLevel { get; set; } = 0;
         public uint StatusMessageCount { get; set; }
 
@@ -100,6 +101,7 @@ namespace Cygnus.TMLink.API.Models
                             GaugeVariant = gaugeInformation?.GaugeVariant;
                             BatteryLevel = gaugeInformation?.BatteryLevel ?? 0;
                             GaugeId = gaugeInformation?.GaugeId ?? 0;
+                            Probe = gaugeInformation?.ProbeType ?? ProbeType.None;
                         }
                         else
                         {
@@ -177,6 +179,7 @@ namespace Cygnus.TMLink.API.Models
             {
                 BatteryLevel = liveMeasurement.BatteryLevel;
                 StatusMessageCount = liveMeasurement.PointIndex;
+                liveMeasurement.Probe = Probe;
                 NotifyObservers(o => o.OnPropertiesUpdated(this));
             }
 
