@@ -141,6 +141,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             if (measurement != null && measurement.State != MeasurementPointState.Deleted)
             {
                 _logger.LogInformation("Received record point from gauge {RecordId}: {PointName}", measurement.recordID, measurement.Name);
+                MeasurementUnits uom = (MeasurementUnits)measurement.Uom;
                 return new()
                 {
                     Name = measurement.Name,
@@ -152,13 +153,13 @@ namespace Cygnus.TMLink.Protobuf.Services
                     Probe = ConvertToProbeType(measurement.probeType),
                     Time = measurement.Taken,
                     GridCoordinate = new() { Column = (ushort)measurement.colNumX, Row = (ushort)measurement.rowNumY },
-                    Units = (MeasurementUnits)measurement.Uom,
+                    Units = uom,
                     Thickness = measurement.Thickness,
                     Velocity = measurement.Velocity,
-                    AScan = GetAScan(measurement.Ascan),
+                    AScan = GetAScan(measurement.Ascan, measurement.Velocity, uom),
                     EchoPoints = [.. GetEchoPoints(measurement.Ascan)],
                     HasAScan = measurement.Ascan?.ascanPoints?.Length > 0,
-                    ThicknessTime = GetThicknessTime(measurement.Thickness, measurement.Velocity, (MeasurementUnits)measurement.Uom)
+                    ThicknessTime = GetThicknessTime(measurement.Thickness, measurement.Velocity, uom)
                 };
             }
 
@@ -210,6 +211,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             if (measurement != null)
             {
                 _logger.LogInformation("Received record point from gauge {RecordId}", measurement.BScanID);
+                MeasurementUnits uom = (MeasurementUnits)measurement.Uom;
                 return new()
                 {
                     Name = measurement.scanPointNum.ToString(),
@@ -218,13 +220,13 @@ namespace Cygnus.TMLink.Protobuf.Services
                     Method = Models.Method.Scan,
                     Mode = ConvertToMeasureMode(measurement.UTMode),
                     Probe = ConvertToProbeType(measurement.probeType),
-                    Units = (MeasurementUnits)measurement.Uom,
+                    Units = uom,
                     Thickness = measurement.Thickness,
                     Velocity = measurement.Velocity,
-                    AScan = GetAScan(measurement.Ascan),
+                    AScan = GetAScan(measurement.Ascan, measurement.Velocity, uom),
                     EchoPoints = [.. GetEchoPoints(measurement.Ascan)],
                     HasAScan = measurement.Ascan?.ascanPoints?.Length > 0,
-                    ThicknessTime = GetThicknessTime(measurement.Thickness, measurement.Velocity, (MeasurementUnits)measurement.Uom)
+                    ThicknessTime = GetThicknessTime(measurement.Thickness, measurement.Velocity, uom)
                 };
             }
 
@@ -232,19 +234,19 @@ namespace Cygnus.TMLink.Protobuf.Services
             return null;
         }
 
-        private Models.GaugeAScan GetAScan(V1.AScan? ascan)
+        private GaugeAScan GetAScan(AScan? ascan, uint velocity, MeasurementUnits units)
         {
             if (ascan == null)
             {
-                return new Models.GaugeAScan();
+                return new GaugeAScan();
             }
 
             return new()
             {
                 RectifyMode = (RectifyMode)ascan.Rectify,
                 Amplitudes = [.. ascan.ascanPoints.Select(p => (sbyte)p)],
-                StartTime = ascan.ascanStart,
-                WidthTime = ascan.ascanWidth
+                StartTime = GetThicknessTime(ascan.ascanStart, velocity, units),
+                WidthTime = GetThicknessTime(ascan.ascanWidth, velocity, units)
             };
         }
 
@@ -369,27 +371,31 @@ namespace Cygnus.TMLink.Protobuf.Services
                             {
                                 var frozenMeasurement = _protobufMessageConverter.FromZippedProtobuf<FrozenLiveMeasurement>(task.Result);
                                 _logger.LogInformation("Received frozen measurement from gauge {DeviceIdentifier}: {serialNumber}", _device?.Name, frozenMeasurement.Index);
-                                NotifyObservers(o => o.OnLiveMeasurementReceived(new LiveMeasurement
-                                {                                    
-                                    BatteryLevel = frozenMeasurement.batteryLevel,
-                                    GaindB = frozenMeasurement.gaindB,
-                                    PointIndex = frozenMeasurement.Index,
-                                    Units = (MeasurementUnits)frozenMeasurement.Uom,
-                                    SurfaceTemperatureCelsius = (int)frozenMeasurement.surfaceTemp,
-                                    Thickness = frozenMeasurement.Thickness,
-                                    Mode = ConvertToMeasureMode(frozenMeasurement.UTMode),
-                                    Probe = ConvertToProbeType(frozenMeasurement.probeType),
-                                    Velocity = frozenMeasurement.Velocity,
-                                    DeepCoatOn = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
-                                    HasAScan = frozenMeasurement.Ascan?.ascanPoints?.Length > 0,
-                                    IsFrozen = true,
-                                    StableMeasurement = frozenMeasurement.stableMeasurement,
-                                    ValidMeasurement = frozenMeasurement.validMeasurement,
-                                    AScan = GetAScan(frozenMeasurement.Ascan),
-                                    EchoPoints = [.. GetEchoPoints(frozenMeasurement.Ascan)],
-                                    Type = frozenMeasurement.Thickness > 0 ? MeasurementType.Valid : MeasurementType.None,
-                                    ThicknessTime = GetThicknessTime(frozenMeasurement.Thickness, frozenMeasurement.Velocity, (MeasurementUnits)frozenMeasurement.Uom)
-                                }));
+                                NotifyObservers(o =>
+                                {
+                                    MeasurementUnits uom = (MeasurementUnits)frozenMeasurement.Uom;
+                                    o.OnLiveMeasurementReceived(new LiveMeasurement
+                                    {
+                                        BatteryLevel = frozenMeasurement.batteryLevel,
+                                        GaindB = frozenMeasurement.gaindB,
+                                        PointIndex = frozenMeasurement.Index,
+                                        Units = uom,
+                                        SurfaceTemperatureCelsius = (int)frozenMeasurement.surfaceTemp,
+                                        Thickness = frozenMeasurement.Thickness,
+                                        Mode = ConvertToMeasureMode(frozenMeasurement.UTMode),
+                                        Probe = ConvertToProbeType(frozenMeasurement.probeType),
+                                        Velocity = frozenMeasurement.Velocity,
+                                        DeepCoatOn = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
+                                        HasAScan = frozenMeasurement.Ascan?.ascanPoints?.Length > 0,
+                                        IsFrozen = true,
+                                        StableMeasurement = frozenMeasurement.stableMeasurement,
+                                        ValidMeasurement = frozenMeasurement.validMeasurement,
+                                        AScan = GetAScan(frozenMeasurement.Ascan, frozenMeasurement.Velocity, uom),
+                                        EchoPoints = [.. GetEchoPoints(frozenMeasurement.Ascan)],
+                                        Type = frozenMeasurement.Thickness > 0 ? MeasurementType.Valid : MeasurementType.None,
+                                        ThicknessTime = GetThicknessTime(frozenMeasurement.Thickness, frozenMeasurement.Velocity, uom)
+                                    });
+                                });
                             }
                             else
                             {
