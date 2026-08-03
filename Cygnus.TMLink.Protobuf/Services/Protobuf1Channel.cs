@@ -157,7 +157,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                     Thickness = measurement.Thickness,
                     Velocity = measurement.Velocity,
                     AScan = GetAScan(measurement.Ascan, measurement.Velocity, uom),
-                    EchoPoints = [.. GetEchoPoints(measurement.Ascan)],
+                    EchoPoints = [.. GetEchoPoints(measurement.Ascan, measurement.Velocity, uom)],
                     HasAScan = measurement.Ascan?.ascanPoints?.Length > 0,
                     ThicknessTime = GetThicknessTime(measurement.Thickness, measurement.Velocity, uom)
                 };
@@ -224,7 +224,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                     Thickness = measurement.Thickness,
                     Velocity = measurement.Velocity,
                     AScan = GetAScan(measurement.Ascan, measurement.Velocity, uom),
-                    EchoPoints = [.. GetEchoPoints(measurement.Ascan)],
+                    EchoPoints = [.. GetEchoPoints(measurement.Ascan, measurement.Velocity, uom)],
                     HasAScan = measurement.Ascan?.ascanPoints?.Length > 0,
                     ThicknessTime = GetThicknessTime(measurement.Thickness, measurement.Velocity, uom)
                 };
@@ -391,7 +391,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                                         StableMeasurement = frozenMeasurement.stableMeasurement,
                                         ValidMeasurement = frozenMeasurement.validMeasurement,
                                         AScan = GetAScan(frozenMeasurement.Ascan, frozenMeasurement.Velocity, uom),
-                                        EchoPoints = [.. GetEchoPoints(frozenMeasurement.Ascan)],
+                                        EchoPoints = [.. GetEchoPoints(frozenMeasurement.Ascan, frozenMeasurement.Velocity, uom)],
                                         Type = frozenMeasurement.Thickness > 0 ? MeasurementType.Valid : MeasurementType.None,
                                         ThicknessTime = GetThicknessTime(frozenMeasurement.Thickness, frozenMeasurement.Velocity, uom)
                                     });
@@ -431,7 +431,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             }
         }
 
-        private IEnumerable<GaugeEchoPoint> GetEchoPoints(V1.AScan? ascan)
+        private IEnumerable<GaugeEchoPoint> GetEchoPoints(V1.AScan? ascan, uint velocity, MeasurementUnits measurementUnits)
         {
             if (ascan == null)
             {
@@ -440,17 +440,17 @@ namespace Cygnus.TMLink.Protobuf.Services
 
             if (ascan.Echo1 > 0)
             {
-                yield return new GaugeEchoPoint { Time = ascan.Echo1 };
+                yield return new GaugeEchoPoint { Time = GetThicknessTime(ascan.Echo1, velocity, measurementUnits) };
             }
 
             if (ascan.Echo2 > 0)
             {
-                yield return new GaugeEchoPoint { Time = ascan.Echo2 };
+                yield return new GaugeEchoPoint { Time = GetThicknessTime(ascan.Echo2, velocity, measurementUnits) };
             }
 
             if (ascan.Echo3 > 0)
             {
-                yield return new GaugeEchoPoint { Time = ascan.Echo3 };
+                yield return new GaugeEchoPoint { Time = GetThicknessTime(ascan.Echo3, velocity, measurementUnits) };
             }
         }
 
