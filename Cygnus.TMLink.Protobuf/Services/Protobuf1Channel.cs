@@ -179,7 +179,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             if (bScan != null)
             {
                 _logger.LogInformation("Received b-scan from gauge {BScanName}: {PointsTaken}", bScan.Name, bScan.numScanPoints);
-                GaugeRecord gaugeRecord = new()
+                GaugeBScan gaugeRecord = new()
                 {
                     Name = bScan.Name,
                     Key = bScan.Key,
@@ -187,7 +187,9 @@ namespace Cygnus.TMLink.Protobuf.Services
                     RecordType = Models.RecordType.BScan,
                     Updated = bScan.Updated,
                     NumberPointsRequired = bScan.numScanPoints,
-                    NumberOfPointsTaken = bScan.numScanPoints
+                    NumberOfPointsTaken = bScan.numScanPoints,
+                    ScanInterval = (int)bScan.scanInterval,
+                    ScanDuration = (int)bScan.numScanPoints * (int)bScan.scanInterval,
                 };
                 return gaugeRecord;
             }
