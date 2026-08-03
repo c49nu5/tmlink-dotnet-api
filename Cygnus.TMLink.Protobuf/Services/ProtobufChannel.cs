@@ -128,6 +128,12 @@ namespace Cygnus.TMLink.Protobuf.Services
                         _recordTransferCts = null;
                         if (transferRequest.Status != FileTransferState.Error)
                         {
+                            if (gaugeRecord is GaugeBScan bScanRecord && bScanRecord.Measurements.Any(m => m.AScan.WidthTime > 0))
+                            {
+                                var maxWidth = bScanRecord.Measurements.Max(m => GetThickness(m.AScan.WidthTime, m.Velocity, m.Units));
+                                bScanRecord.ThicknessRange = maxWidth;
+                            }
+
                             transferRequest.Status = FileTransferState.Complete;
                             return gaugeRecord;
                         }
@@ -148,7 +154,7 @@ namespace Cygnus.TMLink.Protobuf.Services
 
             return null;
         }
-        
+
         protected abstract Task<GaugeRecord?> GetGaugeRecord(IFileTransferRequest transferRequest);
 
         protected abstract Task<GaugeMeasurement?> GetMeasurementPoint(string name, bool withAScans);
@@ -189,9 +195,20 @@ namespace Cygnus.TMLink.Protobuf.Services
                 return 0;
             }
 
-            var thicknessTime = thickness / (velocity / (measurementUnits == MeasurementUnits.Imperial ? 2e4 : 2e3));
+            var thicknessTime = thickness / GetNsToThicknessDivisor(velocity, measurementUnits);
             return Convert.ToUInt32(thicknessTime);
         }
+
+        private double GetThickness(uint maxWidthTime, uint velocity, MeasurementUnits measurementUnits)
+        {
+            return maxWidthTime * GetNsToThicknessDivisor(velocity, measurementUnits);
+        }
+
+        private static double GetNsToThicknessDivisor(uint velocity, MeasurementUnits measurementUnits)
+        {
+            return velocity / (measurementUnits == MeasurementUnits.Imperial ? 2e4 : 2e3);
+        }
+
 
         protected virtual void Dispose(bool disposing)
         {
