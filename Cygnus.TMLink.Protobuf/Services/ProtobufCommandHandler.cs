@@ -116,6 +116,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                                 var value = await readMessageCharacteristic.ReadValue();
                                 if (value.Length > 0)
                                 {
+                                    _logger.LogDebug("Received message data: [{Data}]", BitConverter.ToString(value));
                                     var message = _protobufMessageConverter.FromZippedProtobuf<M>(value);
                                     _logger.LogInformation("Received message from gauge {Command}", message.CommandType);
                                     if (message.CommandType == gaugeCommand.CommandType)
