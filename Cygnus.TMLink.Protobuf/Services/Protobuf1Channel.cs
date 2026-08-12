@@ -247,7 +247,9 @@ namespace Cygnus.TMLink.Protobuf.Services
                 RectifyMode = (RectifyMode)ascan.Rectify,
                 Amplitudes = [.. ascan.ascanPoints.Select(p => (sbyte)p)],
                 StartTime = GetThicknessTime(ascan.ascanStart, velocity, units),
-                WidthTime = GetThicknessTime(ascan.ascanWidth, velocity, units)
+                StartThickness = ascan.ascanStart,
+                WidthTime = GetThicknessTime(ascan.ascanWidth, velocity, units),
+                WidthThickness = ascan.ascanWidth,
             };
         }
 
@@ -441,17 +443,17 @@ namespace Cygnus.TMLink.Protobuf.Services
 
             if (ascan.Echo1 > 0)
             {
-                yield return new GaugeEchoPoint { Time = GetThicknessTime(ascan.Echo1, velocity, measurementUnits) };
+                yield return new GaugeEchoPoint { Time = GetThicknessTime(ascan.Echo1, velocity, measurementUnits), Thickness = ascan.Echo1 };
             }
 
             if (ascan.Echo2 > 0)
             {
-                yield return new GaugeEchoPoint { Time = GetThicknessTime(ascan.Echo2, velocity, measurementUnits) };
+                yield return new GaugeEchoPoint { Time = GetThicknessTime(ascan.Echo2, velocity, measurementUnits), Thickness = ascan.Echo2 };
             }
 
             if (ascan.Echo3 > 0)
             {
-                yield return new GaugeEchoPoint { Time = GetThicknessTime(ascan.Echo3, velocity, measurementUnits) };
+                yield return new GaugeEchoPoint { Time = GetThicknessTime(ascan.Echo3, velocity, measurementUnits), Thickness = ascan.Echo3 };
             }
         }
 
