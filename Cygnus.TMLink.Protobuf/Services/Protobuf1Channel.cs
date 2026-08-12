@@ -186,6 +186,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                     Key = bScan.Key,
                     RecordID = bScan.BScanID,
                     RecordType = Models.RecordType.BScan,
+                    Created = bScan.Updated,
                     Updated = bScan.Updated,
                     NumberPointsRequired = bScan.numScanPoints,
                     NumberOfPointsTaken = bScan.numScanPoints,
