@@ -133,7 +133,7 @@ internal class WhenDiscoverGaugesIsCalled
         testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
         testBed.Observer.Setup(o => o.AddConnectionMessage(It.IsAny<string>()));
         testBed.Observer.Setup(o => o.GaugeDiscovered(It.IsAny<IGauge>()));
-
+        
         // Act
         await sut.DiscoverGauges();
 

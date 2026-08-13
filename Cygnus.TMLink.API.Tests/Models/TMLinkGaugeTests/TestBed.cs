@@ -30,6 +30,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
         public Mock<ITMLinkConnectionService> ConnectionService { get; set; } = new Mock<ITMLinkConnectionService>(MockBehavior.Strict);
         public Mock<IGaugeObserver> Observer { get; private set; }
         public Func<byte, IProtobufChannel> ProtobufChannelFactory { get; set; }
+        public Mock<ITMLinkDevice> ConnectedDevice { get; private set; }
 
         internal TMLinkGauge CreateSUT(bool configureObserver = false)
         {
@@ -48,7 +49,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
         internal async Task<TMLinkGauge> CreateConnectedSUT()
         {
             var sut = CreateSUT(true);
-            var device = CreateDevice(true);
+            var device = ConnectedDevice = CreateDevice(true);
             Protobuf1Channel.Setup(p => p.Connect(device.Object)).ReturnsAsync(new Cygnus.Models.GaugeInformation { SerialNumber = (uint)Random.Shared.Next(23132,41232)});
             Protobuf1Channel.Setup(p => p.AddObserver(sut));
             device.Setup(d => d.IsConnected).Returns(true);
@@ -68,6 +69,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
                 mock.Setup(d => d.GetCharacteristics(Constants.GenericAccessServiceId)).ReturnsAsync([]);
                 mock.Setup(d => d.GetCharacteristics(Constants.DeviceInformationServiceId)).ReturnsAsync([CreateSoftwareVersionCharacteristic(protobufVersion)]);                
                 mock.Setup(d => d.Connect()).Returns(Task.CompletedTask);
+                mock.Setup(d => d.Disconnect());
             }
 
             return mock;
