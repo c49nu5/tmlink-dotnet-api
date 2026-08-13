@@ -49,6 +49,14 @@ namespace Cygnus.BLE.InTheHand
             NotifyObservers(o => o.DeviceDisconnected(Id));
         }
 
+        public void Disconnect()
+        {
+            if (_device.Gatt.IsConnected)
+            {
+                _device.Gatt.Disconnect();
+            }
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)

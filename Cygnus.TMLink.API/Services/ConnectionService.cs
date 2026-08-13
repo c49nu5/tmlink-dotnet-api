@@ -120,6 +120,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
                     if (await gauge.Connect() && gauge.SerialNumber != 0)
                     {
                         gaugeDiscovered = true;
+                        gauge.Disconnect();
                         NotifyObservers(o => o.GaugeDiscovered(gauge));
                     }
                 }
