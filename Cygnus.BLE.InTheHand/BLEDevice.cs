@@ -6,35 +6,67 @@ namespace Cygnus.BLE.InTheHand
 {
     internal class BLEDevice : ObservableModel<ITMLinkDeviceObserver>, ITMLinkDevice
     {
-        private BluetoothDevice _device;
-        private bool disposedValue;
-        private bool initialized = false;
+        private BluetoothDevice? _device;
+        private bool isDisposed;
 
         public BLEDevice(BluetoothDevice device)
         {
+            Id = device.Id;
             _device = device;
+            _device.GattServerDisconnected += OnDisconnected;
         }
 
-        public string Id => _device.Id;
+        public string Id { get; }
 
-        public string Name => _device.Name;
+        public string Name => _device?.Name ?? string.Empty;
 
-        public bool IsConnected => _device.Gatt.IsConnected;
+        public bool IsConnected => _device?.Gatt.IsConnected == true; 
 
         public async Task Connect()
         {
-            await _device.Gatt.ConnectAsync();
-            if (_device.Gatt.IsConnected && !initialized)
+            var device = _device;
+            if (device == null)
             {
-                await _device.Gatt.RequestMtuAsync(500);
-                _device.GattServerDisconnected += OnDisconnected;
-                initialized = true;
+                device = _device = await BluetoothDevice.FromIdAsync(Id);
+                if (device == null)
+                {
+                    return;
+                }
+
+                device.GattServerDisconnected += OnDisconnected;
+            }
+
+            await device.Gatt.ConnectAsync();
+
+            if (device.Gatt.IsConnected)
+            {
+                await device.Gatt.RequestMtuAsync(500);
+            }
+        }
+
+        public void Disconnect()
+        {
+            var device = _device;
+            if (device != null && device.Gatt.IsConnected)
+            {
+                device.Gatt.Disconnect();
+            }
+            else
+            {
+                DisposeDevice(device);
+                NotifyObservers(o => o.DeviceDisconnected(Id));
             }
         }
 
         public async Task<ITMLinkCharacteristic[]?> GetCharacteristics(string serviceId)
         {
-            var service = await _device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new Guid(serviceId)));
+            var device = _device;
+            if (device == null)
+            {
+                return null;
+            }
+
+            var service = await device.Gatt.GetPrimaryServiceAsync(BluetoothUuid.FromGuid(new Guid(serviceId)));
             if (service == null)
             {
                 return null;
@@ -46,24 +78,30 @@ namespace Cygnus.BLE.InTheHand
 
         private void OnDisconnected(object sender, EventArgs e)
         {
+            DisposeDevice(sender as BluetoothDevice);
             NotifyObservers(o => o.DeviceDisconnected(Id));
+        }
+
+        private void DisposeDevice(BluetoothDevice? device)
+        {
+            _device = null;
+            if (device != null)
+            {
+                device.GattServerDisconnected -= OnDisconnected;
+                device.Dispose();
+            }
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!isDisposed)
             {
                 if (disposing)
                 {
-                    if (initialized)
-                    {
-                        _device.GattServerDisconnected -= OnDisconnected;
-                    }
-
-                    _device.Dispose();
+                    DisposeDevice(_device);
                 }
 
-                disposedValue = true;
+                isDisposed = true;
             }
         }
 

@@ -168,9 +168,14 @@ namespace Cygnus.TMLink.API.Models
 
         public void Disconnect()
         {
-            IsConnected = false;
-            _protobufChannel.Disconnect();
-            _connectionService.GaugeIsDisconnected(DeviceIdentifier);
+            if (_device?.IsConnected == true)
+            {
+                _device?.Disconnect();
+            }
+            else
+            {
+                DoDisconnect();
+            }
         }
 
         public void OnLiveMeasurementReceived(LiveMeasurement liveMeasurement)
@@ -189,7 +194,14 @@ namespace Cygnus.TMLink.API.Models
         public void DeviceDisconnected(string deviceId)
         {
             _logger.LogInformation("Device {DeviceIdentifier} disconnected", deviceId);
-            Disconnect();
+            DoDisconnect();
+        }
+
+        private void DoDisconnect()
+        {
+            IsConnected = false;
+            _protobufChannel.Disconnect();
+            _connectionService.GaugeIsDisconnected(DeviceIdentifier);
         }
 
         private async Task InitializeProtobufChannel()

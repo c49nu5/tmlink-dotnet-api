@@ -34,18 +34,19 @@ internal class TestBed
         LiveCharacteristic.Setup(c => c.Uuid).Returns(Constants.TMLinkLiveCharacteristicId);
         FrozenCharacteristic.Setup(c => c.Uuid).Returns(Constants.TMLinkFrozenCharacteristicId);
         Characteristics = CreateTMLinkCharacteristics();
-        return new Protobuf1Channel(ProtobufCommandHandler?.Object, Logger, ProtobufMessageConverter?.Object);
+        return new MockProtobuf1Channel(ProtobufCommandHandler?.Object, Logger, ProtobufMessageConverter?.Object);
     }
 
     internal async Task<Protobuf1Channel> CreateConnectedSUT(bool expectCancelRecordTransfer = false, bool configureForLiveUpdates = false, bool configureForFrozenUpdates = false)
     {
+        var sut = CreateSUT() as MockProtobuf1Channel;
+
         if (expectCancelRecordTransfer)
         {
+            sut.MockRecordRequest();
             ProtobufCommandHandler.Setup(c => c.CancelCommand());
             ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.CancelRecordTransfer), true)).ReturnsAsync(true);
         }
-
-        var sut = CreateSUT();
 
         PrepareForConnect();
 

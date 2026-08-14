@@ -5,12 +5,12 @@ namespace Cygnus.BLE.InTheHand
 {
     internal class BLECharacteristic : ITMLinkCharacteristic
     {
-        private readonly GattCharacteristic _c;
+        private readonly GattCharacteristic _characteristic;
 
-        public BLECharacteristic(GattCharacteristic c)
+        public BLECharacteristic(GattCharacteristic characteristic)
         {
-            _c = c;
-            c.CharacteristicValueChanged += OnCharacteristicValueChanged;
+            _characteristic = characteristic;
+            characteristic.CharacteristicValueChanged += OnCharacteristicValueChanged;
         }
 
         private void OnCharacteristicValueChanged(object sender, GattCharacteristicValueChangedEventArgs e)
@@ -20,14 +20,14 @@ namespace Cygnus.BLE.InTheHand
 
         public event EventHandler<ValueChangedEventArgs>? CharacteristicValueChanged;
 
-        public string Uuid => _c.Uuid.Value.ToString();
+        public string Uuid => _characteristic.Uuid.Value.ToString();
 
         public async Task<byte[]> ReadValue()
         {
             byte[] data = [];
             try
             {
-                var value = await _c.ReadValueAsync();
+                var value = await _characteristic.ReadValueAsync();
                 if (value != null)
                 {
                     data = value;
@@ -43,12 +43,12 @@ namespace Cygnus.BLE.InTheHand
 
         public async Task StartNotifications()
         {
-            await _c.StartNotificationsAsync();
+            await _characteristic.StartNotificationsAsync();
         }
 
         public async Task WriteValueWithResponse(byte[] bytes)
         {
-            await _c.WriteValueWithResponseAsync(bytes);
+            await _characteristic.WriteValueWithResponseAsync(bytes);
         }
     }
 }

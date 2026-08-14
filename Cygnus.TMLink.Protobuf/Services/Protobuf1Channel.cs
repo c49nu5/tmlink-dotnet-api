@@ -53,7 +53,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                     default,
                     Models.RecordType.BScan,
                     i.fileSize,
-                    null,
+                    i.Updated,
                     i.Updated,
                     i.Key,
                     i.numScanPoints,
@@ -343,15 +343,21 @@ namespace Cygnus.TMLink.Protobuf.Services
             }
         }
 
-        public override async Task CancelRecordTransfer()
+        public override async Task<bool> CancelRecordTransfer()
         {
-            await base.CancelRecordTransfer();
-            Command command = new()
+            if (await base.CancelRecordTransfer())
             {
-                commandType = V1.CommandType.CancelRecordTransfer,
-            };
+                // A record transfer was in progress, so send a cancel command to the gauge to stop the transfer at that end
+                Command command = new()
+                {
+                    commandType = V1.CommandType.CancelRecordTransfer,
+                };
 
-            await _protobufCommandHandler.SendCommand(command, true);
+                await _protobufCommandHandler.SendCommand(command, true);
+                return true;
+            }            
+
+            return false;
         }
 
         protected override void UpdateLiveMeasurement(byte[] value)

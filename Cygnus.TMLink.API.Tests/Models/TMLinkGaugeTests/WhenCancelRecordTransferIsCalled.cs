@@ -25,7 +25,7 @@ internal class WhenCancelRecordTransferIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
-        testBed.Protobuf1Channel.Setup(p => p.CancelRecordTransfer()).Returns(Task.CompletedTask);
+        testBed.Protobuf1Channel.Setup(p => p.CancelRecordTransfer()).ReturnsAsync(true);
 
         // Act
         await sut.CancelRecordTransfer();

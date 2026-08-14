@@ -84,12 +84,19 @@ namespace Cygnus.TMLink.Protobuf.Services
 
         protected abstract void UpdateLiveMeasurement(byte[] value);
 
-        public virtual Task CancelRecordTransfer()
+        public virtual Task<bool> CancelRecordTransfer()
         {
-            _recordTransferCts?.Cancel();
+            bool transferInProgress = false;
+            CancellationTokenSource? recordTransferCts = _recordTransferCts;
+            if (recordTransferCts != null && !recordTransferCts.IsCancellationRequested)
+            {
+                _logger.LogInformation("Cancelling record transfer");
+                recordTransferCts.Cancel();
+                transferInProgress = true;
+            }
+            
             _recordTransferCts = null;
-            _protobufCommandHandler.CancelCommand();
-            return Task.CompletedTask;
+            return Task.FromResult(transferInProgress);
         }
 
         public async Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans)
@@ -141,7 +148,6 @@ namespace Cygnus.TMLink.Protobuf.Services
                     else
                     {
                         _logger.LogInformation("No record retrieved for record {RecordName}", transferRequest.Name);
-                        _recordTransferCts = null;
                         transferRequest.Status = FileTransferState.Error;
                     }
                 }
@@ -151,6 +157,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                     transferRequest.Status = FileTransferState.Error;
                 }
             }
+
+            _recordTransferCts = null;
 
             return null;
         }
@@ -203,7 +211,6 @@ namespace Cygnus.TMLink.Protobuf.Services
         {
             return velocity / (measurementUnits == MeasurementUnits.Imperial ? 2e4 : 2e3);
         }
-
 
         protected virtual void Dispose(bool disposing)
         {
