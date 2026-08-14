@@ -1,5 +1,4 @@
 ﻿using Cygnus.TMLink.Protobuf.Interfaces;
-using Cygnus.TMLink.Protobuf.Services;
 using Moq;
 
 namespace Cygnus.TMLink.Protobuf.Tests.Services.Protobuf1ChannelTests;

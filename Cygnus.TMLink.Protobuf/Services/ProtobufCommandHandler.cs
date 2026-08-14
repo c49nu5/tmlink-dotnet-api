@@ -87,7 +87,6 @@ namespace Cygnus.TMLink.Protobuf.Services
                 _logger.LogInformation("Checking TM Link service");
                 _requestCompletionSource?.TrySetCanceled();
                 var requestCompletionSource = _requestCompletionSource = new TaskCompletionSource<NotifyMessage>();
-                Task<NotifyMessage> commandTask = requestCompletionSource.Task;
 
                 // Write command
                 byte[] data = _protobufMessageConverter.ToZippedProtobuf(gaugeCommand);
@@ -98,42 +97,42 @@ namespace Cygnus.TMLink.Protobuf.Services
 
                     // Wait for notification that message is ready
                     _logger.LogInformation("Waiting for notification on characteristic {Uuid}", _notifyMessageCharacteristic?.Uuid);
-                    CancellationToken cancellationToken = token ?? CancellationToken.None;
-                    await Task.WhenAny([commandTask, Task.Delay(TimeSpan.FromSeconds(20), cancellationToken)]);
 
-                    if (!commandTask.IsCanceled)
+                    var cts = CancellationTokenSource.CreateLinkedTokenSource(token ?? CancellationToken.None);
+                    cts.CancelAfter(TimeSpan.FromSeconds(20));
+                    CancellationToken cancellationToken = cts.Token;
+                    cancellationToken.Register(() => requestCompletionSource.TrySetCanceled(cancellationToken));
+
+                    var result = await requestCompletionSource.Task;
+                    _requestCompletionSource = null;
+                    if (result.CommandType == gaugeCommand.CommandType &&
+                        result.ReadDataAvailable)
                     {
-                        _requestCompletionSource = null;
-                        if (!cancellationToken.IsCancellationRequested &&
-                            commandTask.IsCompletedSuccessfully &&
-                            commandTask.Result.CommandType == gaugeCommand.CommandType &&
-                            commandTask.Result.ReadDataAvailable)
+                        // Read the message
+                        ITMLinkCharacteristic? readMessageCharacteristic = _readMessageCharacteristic;
+                        if (readMessageCharacteristic != null)
                         {
-                            // Read the message
-                            ITMLinkCharacteristic? readMessageCharacteristic = _readMessageCharacteristic;
-                            if (readMessageCharacteristic != null)
+                            var value = await readMessageCharacteristic.ReadValue();
+                            if (value.Length > 0)
                             {
-                                var value = await readMessageCharacteristic.ReadValue();
-                                if (value.Length > 0)
+                                var message = _protobufMessageConverter.FromZippedProtobuf<M>(value);
+                                _logger.LogInformation("Received message from gauge {Command}", message.CommandType);
+                                if (message.CommandType == gaugeCommand.CommandType)
                                 {
-                                    var message = _protobufMessageConverter.FromZippedProtobuf<M>(value);
-                                    _logger.LogInformation("Received message from gauge {Command}", message.CommandType);
-                                    if (message.CommandType == gaugeCommand.CommandType)
-                                    {
-                                        return responseHandler(message);
-                                    }
+                                    return responseHandler(message);
                                 }
                             }
                         }
-                        else
-                        {
-                            _logger.LogInformation("Notification did not arrive {Command} {CancelRequested} {CompletedSuccessfully}", gaugeCommand.CommandType, cancellationToken.IsCancellationRequested, requestCompletionSource.Task.IsCompletedSuccessfully);
-                        }
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Notification did not arrive {Command} {CancelRequested} {CompletedSuccessfully}", gaugeCommand.CommandType, cancellationToken.IsCancellationRequested, requestCompletionSource.Task.IsCompletedSuccessfully);
                     }
                 }
             }
             catch (Exception ex)
             {
+                _requestCompletionSource = null;
                 _logger.LogError(ex, "Problem handling command {Command}", gaugeCommand.CommandType);
             }
 
@@ -147,40 +146,33 @@ namespace Cygnus.TMLink.Protobuf.Services
                 _logger.LogWarning("Sending command {Command} to gauge", gaugeCommand.CommandType);
                 _requestCompletionSource?.TrySetCanceled();
                 var requestCompletionSource = _requestCompletionSource = new TaskCompletionSource<NotifyMessage>();
-                Task<NotifyMessage> commandTask = requestCompletionSource.Task;
 
                 // Write command
-
                 ITMLinkCharacteristic? writeCommandCharacteristic = _writeCommandCharacteristic;
                 if (writeCommandCharacteristic != null)
                 {
                     await writeCommandCharacteristic.WriteValueWithResponse(_protobufMessageConverter.ToZippedProtobuf(gaugeCommand));
 
+                    CancellationToken cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(20)).Token;
+                    cancellationToken.Register(() => requestCompletionSource.TrySetCanceled(cancellationToken));
+
                     // Wait for notification that command was sent
                     _logger.LogInformation("Waiting for notification on characteristic {Uuid}", _notifyMessageCharacteristic?.Uuid);
-                    await Task.WhenAny([commandTask, Task.Delay(TimeSpan.FromSeconds(20))]);
-
-                    if (!commandTask.IsCanceled)
+                    var result = await requestCompletionSource.Task;
+                    _requestCompletionSource = null;
+                    if (ignoreErrors ||
+                        (result.CommandType == gaugeCommand.CommandType &&
+                        result.ErrorCode == ErrorCodes.Success) ||
+                        (result.CommandType == CommandType.CancelRecordTransfer &&
+                        result.ErrorCode == ErrorCodes.TransferCancelled))
                     {
-                        _requestCompletionSource = null;
-                        if (ignoreErrors ||
-                            (commandTask.IsCompletedSuccessfully &&
-                            (commandTask.Result.CommandType == gaugeCommand.CommandType &&
-                            commandTask.Result.ErrorCode == ErrorCodes.Success) ||
-                            (commandTask.Result.CommandType == CommandType.CancelRecordTransfer &&
-                            commandTask.Result.ErrorCode == ErrorCodes.TransferCancelled)))
-                        {
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        return false;
+                        return true;
                     }
                 }
             }
             catch (Exception ex)
             {
+                _requestCompletionSource = null;
                 _logger.LogWarning(ex, "Handling command {Command}", gaugeCommand.CommandType);
                 return ignoreErrors;
             }

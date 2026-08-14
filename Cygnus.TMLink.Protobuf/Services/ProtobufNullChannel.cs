@@ -11,7 +11,7 @@ namespace Cygnus.TMLink.Protobuf.Services
     {
         public bool IsInitialized => false;
 
-        public Task CancelRecordTransfer()
+        public Task<bool> CancelRecordTransfer()
         {
             throw new NotImplementedException();
         }

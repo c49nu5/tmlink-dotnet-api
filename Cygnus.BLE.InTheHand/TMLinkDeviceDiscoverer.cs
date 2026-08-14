@@ -30,8 +30,7 @@ internal class TMLinkDeviceDiscoverer : ITMLinkDeviceDiscoverer
             if (ad?.Device != null && ad.Uuids.Contains(TMLinkServiceUuid))
             {
                 _logger.LogInformation("BLE TM Link device found: {DeviceId}", ad.Device.Id);
-                ad.Device.Gatt.AutoConnect = true;
-                gauges[ad.Device.Id] = new BLEDevice(ad.Device);
+                 gauges[ad.Device.Id] = new BLEDevice(ad.Device);
             }
         };
         
