@@ -11,7 +11,7 @@ public interface ITMLinkConnectionService : IConnectionService
     /// <summary>
     /// Localization property for the message displayed when the device is checking for BLE devices for TM-Link services.
     /// </summary>
-    string CheckingDeviceMessageFormat { set; }
+    string CheckingGaugeMessageFormat { set; }
     /// <summary>
     /// Localization property for the message displayed when no TM-Link gauges are found during scanning.
     /// </summary>

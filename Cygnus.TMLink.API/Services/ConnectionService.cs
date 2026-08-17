@@ -45,9 +45,10 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
 
     public string ScanningMessage { private get; set; } = "Scanning for TM-Link gauges.";
     public string NoBluetoothMessage { private get; set; } = "For TM-Link gauges, enable bluetooth and give the app the required permissions.";
-    public string CheckingDeviceMessageFormat { private get; set; } = "Checking device {0}...";
+    public string CheckingGaugeMessageFormat { private get; set; } = "Checking gauge {0}...";
     public string NoTMLinkGaugesMessage { private get; set; } = "No TM-Link gauges found.";
     public string ScanningErrorMessageFormat { private get; set; } = "An error occurred while scanning for TM-Link gauges. ({0})";
+    public string ErrorConnectingMessageFormat { private get; set; } = "An error occurred while connecting to the gauge {0}";
     #endregion
 
 
@@ -59,7 +60,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
             ConnectedGauge?.Disconnect();
 
             NotifyObservers(o => o.ConnectionState = ConnectionState.Connecting);
-            NotifyObservers(o => o.AddConnectionMessage(string.Format(CheckingDeviceMessageFormat, connectionInformation.Name)));
+            NotifyObservers(o => o.AddConnectionMessage(string.Format(CheckingGaugeMessageFormat, connectionInformation.Name)));
             _logger.LogInformation("Connecting to device {Name}", connectionInformation.Name);
 
             _deviceDiscoverer.Cancel();
@@ -74,6 +75,8 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
             else
             {
                 _logger.LogInformation("Connect to gauge {Name} failed", connectionInformation.Name);
+                NotifyObservers(o => o.AddConnectionMessage(string.Format(ErrorConnectingMessageFormat, connectionInformation.Name)));
+                ConnectedGauge = null;
             }
         }
         catch (OperationCanceledException)
@@ -83,6 +86,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
         catch (Exception ex)
         {
             _logger.LogError(ex, "Problem connecting to {Name}", connectionInformation.Name);
+            NotifyObservers(o => o.AddConnectionMessage(string.Format(ErrorConnectingMessageFormat, connectionInformation.Name)));
             ConnectedGauge = null;
         }
     }
@@ -114,7 +118,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
                     _logger.LogInformation("Found device: {Name} ({DeviceIdentifier})", gauge.Name, gauge.DeviceIdentifier);
                     NotifyObservers(o =>
                     {
-                        o.AddConnectionMessage(string.Format(CheckingDeviceMessageFormat, gauge.Name));
+                        o.AddConnectionMessage(string.Format(CheckingGaugeMessageFormat, gauge.Name));
                     });
 
                     if (await gauge.Connect() && gauge.SerialNumber != 0)
