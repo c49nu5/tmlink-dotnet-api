@@ -57,13 +57,13 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
     {
         try
         {
+            _deviceDiscoverer.Cancel();
+
             ConnectedGauge?.Disconnect();
 
             NotifyObservers(o => o.ConnectionState = ConnectionState.Connecting);
             NotifyObservers(o => o.AddConnectionMessage(string.Format(CheckingGaugeMessageFormat, connectionInformation.Name)));
             _logger.LogInformation("Connecting to device {Name}", connectionInformation.Name);
-
-            _deviceDiscoverer.Cancel();
 
             var internalGauge = connectionInformation as ITMLinkGauge;
             if (internalGauge != null && (internalGauge.IsConnected == true || await internalGauge.Connect()))
