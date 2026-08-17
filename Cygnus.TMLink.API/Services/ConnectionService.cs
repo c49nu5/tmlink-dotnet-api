@@ -54,15 +54,15 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
     #region Methods
     public async Task ConnectToGauge(IConnectionInformation connectionInformation)
     {
-        NotifyObservers(o => o.ConnectionState = ConnectionState.Connecting);
-        NotifyObservers(o => o.AddConnectionMessage(string.Format(CheckingDeviceMessageFormat, connectionInformation.Name)));
-        _logger.LogInformation("Connecting to device {Name}", connectionInformation.Name);
-
         try
         {
-            CancelDiscover();
-
             ConnectedGauge?.Disconnect();
+
+            NotifyObservers(o => o.ConnectionState = ConnectionState.Connecting);
+            NotifyObservers(o => o.AddConnectionMessage(string.Format(CheckingDeviceMessageFormat, connectionInformation.Name)));
+            _logger.LogInformation("Connecting to device {Name}", connectionInformation.Name);
+
+            _deviceDiscoverer.Cancel();
 
             var internalGauge = connectionInformation as ITMLinkGauge;
             if (internalGauge != null && (internalGauge.IsConnected == true || await internalGauge.Connect()))
