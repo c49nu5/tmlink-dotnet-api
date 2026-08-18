@@ -24,7 +24,7 @@ internal class WhenUnsubscribeFromLiveUpdatesIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
-        testBed.Protobuf1Channel.Setup(p => p.UnsubscribeFromLiveUpdates());
+        testBed.Protobuf1Channel.Setup(p => p.UnsubscribeFromLiveUpdates()).Returns(Task.CompletedTask);
 
         // Act
         await sut.UnsubscribeFromLiveUpdates();
