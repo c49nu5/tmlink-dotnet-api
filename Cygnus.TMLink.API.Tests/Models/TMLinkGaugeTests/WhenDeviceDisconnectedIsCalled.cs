@@ -10,7 +10,7 @@ internal class WhenDeviceDisconnectedIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
-        testBed.Protobuf1Channel.Setup(p => p.Disconnect());
+        testBed.Protobuf1Channel.Setup(p => p.Disconnect()).Returns(Task.CompletedTask);
         testBed.ConnectionService.Setup(p => p.GaugeIsDisconnected(sut.DeviceIdentifier));
 
         // Act
@@ -26,7 +26,7 @@ internal class WhenDeviceDisconnectedIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
-        testBed.Protobuf1Channel.Setup(p => p.Disconnect());
+        testBed.Protobuf1Channel.Setup(p => p.Disconnect()).Returns(Task.CompletedTask);
         testBed.ConnectionService.Setup(p => p.GaugeIsDisconnected(sut.DeviceIdentifier));
 
         // Act
@@ -42,7 +42,7 @@ internal class WhenDeviceDisconnectedIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
-        testBed.Protobuf1Channel.Setup(p => p.Disconnect());
+        testBed.Protobuf1Channel.Setup(p => p.Disconnect()).Returns(Task.CompletedTask);
         testBed.ConnectionService.Setup(p => p.GaugeIsDisconnected(sut.DeviceIdentifier));
 
         // Act

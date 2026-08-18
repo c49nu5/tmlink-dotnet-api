@@ -1,22 +1,21 @@
-﻿using Cygnus.Models;
-using Moq;
+﻿using Moq;
 using Shouldly;
 
 namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests;
 internal class WhenUnsubscribeFromLiveUpdatesIsCalled
 {
     [Test]
-    public void AndGaugeHasNotBeenConnected_ShouldThrowNotImplementedException()
+    public async Task AndGaugeHasNotBeenConnected_ShouldNotThrow()
     {
         // Arrange
         var testBed = new TestBed();
         var sut = testBed.CreateSUT();
 
         // Act
-        var act = () => sut.UnsubscribeFromLiveUpdates();
+        var act = sut.UnsubscribeFromLiveUpdates();
 
         // Assert
-        act.ShouldThrow<NotImplementedException>();
+        await act.ShouldNotThrowAsync();
     }
 
     [Test]
@@ -28,7 +27,7 @@ internal class WhenUnsubscribeFromLiveUpdatesIsCalled
         testBed.Protobuf1Channel.Setup(p => p.UnsubscribeFromLiveUpdates());
 
         // Act
-        sut.UnsubscribeFromLiveUpdates();
+        await sut.UnsubscribeFromLiveUpdates();
 
         // Assert
         testBed.Protobuf1Channel.Verify(p => p.UnsubscribeFromLiveUpdates(), Times.Once);

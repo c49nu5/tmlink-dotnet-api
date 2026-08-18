@@ -1,14 +1,19 @@
 ﻿using Cygnus.TMLink.Interfaces;
 using InTheHand.Bluetooth;
+using Microsoft.Extensions.Logging;
 
 namespace Cygnus.BLE.InTheHand
 {
     internal class BLECharacteristic : ITMLinkCharacteristic
     {
+        private readonly ILogger<BLECharacteristic> _logger;
         private readonly GattCharacteristic _characteristic;
 
-        public BLECharacteristic(GattCharacteristic characteristic)
+        public BLECharacteristic(
+            ILogger<BLECharacteristic> logger,
+            GattCharacteristic characteristic)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _characteristic = characteristic;
             characteristic.CharacteristicValueChanged += OnCharacteristicValueChanged;
         }
@@ -35,7 +40,7 @@ namespace Cygnus.BLE.InTheHand
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Error reading characteristic {Id} {ex}", Uuid, ex.Message);
+                _logger.LogError(ex, "Error reading characteristic {Id}", Uuid);
             }
 
             return data;
@@ -43,7 +48,26 @@ namespace Cygnus.BLE.InTheHand
 
         public async Task StartNotifications()
         {
-            await _characteristic.StartNotificationsAsync();
+            try
+            {
+                await _characteristic.StartNotificationsAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error starting notifications for characteristic {Id}", Uuid);
+            }
+        }
+
+        public async Task StopNotifications()
+        {
+            try
+            {
+                await _characteristic.StopNotificationsAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error stopping notifications for characteristic {Id}", Uuid);
+            }
         }
 
         public async Task WriteValueWithResponse(byte[] bytes)

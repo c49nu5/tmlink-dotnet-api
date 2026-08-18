@@ -1,12 +1,11 @@
-﻿using Cygnus.Models;
-using Moq;
+﻿using Moq;
 using Shouldly;
 
 namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests;
 internal class WhenCancelRecordTransferIsCalled
 {
     [Test]
-    public async Task AndGaugeHasNotBeenConnected_ShouldThrowNotImplementedException()
+    public async Task AndGaugeHasNotBeenConnected_ShouldNotThrowException()
     {
         // Arrange
         var testBed = new TestBed();
@@ -16,7 +15,7 @@ internal class WhenCancelRecordTransferIsCalled
         var act = sut.CancelRecordTransfer();
 
         // Assert
-        await act.ShouldThrowAsync<NotImplementedException>();
+        await act.ShouldNotThrowAsync();
     }
 
     [Test]

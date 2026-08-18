@@ -31,7 +31,7 @@ namespace Cygnus.Interfaces
         Task DeleteRecord(IFileTransferRequest deleteRequest);
 
         Task SubscribeToLiveUpdates();
-        void UnsubscribeFromLiveUpdates();
+        Task UnsubscribeFromLiveUpdates();
 
         void Disconnect();
 

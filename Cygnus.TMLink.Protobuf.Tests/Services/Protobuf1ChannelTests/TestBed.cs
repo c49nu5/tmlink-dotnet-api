@@ -105,6 +105,7 @@ internal class TestBed
     internal void PrepareForDisconnect()
     {
         LiveCharacteristic.SetupRemove(c => c.CharacteristicValueChanged -= null);
+        LiveCharacteristic.Setup(c => c.StopNotifications()).Returns(Task.CompletedTask);
         ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.CancelRecordTransfer), true)).ReturnsAsync(true);
         ProtobufCommandHandler.Setup(c => c.Disconnect());
     }

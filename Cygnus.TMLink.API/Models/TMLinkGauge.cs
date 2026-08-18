@@ -156,9 +156,9 @@ namespace Cygnus.TMLink.API.Models
             await _protobufChannel.SubscribeToLiveUpdates();
         }
 
-        public void UnsubscribeFromLiveUpdates()
+        public async Task UnsubscribeFromLiveUpdates()
         {
-            _protobufChannel.UnsubscribeFromLiveUpdates();
+            await _protobufChannel.UnsubscribeFromLiveUpdates();
         }
 
         public async Task CancelRecordTransfer()

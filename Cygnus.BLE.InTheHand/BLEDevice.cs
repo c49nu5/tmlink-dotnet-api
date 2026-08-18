@@ -6,11 +6,15 @@ namespace Cygnus.BLE.InTheHand
 {
     internal class BLEDevice : ObservableModel<ITMLinkDeviceObserver>, ITMLinkDevice
     {
+        private readonly Func<GattCharacteristic, BLECharacteristic> _characteristicFactory;
         private BluetoothDevice? _device;
         private bool isDisposed;
 
-        public BLEDevice(BluetoothDevice device)
+        public BLEDevice(
+            Func<GattCharacteristic, BLECharacteristic> characteristicFactory, 
+            BluetoothDevice device)
         {
+            _characteristicFactory = characteristicFactory ?? throw new ArgumentNullException(nameof(characteristicFactory));
             Id = device.Id;
             _device = device;
             _device.GattServerDisconnected += OnDisconnected;
@@ -73,7 +77,7 @@ namespace Cygnus.BLE.InTheHand
             }
             
             var characteristics = await service.GetCharacteristicsAsync();
-            return characteristics?.Select(c => new BLECharacteristic(c)).ToArray();
+            return characteristics?.Select(_characteristicFactory).ToArray();
         }
 
         private void OnDisconnected(object sender, EventArgs e)

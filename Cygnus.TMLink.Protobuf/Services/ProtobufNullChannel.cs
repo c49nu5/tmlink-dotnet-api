@@ -10,63 +10,19 @@ namespace Cygnus.TMLink.Protobuf.Services
     public class ProtobufNullChannel : IProtobufChannel
     {
         public bool IsInitialized => false;
+        public Task Disconnect() => Task.CompletedTask;
+        public Task UnsubscribeFromLiveUpdates() => Task.CompletedTask;
+        public Task<bool> CancelRecordTransfer() => Task.FromResult(false);
 
-        public Task<bool> CancelRecordTransfer()
-        {
-            throw new NotImplementedException();
-        }
+        public Task<GaugeInformation?> Connect(ITMLinkDevice device) => throw new NotImplementedException();
+        public Task DeleteAllRecords() => throw new NotImplementedException();
+        public Task DeleteRecord(IFileTransferRequest deleteRequest) => throw new NotImplementedException();
+        public Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans) => throw new NotImplementedException();
+        public Task<List<GaugeRecordSummary>?> GetRecordList() => throw new NotImplementedException();
+        public Task NewRecord(BlankRecord record) => throw new NotImplementedException();
+        public Task SubscribeToLiveUpdates() => throw new NotImplementedException();
+        public void AddObserver(ILiveMeasurementObserver observer) => throw new NotImplementedException();
 
-        public Task<GaugeInformation?> Connect(ITMLinkDevice device)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteAllRecords()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteRecord(IFileTransferRequest deleteRequest)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<GaugeRecordSummary>?> GetRecordList()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task NewRecord(BlankRecord record)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task SubscribeToLiveUpdates()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UnsubscribeFromLiveUpdates()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddObserver(ILiveMeasurementObserver observer)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Disconnect()
-        {
-        }
-
-        public void Dispose()
-        {
-        }
+        public void Dispose() {}
     }
 }
