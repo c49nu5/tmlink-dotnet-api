@@ -166,10 +166,11 @@ namespace Cygnus.TMLink.API.Models
             await _protobufChannel.CancelRecordTransfer();
         }
 
-        public void Disconnect()
+        public async Task Disconnect()
         {
             if (_device?.IsConnected == true)
             {
+                await _protobufChannel.Disconnect();
                 _device?.Disconnect();
             }
             else
@@ -200,7 +201,6 @@ namespace Cygnus.TMLink.API.Models
         private void DoDisconnect()
         {
             IsConnected = false;
-            _protobufChannel.Disconnect();
             _connectionService.GaugeIsDisconnected(DeviceIdentifier);
         }
 

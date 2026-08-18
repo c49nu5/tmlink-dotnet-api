@@ -33,7 +33,7 @@ namespace Cygnus.Interfaces
         Task SubscribeToLiveUpdates();
         Task UnsubscribeFromLiveUpdates();
 
-        void Disconnect();
+        Task Disconnect();
 
         // TM-Link specific methods
         Task NewRecord(BlankRecord record);
