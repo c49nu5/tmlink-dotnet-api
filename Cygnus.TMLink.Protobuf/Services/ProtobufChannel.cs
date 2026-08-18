@@ -79,7 +79,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             if (liveCharacteristic != null)
             {
                 liveCharacteristic.CharacteristicValueChanged -= OnLiveMeasurementReceived;
-                await liveCharacteristic.StopNotifications();
+                //   await liveCharacteristic.StopNotifications(); // TODO This works with the virtual device but not with the real device. Need to investigate why.
             }
         }
 
