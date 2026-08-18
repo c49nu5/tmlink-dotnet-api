@@ -48,7 +48,7 @@ internal class TestBed
     {
         var mockGauge = new Mock<ITMLinkGauge>(MockBehavior.Strict);
         mockGauge.Setup(g => g.Connect()).ReturnsAsync(gaugeConnected);
-        mockGauge.Setup(g => g.Disconnect());
+        mockGauge.Setup(g => g.Disconnect()).Returns(Task.CompletedTask);
         mockGauge.Setup(g => g.SetDevice(It.IsAny<ITMLinkDevice>()));
         mockGauge.SetupGet(g => g.Name).Returns(mockGauge.ToString());
         mockGauge.SetupGet(q => q.DeviceIdentifier).Returns(Guid.NewGuid().ToString());

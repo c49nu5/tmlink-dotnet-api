@@ -1,6 +1,5 @@
 ﻿using Cygnus.TMLink.Interfaces;
 using Cygnus.TMLink.Protobuf.Interfaces;
-using Cygnus.TMLink.Protobuf.Services;
 using Moq;
 
 namespace Cygnus.TMLink.Protobuf.Tests.Services.Protobuf1ChannelTests;
@@ -15,7 +14,7 @@ internal class WhenDisconnectIsCalled
         testBed.PrepareForDisconnect();
 
         // Act
-        sut.Disconnect();
+        await sut.Disconnect();
 
         // Assert
         testBed.LiveCharacteristic.VerifyRemove(c => c.CharacteristicValueChanged -= It.IsAny<EventHandler<ValueChangedEventArgs>>(), Times.Once);
@@ -30,7 +29,7 @@ internal class WhenDisconnectIsCalled
         testBed.PrepareForDisconnect();
 
         // Act
-        sut.Disconnect();
+        await sut.Disconnect();
 
         // Assert
         testBed.ProtobufCommandHandler.Verify(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.CancelRecordTransfer), true), Times.Once);
@@ -45,7 +44,7 @@ internal class WhenDisconnectIsCalled
         testBed.PrepareForDisconnect();
 
         // Act
-        sut.Disconnect();
+        await sut.Disconnect();
 
         // Assert
         testBed.ProtobufCommandHandler.Verify(c => c.Disconnect(), Times.Once);

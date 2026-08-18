@@ -65,16 +65,22 @@ namespace Cygnus.TMLink.Protobuf.Services
 
         public async Task SubscribeToLiveUpdates()
         {
-            if (_liveCharacteristic != null)
-            { 
-                _liveCharacteristic.CharacteristicValueChanged += OnLiveMeasurementReceived;
-                await _liveCharacteristic.StartNotifications();
+            var liveCharacteristic = _liveCharacteristic;
+            if (liveCharacteristic != null)
+            {
+                liveCharacteristic.CharacteristicValueChanged += OnLiveMeasurementReceived;
+                await liveCharacteristic.StartNotifications();
             }
         }
 
-        public void UnsubscribeFromLiveUpdates()
+        public async Task UnsubscribeFromLiveUpdates()
         {
-            _liveCharacteristic?.CharacteristicValueChanged -= OnLiveMeasurementReceived;
+            var liveCharacteristic = _liveCharacteristic;
+            if (liveCharacteristic != null)
+            {
+                liveCharacteristic.CharacteristicValueChanged -= OnLiveMeasurementReceived;
+                //   await liveCharacteristic.StopNotifications(); // TODO This works with the virtual device but not with the real device. Need to investigate why.
+            }
         }
 
         public abstract Task DeleteAllRecords();
@@ -173,10 +179,10 @@ namespace Cygnus.TMLink.Protobuf.Services
 
         protected abstract Task<GaugeInformation> GetGaugeInformation();
 
-        public void Disconnect()
+        public async Task Disconnect()
         {
-            UnsubscribeFromLiveUpdates();
-            CancelRecordTransfer();
+            await UnsubscribeFromLiveUpdates();
+            await CancelRecordTransfer();
             _protobufCommandHandler.Disconnect();
         }
 
@@ -218,7 +224,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             {
                 if (disposing)
                 {
-                    Disconnect();
+                    Disconnect().ConfigureAwait(false);
                 }
 
                 _isDisposed = true;

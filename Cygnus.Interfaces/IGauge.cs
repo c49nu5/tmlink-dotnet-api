@@ -31,9 +31,9 @@ namespace Cygnus.Interfaces
         Task DeleteRecord(IFileTransferRequest deleteRequest);
 
         Task SubscribeToLiveUpdates();
-        void UnsubscribeFromLiveUpdates();
+        Task UnsubscribeFromLiveUpdates();
 
-        void Disconnect();
+        Task Disconnect();
 
         // TM-Link specific methods
         Task NewRecord(BlankRecord record);

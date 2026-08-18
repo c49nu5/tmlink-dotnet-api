@@ -9,5 +9,6 @@
         Task<byte[]> ReadValue();
         Task StartNotifications();
         Task WriteValueWithResponse(byte[] bytes);
+        Task StopNotifications();
     }
 }

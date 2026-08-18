@@ -92,14 +92,14 @@ If clients wish to receive updates when the live and frozen measurements are upd
 
         public uint BatteryLevel { get; set; }
 
-        public Task SubscribeToLiveUpdates()
+        public async Task SubscribeToLiveUpdates()
         {
-            _gauge.SubscribeToLiveUpdates();
+            await _gauge.SubscribeToLiveUpdates();
         }
 
-        public void UnsubscribeFromLiveUpdates()
+        public async Task UnsubscribeFromLiveUpdates()
         {
-            _gauge.UnsubscribeFromLiveUpdates();
+            await _gauge.UnsubscribeFromLiveUpdates();
         }
 
         public void OnLiveMeasurementReceived(LiveMeasurement liveMeasurement)

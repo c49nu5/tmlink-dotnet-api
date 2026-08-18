@@ -4,21 +4,6 @@ using Shouldly;
 namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests;
 internal class WhenDeviceDisconnectedIsCalled
 {
-    [Test]
-    public async Task AndGaugeIsConnected_ShouldCallDisconnectOnProtobufChannel()
-    {
-        // Arrange
-        var testBed = new TestBed();
-        var sut = await testBed.CreateConnectedSUT();
-        testBed.Protobuf1Channel.Setup(p => p.Disconnect());
-        testBed.ConnectionService.Setup(p => p.GaugeIsDisconnected(sut.DeviceIdentifier));
-
-        // Act
-        sut.DeviceDisconnected(sut.DeviceIdentifier);
-
-        // Assert
-        testBed.Protobuf1Channel.Verify(p => p.Disconnect(), Times.Once);
-    }
 
     [Test]
     public async Task AndGaugeIsConnected_ShouldSetIsConnectedToFalse()
@@ -26,7 +11,7 @@ internal class WhenDeviceDisconnectedIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
-        testBed.Protobuf1Channel.Setup(p => p.Disconnect());
+        testBed.Protobuf1Channel.Setup(p => p.Disconnect()).Returns(Task.CompletedTask);
         testBed.ConnectionService.Setup(p => p.GaugeIsDisconnected(sut.DeviceIdentifier));
 
         // Act
@@ -42,7 +27,7 @@ internal class WhenDeviceDisconnectedIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
-        testBed.Protobuf1Channel.Setup(p => p.Disconnect());
+        testBed.Protobuf1Channel.Setup(p => p.Disconnect()).Returns(Task.CompletedTask);
         testBed.ConnectionService.Setup(p => p.GaugeIsDisconnected(sut.DeviceIdentifier));
 
         // Act

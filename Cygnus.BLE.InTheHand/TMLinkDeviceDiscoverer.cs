@@ -7,12 +7,16 @@ namespace Cygnus.BLE.InTheHand;
 internal class TMLinkDeviceDiscoverer : ITMLinkDeviceDiscoverer
 {
     private readonly BluetoothUuid TMLinkServiceUuid = new Guid(Constants.TMLinkServiceId);
+    private readonly Func<BluetoothDevice, ITMLinkDevice> _deviceFactory;
     private readonly ILogger<TMLinkDeviceDiscoverer> _logger;
     private CancellationTokenSource? _scanCancellationTokenSource = null;
 
-    public TMLinkDeviceDiscoverer(ILogger<TMLinkDeviceDiscoverer> logger)
+    public TMLinkDeviceDiscoverer(
+        ILogger<TMLinkDeviceDiscoverer> logger,
+        Func<BluetoothDevice, ITMLinkDevice> deviceFactory)
     {
-        _logger = logger;
+        _deviceFactory = deviceFactory ?? throw new ArgumentNullException(nameof(deviceFactory));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public void Cancel()
@@ -30,7 +34,7 @@ internal class TMLinkDeviceDiscoverer : ITMLinkDeviceDiscoverer
             if (ad?.Device != null && ad.Uuids.Contains(TMLinkServiceUuid))
             {
                 _logger.LogInformation("BLE TM Link device found: {DeviceId}", ad.Device.Id);
-                 gauges[ad.Device.Id] = new BLEDevice(ad.Device);
+                gauges[ad.Device.Id] = _deviceFactory(ad.Device);
             }
         };
         

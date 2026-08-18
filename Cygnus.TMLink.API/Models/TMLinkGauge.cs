@@ -17,6 +17,7 @@ namespace Cygnus.TMLink.API.Models
         private ITMLinkDevice? _device;
         private bool _isDataTransferInProgress;
         private bool _isDisposed;
+        private LiveMeasurement? _lastLiveMeasurement;
 
         public TMLinkGauge(ILogger<TMLinkGauge> logger,
                         Func<byte, IProtobufChannel?> protobufChannelFactory,
@@ -154,11 +155,15 @@ namespace Cygnus.TMLink.API.Models
         public async Task SubscribeToLiveUpdates()
         {
             await _protobufChannel.SubscribeToLiveUpdates();
+            if (_lastLiveMeasurement != null)
+            {
+                NotifyObservers(o => o.OnLiveMeasurementReceived(_lastLiveMeasurement));
+            }
         }
 
-        public void UnsubscribeFromLiveUpdates()
+        public async Task UnsubscribeFromLiveUpdates()
         {
-            _protobufChannel.UnsubscribeFromLiveUpdates();
+            await _protobufChannel.UnsubscribeFromLiveUpdates();
         }
 
         public async Task CancelRecordTransfer()
@@ -166,10 +171,11 @@ namespace Cygnus.TMLink.API.Models
             await _protobufChannel.CancelRecordTransfer();
         }
 
-        public void Disconnect()
+        public async Task Disconnect()
         {
             if (_device?.IsConnected == true)
             {
+                await _protobufChannel.Disconnect();
                 _device?.Disconnect();
             }
             else
@@ -188,6 +194,7 @@ namespace Cygnus.TMLink.API.Models
                 NotifyObservers(o => o.OnPropertiesUpdated(this));
             }
 
+            _lastLiveMeasurement = liveMeasurement;
             NotifyObservers(o => o.OnLiveMeasurementReceived(liveMeasurement));
         }
 
@@ -200,7 +207,6 @@ namespace Cygnus.TMLink.API.Models
         private void DoDisconnect()
         {
             IsConnected = false;
-            _protobufChannel.Disconnect();
             _connectionService.GaugeIsDisconnected(DeviceIdentifier);
         }
 
@@ -302,7 +308,7 @@ namespace Cygnus.TMLink.API.Models
             GaugeFeatures.SendsAScans |
             GaugeFeatures.SendsBatteryLevel |
             GaugeFeatures.SendsLiveMeasurements |
-            GaugeFeatures.HasFreezeCapability |
+            GaugeFeatures.SendsOnlyValidMeasurements |
             GaugeFeatures.CanSendBScanList |
             GaugeFeatures.CanSendRecordList;
 
