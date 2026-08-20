@@ -6,11 +6,26 @@ namespace Cygnus.TMLink.Protobuf.Tests.Services.Protobuf1ChannelTests;
 internal class WhenDisposeIsCalled
 {
     [Test]
-    public async Task ShouldUnsubscribeFromLiveUpdates()
+    public async Task WithNoObservers_ShouldNotUnsubscribeFromLiveUpdates()
     {
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
+        testBed.PrepareForDisconnect();
+
+        // Act
+        sut.Dispose();
+
+        // Assert
+        testBed.LiveCharacteristic.VerifyRemove(c => c.CharacteristicValueChanged -= It.IsAny<EventHandler<ValueChangedEventArgs>>(), Times.Never);
+    }
+
+    [Test]
+    public async Task WithObservers_ShouldUnsubscribeFromLiveUpdates()
+    {
+        // Arrange
+        var testBed = new TestBed();
+        var sut = await testBed.CreateConnectedSUT(true, true);
         testBed.PrepareForDisconnect();
 
         // Act

@@ -360,12 +360,12 @@ namespace Cygnus.TMLink.Protobuf.Services
             return false;
         }
 
-        protected override void UpdateLiveMeasurement(byte[] value)
+        protected override void ProcessLiveMeasurement(byte[] value)
         {
-            NotifyLiveMeasurement liveMeasurement = _protobufMessageConverter.FromProtobuf<NotifyLiveMeasurement>(value);
-            if (liveMeasurement != null)
+            NotifyLiveMeasurement protobufMeasurement = _protobufMessageConverter.FromProtobuf<NotifyLiveMeasurement>(value);
+            if (protobufMeasurement != null)
             {
-                if (liveMeasurement.liveMeasurementType == LiveMeasurementType.Frozen)
+                if (protobufMeasurement.liveMeasurementType == LiveMeasurementType.Frozen)
                 {
                     var frozenCharacteristic = _frozenCharacteristic;
                     if (frozenCharacteristic == null)
@@ -380,31 +380,29 @@ namespace Cygnus.TMLink.Protobuf.Services
                             {
                                 var frozenMeasurement = _protobufMessageConverter.FromZippedProtobuf<FrozenLiveMeasurement>(task.Result);
                                 _logger.LogInformation("Received frozen measurement from gauge {DeviceIdentifier}: {serialNumber}", _device?.Name, frozenMeasurement.Index);
-                                NotifyObservers(o =>
+                                MeasurementUnits uom = (MeasurementUnits)frozenMeasurement.Uom;
+                                LiveMeasurement frozenLiveMeasurement = new()
                                 {
-                                    MeasurementUnits uom = (MeasurementUnits)frozenMeasurement.Uom;
-                                    o.OnLiveMeasurementReceived(new LiveMeasurement
-                                    {
-                                        BatteryLevel = frozenMeasurement.batteryLevel,
-                                        GaindB = frozenMeasurement.gaindB,
-                                        PointIndex = frozenMeasurement.Index,
-                                        Units = uom,
-                                        SurfaceTemperatureCelsius = (int)frozenMeasurement.surfaceTemp,
-                                        Thickness = frozenMeasurement.Thickness,
-                                        Mode = ConvertToMeasureMode(frozenMeasurement.UTMode),
-                                        Probe = ConvertToProbeType(frozenMeasurement.probeType),
-                                        Velocity = frozenMeasurement.Velocity,
-                                        DeepCoatOn = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
-                                        HasAScan = frozenMeasurement.Ascan?.ascanPoints?.Length > 0,
-                                        IsFrozen = true,
-                                        StableMeasurement = frozenMeasurement.stableMeasurement,
-                                        ValidMeasurement = frozenMeasurement.validMeasurement,
-                                        AScan = GetAScan(frozenMeasurement.Ascan, frozenMeasurement.Velocity, uom),
-                                        EchoPoints = [.. GetEchoPoints(frozenMeasurement.Ascan, frozenMeasurement.Velocity, uom)],
-                                        Type = frozenMeasurement.Thickness > 0 ? MeasurementType.Valid : MeasurementType.None,
-                                        ThicknessTime = GetThicknessTime(frozenMeasurement.Thickness, frozenMeasurement.Velocity, uom)
-                                    });
-                                });
+                                    BatteryLevel = frozenMeasurement.batteryLevel,
+                                    GaindB = frozenMeasurement.gaindB,
+                                    PointIndex = frozenMeasurement.Index,
+                                    Units = uom,
+                                    SurfaceTemperatureCelsius = (int)frozenMeasurement.surfaceTemp,
+                                    Thickness = frozenMeasurement.Thickness,
+                                    Mode = ConvertToMeasureMode(frozenMeasurement.UTMode),
+                                    Probe = ConvertToProbeType(frozenMeasurement.probeType),
+                                    Velocity = frozenMeasurement.Velocity,
+                                    DeepCoatOn = (protobufMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
+                                    HasAScan = frozenMeasurement.Ascan?.ascanPoints?.Length > 0,
+                                    IsFrozen = true,
+                                    StableMeasurement = frozenMeasurement.stableMeasurement,
+                                    ValidMeasurement = frozenMeasurement.validMeasurement,
+                                    AScan = GetAScan(frozenMeasurement.Ascan, frozenMeasurement.Velocity, uom),
+                                    EchoPoints = [.. GetEchoPoints(frozenMeasurement.Ascan, frozenMeasurement.Velocity, uom)],
+                                    Type = frozenMeasurement.Thickness > 0 ? MeasurementType.Valid : MeasurementType.None,
+                                    ThicknessTime = GetThicknessTime(frozenMeasurement.Thickness, frozenMeasurement.Velocity, uom)
+                                };
+                                OnLiveMeasurementReceived(frozenLiveMeasurement);
                             }
                             else
                             {
@@ -415,27 +413,26 @@ namespace Cygnus.TMLink.Protobuf.Services
                 }
                 else
                 {
-                    NotifyObservers(o =>
+                    MeasurementUnits measurementUnits = (protobufMeasurement.statusBits & IsImperialUnits) == IsImperialUnits ? MeasurementUnits.Imperial : MeasurementUnits.Metric;
+                    LiveMeasurement liveMeasurement = new()
                     {
-                        MeasurementUnits measurementUnits = (liveMeasurement.statusBits & IsImperialUnits) == IsImperialUnits ? MeasurementUnits.Imperial : MeasurementUnits.Metric;
-                        o.OnLiveMeasurementReceived(new LiveMeasurement
-                        {
-                            BatteryLevel = liveMeasurement.batteryLevel,
-                            GaindB = liveMeasurement.gaindB,
-                            PointIndex = liveMeasurement.Index,
-                            Units = measurementUnits,
-                            SurfaceTemperatureCelsius = (int)liveMeasurement.surfaceTemp,
-                            Thickness = liveMeasurement.Thickness,
-                            Mode = ConvertToMeasureMode(liveMeasurement.UTMode),
-                            Velocity = liveMeasurement.Velocity,
-                            DeepCoatOn = (liveMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
-                            IsFrozen = (liveMeasurement.statusBits & IsFrozenFlag) == IsFrozenFlag,
-                            StableMeasurement = (liveMeasurement.statusBits & IsStableFlag) == IsStableFlag,
-                            ValidMeasurement = (liveMeasurement.statusBits & IsValidFlag) == IsValidFlag,
-                            Type = liveMeasurement.Thickness > 0 ? MeasurementType.Valid : MeasurementType.None,
-                            ThicknessTime = GetThicknessTime(liveMeasurement.Thickness, liveMeasurement.Velocity, measurementUnits),
-                        });
-                    });
+                        BatteryLevel = protobufMeasurement.batteryLevel,
+                        GaindB = protobufMeasurement.gaindB,
+                        PointIndex = protobufMeasurement.Index,
+                        Units = measurementUnits,
+                        SurfaceTemperatureCelsius = (int)protobufMeasurement.surfaceTemp,
+                        Thickness = protobufMeasurement.Thickness,
+                        Mode = ConvertToMeasureMode(protobufMeasurement.UTMode),
+                        Velocity = protobufMeasurement.Velocity,
+                        DeepCoatOn = (protobufMeasurement.statusBits & DeepcoatFlag) == DeepcoatFlag,
+                        IsFrozen = (protobufMeasurement.statusBits & IsFrozenFlag) == IsFrozenFlag,
+                        StableMeasurement = (protobufMeasurement.statusBits & IsStableFlag) == IsStableFlag,
+                        ValidMeasurement = (protobufMeasurement.statusBits & IsValidFlag) == IsValidFlag,
+                        Type = protobufMeasurement.Thickness > 0 ? MeasurementType.Valid : MeasurementType.None,
+                        ThicknessTime = GetThicknessTime(protobufMeasurement.Thickness, protobufMeasurement.Velocity, measurementUnits),
+                    };
+
+                    OnLiveMeasurementReceived(liveMeasurement);
                 }
             }
         }
@@ -535,7 +532,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             };
         }
 
-        protected override async Task<GaugeInformation> GetGaugeInformation()
+        public override async Task<GaugeInformation?> GetGaugeInformation()
         {
             Command command = new()
             {
@@ -544,23 +541,23 @@ namespace Cygnus.TMLink.Protobuf.Services
             };
 
             var gaugeInfo = await _protobufCommandHandler.SendCommandWithResponse<Message.GaugeInfo, Message>(command, m => m.gaugeInfo);
-            if (gaugeInfo != null)
+            if (gaugeInfo == null)
             {
-                _logger.LogInformation("Updated gauge info for {Device}: Serial Number {SerialNumber}", _device?.Name, gaugeInfo.serialNumber);
+                _logger.LogError("No gauge info returned for device {Device}", _device?.Name);
+                return null;
             }
             else
             {
-                _logger.LogError("No gauge info returned for device {Device}", _device?.Name);
+                _logger.LogInformation("Updated gauge info for {Device}: Serial Number {SerialNumber}", _device?.Name, gaugeInfo.serialNumber);
+                return new GaugeInformation
+                {
+                    SerialNumber = gaugeInfo.serialNumber,
+                    GaugeId = gaugeInfo.gaugeUD,
+                    SoftwareVersionNumber = gaugeInfo.versionNumber,
+                    BatteryLevel = gaugeInfo.batteryLevel,
+                    GaugeVariant = (Models.GaugeVariant)(gaugeInfo.gaugeVariant),
+                };
             }
-            
-            return new GaugeInformation
-            {
-                SerialNumber = gaugeInfo?.serialNumber ?? 0,
-                GaugeId = gaugeInfo?.gaugeUD ?? 0,
-                SoftwareVersionNumber = gaugeInfo?.versionNumber ?? 0,
-                BatteryLevel = gaugeInfo?.batteryLevel ?? 0,
-                GaugeVariant = (Models.GaugeVariant)(gaugeInfo?.gaugeVariant ?? V1.GaugeVariant.Test),
-            };
         }
     }
 }

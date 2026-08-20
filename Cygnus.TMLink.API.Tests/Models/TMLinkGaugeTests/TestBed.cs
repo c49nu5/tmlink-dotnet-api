@@ -50,7 +50,8 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
         {
             var sut = CreateSUT(true);
             var device = ConnectedDevice = CreateDevice(true);
-            Protobuf1Channel.Setup(p => p.Connect(device.Object)).ReturnsAsync(new Cygnus.Models.GaugeInformation { SerialNumber = (uint)Random.Shared.Next(23132,41232)});
+            Protobuf1Channel.Setup(p => p.Connect(device.Object, sut)).ReturnsAsync(true);
+            Protobuf1Channel.Setup(p => p.GetGaugeInformation()).ReturnsAsync(new Cygnus.Models.GaugeInformation { SerialNumber = (uint)Random.Shared.Next(23132, 41232) });
             Protobuf1Channel.Setup(p => p.AddObserver(sut));
             device.Setup(d => d.IsConnected).Returns(true);
             sut.SetDevice(device.Object);

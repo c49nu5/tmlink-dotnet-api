@@ -15,6 +15,7 @@ namespace Cygnus.TMLink.Protobuf.Services
 
         protected ILogger _logger;
         protected ITMLinkDevice? _device;
+        private ILiveMeasurementObserver? _gauge;
         protected CancellationTokenSource? _recordTransferCts;
         protected IProtobufCommandHandler _protobufCommandHandler;
 
@@ -26,9 +27,10 @@ namespace Cygnus.TMLink.Protobuf.Services
 
         public bool IsInitialized => true;
 
-        public async Task<GaugeInformation?> Connect(ITMLinkDevice device)
+        public async Task<bool> Connect(ITMLinkDevice device, ILiveMeasurementObserver gauge)
         {
             _device = device;
+            _gauge = gauge;
 
             ITMLinkCharacteristic[]? characteristics = await _device.GetCharacteristics(Constants.TMLinkServiceId);
             if (characteristics == null)
@@ -57,29 +59,28 @@ namespace Cygnus.TMLink.Protobuf.Services
                     _logger.LogError("Could not find notify live characteristic for {Device}", _device.Name);
                 }
 
-                return await GetGaugeInformation();
+                return true;
             }
 
-            return null;
+            return false;
         }
 
-        public async Task SubscribeToLiveUpdates()
+        protected override void OnObserverCountChanged(int count)
         {
             var liveCharacteristic = _liveCharacteristic;
             if (liveCharacteristic != null)
             {
-                liveCharacteristic.CharacteristicValueChanged += OnLiveMeasurementReceived;
-                await liveCharacteristic.StartNotifications();
-            }
-        }
-
-        public async Task UnsubscribeFromLiveUpdates()
-        {
-            var liveCharacteristic = _liveCharacteristic;
-            if (liveCharacteristic != null)
-            {
-                liveCharacteristic.CharacteristicValueChanged -= OnLiveMeasurementReceived;
-                //   await liveCharacteristic.StopNotifications(); // TODO This works with the virtual device but not with the real device. Need to investigate why.
+                switch (count)
+                {
+                    case 0:
+                        liveCharacteristic.CharacteristicValueChanged -= OnLiveMeasurementReceived;
+                        // await liveCharacteristic.StopNotifications(); // TODO This works with the virtual device but not with the real device. Need to investigate why.
+                        break;
+                    case 1:
+                        liveCharacteristic.CharacteristicValueChanged += OnLiveMeasurementReceived;
+                        liveCharacteristic.StartNotifications();
+                        break;
+                }
             }
         }
 
@@ -88,7 +89,7 @@ namespace Cygnus.TMLink.Protobuf.Services
         public abstract Task NewRecord(BlankRecord record);
         public abstract Task<List<GaugeRecordSummary>?> GetRecordList();
 
-        protected abstract void UpdateLiveMeasurement(byte[] value);
+        protected abstract void ProcessLiveMeasurement(byte[] value);
 
         public virtual Task<bool> CancelRecordTransfer()
         {
@@ -177,11 +178,11 @@ namespace Cygnus.TMLink.Protobuf.Services
 
         protected abstract Task<GaugeMeasurement?> GetBScanPoint(string name, bool withAScans);
 
-        protected abstract Task<GaugeInformation> GetGaugeInformation();
+        public abstract Task<GaugeInformation?> GetGaugeInformation();
 
         public async Task Disconnect()
         {
-            await UnsubscribeFromLiveUpdates();
+            RemoveAllObservers();
             await CancelRecordTransfer();
             _protobufCommandHandler.Disconnect();
         }
@@ -193,13 +194,21 @@ namespace Cygnus.TMLink.Protobuf.Services
             {
                 try
                 {
-                    UpdateLiveMeasurement(e.Value);
+                    ProcessLiveMeasurement(e.Value);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Problem with live measurement characteristic");
                 }
             }
+        }
+
+        protected void OnLiveMeasurementReceived(LiveMeasurement liveMeasurement)
+        {
+            // Initially notify the gauge of the live measurement, then notify any other observers
+            _gauge?.OnLiveMeasurementReceived(liveMeasurement);
+            
+            NotifyObservers(o => o.OnLiveMeasurementReceived(liveMeasurement));
         }
 
         protected uint GetThicknessTime(uint thickness, uint velocity, MeasurementUnits measurementUnits)

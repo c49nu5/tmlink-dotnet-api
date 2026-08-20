@@ -2,7 +2,7 @@
 using Moq;
 
 namespace Cygnus.TMLink.Protobuf.Tests.Services.Protobuf1ChannelTests;
-internal class WhenSubscribeToLiveUpdatesIsCalled
+internal class WhenAddObserverIsCalled
 {
     [Test]
     public async Task ShouldAttachEventHandlerToLiveUpdates()
@@ -14,7 +14,7 @@ internal class WhenSubscribeToLiveUpdatesIsCalled
         testBed.LiveCharacteristic.Setup(c => c.StartNotifications()).Returns(Task.CompletedTask);
 
         // Act
-        await sut.SubscribeToLiveUpdates();
+        sut.AddObserver(testBed.Observer.Object);
 
         // Assert
         testBed.LiveCharacteristic.VerifyAdd(c => c.CharacteristicValueChanged += It.IsAny<EventHandler<ValueChangedEventArgs>>(), Times.Once);
@@ -30,7 +30,7 @@ internal class WhenSubscribeToLiveUpdatesIsCalled
         testBed.LiveCharacteristic.Setup(c => c.StartNotifications()).Returns(Task.CompletedTask);
 
         // Act
-        await sut.SubscribeToLiveUpdates();
+        sut.AddObserver(testBed.Observer.Object);
 
         // Assert
         testBed.LiveCharacteristic.Verify(c => c.StartNotifications(), Times.Once);
@@ -44,7 +44,7 @@ internal class WhenSubscribeToLiveUpdatesIsCalled
         var sut = testBed.CreateSUT();
 
         // Act
-        await sut.SubscribeToLiveUpdates();
+        sut.AddObserver(testBed.Observer.Object);
 
         // Assert
         Assert.Pass();

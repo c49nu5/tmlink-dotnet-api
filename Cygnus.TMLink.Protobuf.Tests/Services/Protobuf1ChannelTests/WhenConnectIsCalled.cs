@@ -14,7 +14,7 @@ internal class WhenConnectIsCalled
         testBed.PrepareForConnect();
 
         // Act
-        await sut.Connect(testBed.Device.Object);
+        await sut.Connect(testBed.Device.Object, testBed.Gauge.Object);
 
         // Assert
         testBed.Device.Verify(d => d.GetCharacteristics(Constants.TMLinkServiceId), Times.Once);
@@ -29,14 +29,14 @@ internal class WhenConnectIsCalled
         testBed.PrepareForConnect();
 
         // Act
-        await sut.Connect(testBed.Device.Object);
+        await sut.Connect(testBed.Device.Object, testBed.Gauge.Object);
 
         // Assert
         testBed.ProtobufCommandHandler.Verify(h => h.Connect(testBed.Characteristics), Times.Once);
     }
 
     [Test]
-    public async Task AndConnectSuceeds_ShouldReturnExpectedGaugeInformation()
+    public async Task AndConnectSuceeds_ShouldReturnTrue()
     {
         // Arrange
         var testBed = new TestBed();
@@ -44,16 +44,14 @@ internal class WhenConnectIsCalled
         var expectedInfo = testBed.PrepareForConnect();
 
         // Act
-        var gaugeInfo = await sut.Connect(testBed.Device.Object);
+        var result = await sut.Connect(testBed.Device.Object, testBed.Gauge.Object);
 
         // Assert
-        gaugeInfo?.BatteryLevel.ShouldBe(expectedInfo.batteryLevel);
-        gaugeInfo?.SerialNumber.ShouldBe(expectedInfo.serialNumber);
-        gaugeInfo?.SoftwareVersionNumber.ShouldBe(expectedInfo.versionNumber);
+        result.ShouldBeTrue();
     }
 
     [Test]
-    public async Task AndConnectToProtobufCommandHandlerFails_ShouldReturnNull()
+    public async Task AndConnectToProtobufCommandHandlerFails_ShouldReturnFalse()
     {
         // Arrange
         var testBed = new TestBed();
@@ -62,10 +60,10 @@ internal class WhenConnectIsCalled
         testBed.ProtobufCommandHandler.Setup(h => h.Connect(testBed.Characteristics)).ReturnsAsync(false);
 
         // Act
-        var gaugeInfo = await sut.Connect(testBed.Device.Object);
+        var result = await sut.Connect(testBed.Device.Object, testBed.Gauge.Object);
 
         // Assert
-        gaugeInfo.ShouldBeNull();
+        result.ShouldBeFalse();
     }
 
     [Test]
@@ -78,9 +76,9 @@ internal class WhenConnectIsCalled
         testBed.Device.Setup(d => d.GetCharacteristics(Constants.TMLinkServiceId)).ReturnsAsync((ITMLinkCharacteristic[])null);
 
         // Act
-        var gaugeInfo = await sut.Connect(testBed.Device.Object);
+        var result = await sut.Connect(testBed.Device.Object, testBed.Gauge.Object);
 
         // Assert
-        gaugeInfo.ShouldBeNull();
+        result.ShouldBeFalse();
     }
 }

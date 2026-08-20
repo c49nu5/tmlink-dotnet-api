@@ -6,7 +6,22 @@ namespace Cygnus.TMLink.Protobuf.Tests.Services.Protobuf1ChannelTests;
 internal class WhenDisconnectIsCalled
 {
     [Test]
-    public async Task ShouldUnsubscribeFromLiveUpdates()
+    public async Task WithObservers_ShouldUnsubscribeFromLiveUpdates()
+    {
+        // Arrange
+        var testBed = new TestBed();
+        var sut = await testBed.CreateConnectedSUT(true, true);
+        testBed.PrepareForDisconnect();
+
+        // Act
+        await sut.Disconnect();
+
+        // Assert
+        testBed.LiveCharacteristic.VerifyRemove(c => c.CharacteristicValueChanged -= It.IsAny<EventHandler<ValueChangedEventArgs>>(), Times.Once);
+    }
+
+    [Test]
+    public async Task WithNoObservers_ShouldNotUnsubscribeFromLiveUpdates()
     {
         // Arrange
         var testBed = new TestBed();
@@ -17,7 +32,7 @@ internal class WhenDisconnectIsCalled
         await sut.Disconnect();
 
         // Assert
-        testBed.LiveCharacteristic.VerifyRemove(c => c.CharacteristicValueChanged -= It.IsAny<EventHandler<ValueChangedEventArgs>>(), Times.Once);
+        testBed.LiveCharacteristic.VerifyRemove(c => c.CharacteristicValueChanged -= It.IsAny<EventHandler<ValueChangedEventArgs>>(), Times.Never);
     }
 
     [Test]
