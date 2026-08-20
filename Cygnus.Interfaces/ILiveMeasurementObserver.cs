@@ -1,6 +1,6 @@
 ﻿using Cygnus.Models;
 
-namespace Cygnus.TMLink.Interfaces
+namespace Cygnus.Interfaces
 {
     public interface ILiveMeasurementObserver
     {

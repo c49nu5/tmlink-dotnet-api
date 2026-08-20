@@ -23,15 +23,21 @@ namespace Cygnus.Interfaces
         int MinCommentCount { get; }
 
         // Shared methods for all gauge types
+
+        /// <summary>
+        /// Adds an observer to the gauge to receive updates on property changes.
+        /// </summary>
+        /// <param name="observer"></param>
         void AddObserver(IGaugeObserver observer);
+
         Task<List<GaugeRecordSummary>?> GetRecordList();
         Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans);
         Task CancelRecordTransfer();
         Task DeleteAllRecords();
         Task DeleteRecord(IFileTransferRequest deleteRequest);
 
-        Task SubscribeToLiveUpdates();
-        Task UnsubscribeFromLiveUpdates();
+        Task SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver);
+        Task UnsubscribeFromLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver);
 
         Task Disconnect();
 

@@ -76,8 +76,8 @@ A view model can then use the following methods on the IGauge interface to retri
 ```
 other methods on the IGauge interface are not supported by the TM-Link BLE API, and will throw a NotSupportedException if called.
 
-### Live updates
-If clients wish to receive updates when the live and frozen measurements are updated then the view model can implement the IGaugeObserver interface and add itself to the IGauge instance as an observer.
+### Property updates
+If clients wish to receive updates when properties change on the gauge, ie battery level, etc, are updated then the view model can implement the IGaugeObserver interface and add itself to the IGauge instance as an observer.
 ``` C#
     public partial class GaugeViewModel : IGaugeObserver
     {
@@ -92,14 +92,34 @@ If clients wish to receive updates when the live and frozen measurements are upd
 
         public uint BatteryLevel { get; set; }
 
+        public void OnPropertiesUpdated(IGauge gauge)
+        {
+            BatteryLevel = gauge.BatteryLevel;
+        }
+    }
+```
+
+### Live updates
+If clients wish to receive updates when the live and frozen measurements are updated then the view model can implement the ILiveMeasurementObserver interface and subscribe to, and unsubscribe from the IGauge instance as an observer.
+``` C#
+    public partial class GaugeViewModel : ILiveMeasurementObserver
+    {
+        private readonly IGauge _gauge;
+
+        public GaugeViewModel(
+            IGauge gauge)
+        {
+            _gauge = gauge;
+        }
+
         public async Task SubscribeToLiveUpdates()
         {
-            await _gauge.SubscribeToLiveUpdates();
+            await _gauge.SubscribeToLiveUpdates(this);
         }
 
         public async Task UnsubscribeFromLiveUpdates()
         {
-            await _gauge.UnsubscribeFromLiveUpdates();
+            await _gauge.UnsubscribeFromLiveUpdates(this);
         }
 
         public void OnLiveMeasurementReceived(LiveMeasurement liveMeasurement)
@@ -107,16 +127,9 @@ If clients wish to receive updates when the live and frozen measurements are upd
             LiveMeasurement = liveMeasurement;
         }
 
-        public void OnPropertiesUpdated(IGauge gauge)
-        {
-            BatteryLevel = gauge.BatteryLevel;
-        }
-
         public LiveMeasurement? LiveMeasurement { get; set; }
     }
 ```
-In a similar way to the connection view model, the gauge view model can implement the `IGaugeObserver` interface to receive updates about live measurements after calling SubscribeToLiveUpdates, by adding itself to the IGauge instance as an observer.
-
 
 ### Measurement display
 The thickness and velocity values in the measurements handed out by the API are raw values that need to be converted to be displayed in a user friendly way.

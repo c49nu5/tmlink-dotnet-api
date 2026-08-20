@@ -93,20 +93,27 @@ namespace Cygnus.TMLink.API.Models
 
                     if (_protobufChannel.IsInitialized)
                     {
-                        var gaugeInformation = await _protobufChannel.Connect(_device);
-                        if (gaugeInformation != null)
+                        if (await _protobufChannel.Connect(_device, this))
                         {
-                            IsConnected = true;
-                            SerialNumber = gaugeInformation?.SerialNumber ?? 0;
-                            SoftwareVersionNumber = gaugeInformation?.SoftwareVersionNumber ?? 0;
-                            GaugeVariant = gaugeInformation?.GaugeVariant;
-                            BatteryLevel = gaugeInformation?.BatteryLevel ?? 0;
-                            GaugeId = gaugeInformation?.GaugeId ?? 0;
-                            Probe = gaugeInformation?.ProbeType ?? ProbeType.None;
+                            var gaugeInformation = await _protobufChannel.GetGaugeInformation();
+                            if (gaugeInformation != null)
+                            {
+                                IsConnected = true;
+                                SerialNumber = gaugeInformation?.SerialNumber ?? 0;
+                                SoftwareVersionNumber = gaugeInformation?.SoftwareVersionNumber ?? 0;
+                                GaugeVariant = gaugeInformation?.GaugeVariant;
+                                BatteryLevel = gaugeInformation?.BatteryLevel ?? 0;
+                                GaugeId = gaugeInformation?.GaugeId ?? 0;
+                                Probe = gaugeInformation?.ProbeType ?? ProbeType.None;
+                            }
+                            else
+                            {
+                                _logger.LogError("Failed to retrieve gauge information for {Name}", Name);
+                            }
                         }
-                        else
+
+                        if (!IsConnected)
                         {
-                            _logger.LogError("Failed to retrieve gauge information for {Name}", Name);
                             _protobufChannel.Dispose();
                             _protobufChannel = new ProtobufNullChannel();
                         }
@@ -152,18 +159,20 @@ namespace Cygnus.TMLink.API.Models
             return await _protobufChannel.GetRecordList();
         }
 
-        public async Task SubscribeToLiveUpdates()
+        public async Task SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver)
         {
-            await _protobufChannel.SubscribeToLiveUpdates();
+            _protobufChannel.RemoveObserver(this);
+            _protobufChannel.AddObserver(this);
+            _protobufChannel.AddObserver(liveMeasurementObserver);
             if (_lastLiveMeasurement != null)
             {
-                NotifyObservers(o => o.OnLiveMeasurementReceived(_lastLiveMeasurement));
+                liveMeasurementObserver.OnLiveMeasurementReceived(_lastLiveMeasurement);
             }
         }
 
-        public async Task UnsubscribeFromLiveUpdates()
+        public async Task UnsubscribeFromLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver)
         {
-            await _protobufChannel.UnsubscribeFromLiveUpdates();
+            _protobufChannel.RemoveObserver(liveMeasurementObserver);
         }
 
         public async Task CancelRecordTransfer()
@@ -195,7 +204,6 @@ namespace Cygnus.TMLink.API.Models
             }
 
             _lastLiveMeasurement = liveMeasurement;
-            NotifyObservers(o => o.OnLiveMeasurementReceived(liveMeasurement));
         }
 
         public void DeviceDisconnected(string deviceId)

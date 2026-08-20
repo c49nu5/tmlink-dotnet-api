@@ -12,7 +12,9 @@ namespace Cygnus.TMLink.Protobuf.Interfaces
         bool IsInitialized { get; }
 
         void AddObserver(ILiveMeasurementObserver observer);
-        Task<GaugeInformation?> Connect(ITMLinkDevice device);
+        void RemoveObserver(ILiveMeasurementObserver observer);
+
+        Task<bool> Connect(ITMLinkDevice device, ILiveMeasurementObserver gauge);
         Task Disconnect();
 
         Task DeleteAllRecords();
@@ -20,8 +22,7 @@ namespace Cygnus.TMLink.Protobuf.Interfaces
         Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans);
         Task<List<GaugeRecordSummary>?> GetRecordList();
         Task NewRecord(BlankRecord record);
-        Task SubscribeToLiveUpdates();
-        Task UnsubscribeFromLiveUpdates();
+        Task<GaugeInformation?> GetGaugeInformation();
 
         /// <summary>
         /// Cancel any record transfer currently in progress

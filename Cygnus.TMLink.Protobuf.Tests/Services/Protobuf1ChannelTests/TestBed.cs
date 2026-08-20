@@ -1,4 +1,5 @@
-﻿using Cygnus.TMLink.Interfaces;
+﻿using Cygnus.Interfaces;
+using Cygnus.TMLink.Interfaces;
 using Cygnus.TMLink.Protobuf.Interfaces;
 using Cygnus.TMLink.Protobuf.Services;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ internal class TestBed
     public Mock<IProtobufCommandHandler> ProtobufCommandHandler { get; set; } = new Mock<IProtobufCommandHandler>(MockBehavior.Strict);
     public Mock<ITMLinkDevice> Device { get; set; } = new Mock<ITMLinkDevice>(MockBehavior.Strict);
     public Mock<ILiveMeasurementObserver> Observer { get; set; } = new Mock<ILiveMeasurementObserver>(MockBehavior.Strict);
+    public Mock<ILiveMeasurementObserver> Gauge { get; set; } = new Mock<ILiveMeasurementObserver>(MockBehavior.Strict);
 
     public Mock<ITMLinkCharacteristic> WriteCommandCharacteristic { get; set; } = new Mock<ITMLinkCharacteristic>(MockBehavior.Strict);
     public Mock<ITMLinkCharacteristic> NotifyMessageCharacteristic { get; set; } = new Mock<ITMLinkCharacteristic>();
@@ -50,14 +52,15 @@ internal class TestBed
 
         PrepareForConnect();
 
-        await sut.Connect(Device.Object);
+        await sut.Connect(Device.Object, Gauge.Object);
 
         if (configureForLiveUpdates || configureForFrozenUpdates)
         {
+            Gauge.Setup(o => o.OnLiveMeasurementReceived(It.Is<Models.LiveMeasurement>(m => m.IsFrozen == configureForFrozenUpdates)));
             Observer.Setup(o => o.OnLiveMeasurementReceived(It.Is<Models.LiveMeasurement>(m => m.IsFrozen == configureForFrozenUpdates)));
-            sut.AddObserver(Observer.Object);
             LiveCharacteristic.SetupAdd(c => c.CharacteristicValueChanged += null);
             LiveCharacteristic.Setup(c => c.StartNotifications()).Returns(Task.CompletedTask);
+            sut.AddObserver(Observer.Object);
             if (configureForFrozenUpdates)
             {
                 ProtobufMessageConverter.Setup(c => c.FromProtobuf<V1.NotifyLiveMeasurement>(LiveBytes)).Returns(new V1.NotifyLiveMeasurement { liveMeasurementType = V1.LiveMeasurementType.Frozen, statusBits = (uint)(V1.Constants.IsFrozenFlag | V1.Constants.IsValidFlag) });
