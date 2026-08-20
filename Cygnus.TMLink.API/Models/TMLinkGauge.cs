@@ -159,18 +159,17 @@ namespace Cygnus.TMLink.API.Models
             return await _protobufChannel.GetRecordList();
         }
 
-        public async Task SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver)
+        public void SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver)
         {
-            _protobufChannel.RemoveObserver(this);
-            _protobufChannel.AddObserver(this);
-            _protobufChannel.AddObserver(liveMeasurementObserver);
             if (_lastLiveMeasurement != null)
             {
                 liveMeasurementObserver.OnLiveMeasurementReceived(_lastLiveMeasurement);
             }
+
+            _protobufChannel.AddObserver(liveMeasurementObserver);
         }
 
-        public async Task UnsubscribeFromLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver)
+        public void UnsubscribeFromLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver)
         {
             _protobufChannel.RemoveObserver(liveMeasurementObserver);
         }
