@@ -36,8 +36,8 @@ namespace Cygnus.Interfaces
         Task DeleteAllRecords();
         Task DeleteRecord(IFileTransferRequest deleteRequest);
 
-        Task SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver);
-        Task UnsubscribeFromLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver);
+        void SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver);
+        void UnsubscribeFromLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver);
 
         Task Disconnect();
 
