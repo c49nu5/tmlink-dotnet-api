@@ -10,14 +10,15 @@ public abstract class ObservableModel<T> where T : class
     private List<WeakReference<T>> _observers = [];
     private int _observerCount;
 
-    protected int ObserverCount
+    protected bool IsBeingObserved
     {
+        get;
         set
         {
-            if (_observerCount != value)
-            { 
-                _observerCount = value;
-                OnObserverCountChanged(value);
+            if (field != value)
+            {
+                field = value;
+                OnIsBeingObservedChanged(value);
             }
         }
     }
@@ -29,7 +30,7 @@ public abstract class ObservableModel<T> where T : class
             _observers = [];
         }
 
-        ObserverCount = 0;
+        SetObserverCount(0);
     }
 
     public void AddObservers(IEnumerable<T> registeredObservers)
@@ -49,7 +50,7 @@ public abstract class ObservableModel<T> where T : class
             newCount = _observers.Count;
         }
 
-        ObserverCount = newCount;
+        SetObserverCount(newCount);
     }
 
     /// <summary>
@@ -73,24 +74,22 @@ public abstract class ObservableModel<T> where T : class
             newCount = _observers.Count;
         }
 
-        ObserverCount = newCount;
+        SetObserverCount(newCount);
     }
 
     public void NotifyObservers(Action<T> action)
     {
-        List<WeakReference<T>> observers = _observers;
-        NotifyObservers(action, observers);
+        NotifyObservers(action, _observers);
     }
 
-    protected int NotifyObservers<A>(Action<A> action, List<WeakReference<A>> observers) where A : class
+    protected void NotifyObservers<A>(Action<A> action, List<WeakReference<A>> observers) where A : class
     {
-        int newCount = 0;
         List<A> snapshot = [];
         lock (s_observerLock)
         {
             _observers.RemoveAll(wr => !wr.TryGetTarget(out _));
 
-            newCount = observers.Count;
+            SetObserverCount(observers.Count);
 
             foreach (var reference in observers)
             {
@@ -106,15 +105,17 @@ public abstract class ObservableModel<T> where T : class
         {
             action(observer);
         }
+    }
 
-        return newCount;
+    private void SetObserverCount(int newCount)
+    {
+        Interlocked.Exchange(ref _observerCount, newCount);
+        IsBeingObserved = newCount > 0;
     }
 
     /// <summary>
-    // Override in derived classes to handle observer count changes
+    // Override in derived classes to handle observation changes
     /// </summary>
     /// <param name="count"></param>
-    protected virtual void OnObserverCountChanged(int count)
-    {
-    }
+    protected virtual void OnIsBeingObservedChanged(bool isBeingObserved) { }
 }
