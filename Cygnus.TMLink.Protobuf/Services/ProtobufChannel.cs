@@ -65,21 +65,20 @@ namespace Cygnus.TMLink.Protobuf.Services
             return false;
         }
 
-        protected override void OnObserverCountChanged(int count)
+        protected override void OnIsBeingObservedChanged(bool isBeingObserved)
         {
             var liveCharacteristic = _liveCharacteristic;
             if (liveCharacteristic != null)
             {
-                switch (count)
+                if (isBeingObserved)
                 {
-                    case 0:
-                        liveCharacteristic.CharacteristicValueChanged -= OnLiveMeasurementReceived;
-                        // await liveCharacteristic.StopNotifications(); // TODO This works with the virtual device but not with the real device. Need to investigate why.
-                        break;
-                    case 1:
-                        liveCharacteristic.CharacteristicValueChanged += OnLiveMeasurementReceived;
-                        liveCharacteristic.StartNotifications();
-                        break;
+                    liveCharacteristic.CharacteristicValueChanged += OnLiveMeasurementReceived;
+                    liveCharacteristic.StartNotifications();
+                }
+                else
+                {
+                    liveCharacteristic.CharacteristicValueChanged -= OnLiveMeasurementReceived;
+                    // await liveCharacteristic.StopNotifications(); // TODO This works with the virtual device but not with the real device. Need to investigate why.
                 }
             }
         }
