@@ -9,6 +9,7 @@ namespace Cygnus.TMLink.Protobuf.Services
     internal abstract class ProtobufChannel : ObservableModel<ILiveMeasurementObserver>,  IProtobufChannel
     {
         private bool _isDisposed;
+        private LiveMeasurement? _lastLiveMeasurement;
 
         private ITMLinkCharacteristic? _liveCharacteristic;
         protected ITMLinkCharacteristic? _frozenCharacteristic;
@@ -63,6 +64,16 @@ namespace Cygnus.TMLink.Protobuf.Services
             }
 
             return false;
+        }
+
+        public override void AddObserver(ILiveMeasurementObserver observer)
+        {
+            if (_lastLiveMeasurement != null)
+            {
+                observer.OnLiveMeasurementReceived(_lastLiveMeasurement);
+            }
+
+            base.AddObserver(observer);
         }
 
         protected override void OnIsBeingObservedChanged(bool isBeingObserved)
@@ -204,9 +215,9 @@ namespace Cygnus.TMLink.Protobuf.Services
 
         protected void OnLiveMeasurementReceived(LiveMeasurement liveMeasurement)
         {
-            // Initially notify the gauge of the live measurement, then notify any other observers
+            // Initially notify the gauge of the live measurement, which will update the measurement, then notify any other observers
             _gauge?.OnLiveMeasurementReceived(liveMeasurement);
-            
+            _lastLiveMeasurement = liveMeasurement;
             NotifyObservers(o => o.OnLiveMeasurementReceived(liveMeasurement));
         }
 

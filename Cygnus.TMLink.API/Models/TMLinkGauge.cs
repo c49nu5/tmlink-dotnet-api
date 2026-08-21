@@ -17,7 +17,6 @@ namespace Cygnus.TMLink.API.Models
         private ITMLinkDevice? _device;
         private bool _isDataTransferInProgress;
         private bool _isDisposed;
-        private LiveMeasurement? _lastLiveMeasurement;
 
         public TMLinkGauge(ILogger<TMLinkGauge> logger,
                         Func<byte, IProtobufChannel?> protobufChannelFactory,
@@ -161,11 +160,6 @@ namespace Cygnus.TMLink.API.Models
 
         public void SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver)
         {
-            if (_lastLiveMeasurement != null)
-            {
-                liveMeasurementObserver.OnLiveMeasurementReceived(_lastLiveMeasurement);
-            }
-
             _protobufChannel.AddObserver(liveMeasurementObserver);
         }
 
@@ -201,8 +195,6 @@ namespace Cygnus.TMLink.API.Models
                 liveMeasurement.Probe = Probe;
                 NotifyObservers(o => o.OnPropertiesUpdated(this));
             }
-
-            _lastLiveMeasurement = liveMeasurement;
         }
 
         public void DeviceDisconnected(string deviceId)
@@ -315,6 +307,7 @@ namespace Cygnus.TMLink.API.Models
             GaugeFeatures.SendsAScans |
             GaugeFeatures.SendsBatteryLevel |
             GaugeFeatures.SendsLiveMeasurements |
+            GaugeFeatures.SendsFrozenMeasurements |
             GaugeFeatures.SendsOnlyValidMeasurements |
             GaugeFeatures.CanSendBScanList |
             GaugeFeatures.CanSendRecordList;
