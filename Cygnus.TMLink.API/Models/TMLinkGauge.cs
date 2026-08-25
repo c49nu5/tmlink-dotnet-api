@@ -72,6 +72,8 @@ namespace Cygnus.TMLink.API.Models
         {
             try
             {
+                _logger.LogInformation("Connect called for gauge {DeviceIdentifier}", DeviceIdentifier);
+
                 if (_device == null)
                 {
                     _logger.LogError("No device to connect to for gauge {DeviceIdentifier}", DeviceIdentifier);
@@ -80,18 +82,23 @@ namespace Cygnus.TMLink.API.Models
 
                 if (!_device.IsConnected)
                 {
+                    _logger.LogInformation("Device not connected, calling connect for gauge {DeviceIdentifier}", DeviceIdentifier);
                     await _device.Connect();
                 }
 
                 if (_device.IsConnected)
                 {
+                    _logger.LogInformation("Device connected gauge {DeviceIdentifier}", DeviceIdentifier);
                     if (!_protobufChannel.IsInitialized)
                     {
+                        _logger.LogInformation("Initializing protobuf channel for gauge {DeviceIdentifier}", DeviceIdentifier);
                         await InitializeProtobufChannel();
                     }
 
                     if (_protobufChannel.IsInitialized)
                     {
+                        _logger.LogInformation("Connecting protobuf channel for gauge {DeviceIdentifier}", DeviceIdentifier);
+
                         if (await _protobufChannel.Connect(_device, this))
                         {
                             var gaugeInformation = await _protobufChannel.GetGaugeInformation();
@@ -113,6 +120,7 @@ namespace Cygnus.TMLink.API.Models
 
                         if (!IsConnected)
                         {
+                            _logger.LogError("Device not connected disposiong protobuf channel for gauge {DeviceIdentifier}", DeviceIdentifier);
                             _protobufChannel.Dispose();
                             _protobufChannel = new ProtobufNullChannel();
                         }
@@ -177,7 +185,6 @@ namespace Cygnus.TMLink.API.Models
         {
             if (_device?.IsConnected == true)
             {
-                await _protobufChannel.Disconnect();
                 _device?.Disconnect();
             }
             else
@@ -206,6 +213,7 @@ namespace Cygnus.TMLink.API.Models
         private void DoDisconnect()
         {
             IsConnected = false;
+            _protobufChannel.Disconnect();
             _connectionService.GaugeIsDisconnected(DeviceIdentifier);
         }
 
