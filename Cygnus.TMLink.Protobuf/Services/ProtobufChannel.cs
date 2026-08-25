@@ -83,14 +83,20 @@ namespace Cygnus.TMLink.Protobuf.Services
             {
                 if (isBeingObserved)
                 {
+                    _logger.LogInformation("Hooking up live characteristic for {Device}", _device?.Name);
                     liveCharacteristic.CharacteristicValueChanged += OnLiveMeasurementReceived;
                     liveCharacteristic.StartNotifications();
                 }
                 else
                 {
+                    _logger.LogInformation("Unhooking live characteristic for {Device}", _device?.Name);
                     liveCharacteristic.CharacteristicValueChanged -= OnLiveMeasurementReceived;
                     // await liveCharacteristic.StopNotifications(); // TODO This works with the virtual device but not with the real device. Need to investigate why.
                 }
+            }
+            else
+            {
+                _logger.LogError("Could not find notify live characteristic for {Device}", _device?.Name);
             }
         }
 
@@ -193,7 +199,11 @@ namespace Cygnus.TMLink.Protobuf.Services
         public async Task Disconnect()
         {
             RemoveAllObservers();
-            await CancelRecordTransfer();
+            if (_device?.IsConnected == true)
+            {
+                await CancelRecordTransfer();
+            }
+
             _protobufCommandHandler.Disconnect();
         }
 

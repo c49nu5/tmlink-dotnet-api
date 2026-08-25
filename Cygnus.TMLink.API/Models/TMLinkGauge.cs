@@ -175,9 +175,9 @@ namespace Cygnus.TMLink.API.Models
 
         public async Task Disconnect()
         {
+            await _protobufChannel.Disconnect();
             if (_device?.IsConnected == true)
             {
-                await _protobufChannel.Disconnect();
                 _device?.Disconnect();
             }
             else

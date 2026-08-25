@@ -88,7 +88,7 @@ internal class TestBed
         ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo), It.IsAny<Func<V1.Message, V1.Message.GaugeInfo>>())).ReturnsAsync(gaugeInfo);
 
         Device.SetupGet(g => g.Name).Returns("Test Gauge");
-
+        Device.SetupGet(d => d.IsConnected).Returns(true);
         Device.Setup(d => d.GetCharacteristics(Constants.TMLinkServiceId)).ReturnsAsync(Characteristics);
         ProtobufCommandHandler.Setup(h => h.Connect(Characteristics)).ReturnsAsync(true);
         return gaugeInfo;
