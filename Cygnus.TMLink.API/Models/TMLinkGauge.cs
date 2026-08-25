@@ -82,7 +82,7 @@ namespace Cygnus.TMLink.API.Models
 
                 if (!_device.IsConnected)
                 {
-                    _logger.LogError("Device not connected, calling connect for gauge {DeviceIdentifier}", DeviceIdentifier);
+                    _logger.LogInformation("Device not connected, calling connect for gauge {DeviceIdentifier}", DeviceIdentifier);
                     await _device.Connect();
                 }
 
@@ -120,7 +120,7 @@ namespace Cygnus.TMLink.API.Models
 
                         if (!IsConnected)
                         {
-                            _logger.LogInformation("Device not connected disposiong protobuf channel for gauge {DeviceIdentifier}", DeviceIdentifier);
+                            _logger.LogError("Device not connected disposiong protobuf channel for gauge {DeviceIdentifier}", DeviceIdentifier);
                             _protobufChannel.Dispose();
                             _protobufChannel = new ProtobufNullChannel();
                         }
