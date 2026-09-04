@@ -40,7 +40,10 @@ namespace Cygnus.BLE.InTheHand
                 device.GattServerDisconnected += OnDisconnected;
             }
 
-            await device.Gatt.ConnectAsync();
+            if (!device.Gatt.IsConnected)
+            {
+                await device.Gatt.ConnectAsync();
+            }
 
             if (device.Gatt.IsConnected)
             {
