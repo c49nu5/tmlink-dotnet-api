@@ -125,6 +125,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
                     {
                         gaugeDiscovered = true;
                         await gauge.Disconnect();
+                        await Task.Delay(300);
                         NotifyObservers(o => o.GaugeDiscovered(gauge));
                     }
                 }
