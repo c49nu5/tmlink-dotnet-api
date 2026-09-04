@@ -36,6 +36,7 @@ namespace Cygnus.BLE.InTheHand
                 if (value != null)
                 {
                     data = value;
+                    _logger.LogDebug("Read value from characteristic {Id}: Length {Length}", Uuid, data.Length);
                 }
             }
             catch (Exception ex)
