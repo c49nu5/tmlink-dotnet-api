@@ -55,7 +55,7 @@ namespace Cygnus.BLE.InTheHand
 
             if (device.Gatt.IsConnected)
             {
-                await device.Gatt.RequestMtuAsync(500);
+                await device.Gatt.RequestMtuAsync(32);
             }
         }
 
