@@ -38,7 +38,7 @@ internal class WhenDisconnectIsCalled
             {
                 sut.Disconnect();
             });
-        var result = await sut.SendCommandWithResponse<Message.Record, Message>(new Command { commandType = CommandType.GetRecord }, m => m.record);
+        var result = await sut.SendCommandWithResponse<Message>(new Command { commandType = CommandType.GetRecord });
 
         // Assert
         result.ShouldBe(null);

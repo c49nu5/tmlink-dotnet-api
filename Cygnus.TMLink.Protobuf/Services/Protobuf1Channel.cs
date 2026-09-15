@@ -1,10 +1,8 @@
 ﻿using Cygnus.Interfaces;
 using Cygnus.Models;
-using Cygnus.Models.Constants;
 using Cygnus.TMLink.Protobuf.Interfaces;
 using Cygnus.TMLink.Protobuf.V1;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics.Metrics;
 using static Cygnus.TMLink.Protobuf.V1.Constants;
 
 namespace Cygnus.TMLink.Protobuf.Services
@@ -14,14 +12,6 @@ namespace Cygnus.TMLink.Protobuf.Services
         protected IProtobufMessageConverter _protobufMessageConverter;
 
         public Protobuf1Channel(
-            ILogger<Protobuf1Channel> logger,
-            IProtobufMessageConverter protobufMessageConverter,
-            Protobuf1CommandHandler protobuf1CommandHandler) 
-            : this(protobuf1CommandHandler, logger, protobufMessageConverter)
-        {
-        }
-
-        internal Protobuf1Channel(
             IProtobufCommandHandler protobuf1CommandHandler,
             ILogger<Protobuf1Channel> logger,
             IProtobufMessageConverter protobufMessageConverter)
@@ -43,7 +33,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Timestamp = DateTime.Now
             };
 
-            var bScanList = await _protobufCommandHandler.SendCommandWithResponse<Message.BScanList, Message>(command, m => m.bscanList);
+            var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command);
+            var bScanList = message?.bscanList;
             _logger.LogInformation("Received bscan list from gauge {Device}: {RecordCount}", _device?.Name, bScanList?.Items.Count);
 
             return bScanList?.Items
@@ -69,7 +60,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Timestamp = DateTime.Now,                
             };
 
-            var recordList = await _protobufCommandHandler.SendCommandWithResponse<Message.RecordList, Message>(command, m => m.recordList);
+            var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command);
+            var recordList = message?.recordList;
             _logger.LogInformation("Received record list from gauge {Device}: {RecordCount}", _device?.Name, recordList?.Items.Count);
 
             return recordList?.Items
@@ -96,7 +88,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Timestamp = DateTime.Now
             };
 
-            Message.Record? record = await _protobufCommandHandler.SendCommandWithResponse<Message.Record, Message>(command, m => m.record, _recordTransferCts?.Token);
+            var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command, _recordTransferCts?.Token);
+            Message.Record? record = message?.record;
 
             if (record != null)
             {
@@ -137,7 +130,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Name = recordName
             };
 
-            var measurement = await _protobufCommandHandler.SendCommandWithResponse<Message.RecordPoint, Message>(command, m => m.recordPoint, _recordTransferCts?.Token);
+            var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command, _recordTransferCts?.Token);
+            var measurement = message?.recordPoint;
             if (measurement != null && measurement.State != MeasurementPointState.Deleted)
             {
                 _logger.LogInformation("Received record point from gauge {RecordId}: {PointName}", measurement.recordID, measurement.Name);
@@ -176,7 +170,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Timestamp = DateTime.Now
             };
 
-            Message.BScan? bScan = await _protobufCommandHandler.SendCommandWithResponse<Message.BScan, Message>(command, m => m.Bscan, _recordTransferCts?.Token);
+            var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command, _recordTransferCts?.Token);
+            Message.BScan? bScan = message?.Bscan;
             if (bScan != null)
             {
                 _logger.LogInformation("Received b-scan from gauge {BScanName}: {PointsTaken}", bScan.Name, bScan.numScanPoints);
@@ -208,7 +203,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Name = recordName
             };
 
-            var measurement = await _protobufCommandHandler.SendCommandWithResponse<Message.BScanPoint, Message>(command, m => m.bscanPoint, _recordTransferCts?.Token);
+            var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command, _recordTransferCts?.Token);
+            var measurement = message?.bscanPoint;
             if (measurement != null)
             {
                 _logger.LogInformation("Received record point from gauge {RecordId}", measurement.BScanID);
@@ -540,7 +536,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Timestamp = DateTime.Now
             };
 
-            var gaugeInfo = await _protobufCommandHandler.SendCommandWithResponse<Message.GaugeInfo, Message>(command, m => m.gaugeInfo);
+            var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command);
+            var gaugeInfo = message?.gaugeInfo;
             if (gaugeInfo == null)
             {
                 _logger.LogError("No gauge info returned for device {Device}", _device?.Name);

@@ -19,10 +19,10 @@ internal class WhenSendCommandWithResponseIsCalled
         testBed.ProtobufMessageConverter.Setup(c => c.FromZippedProtobuf<Message>(testBed.ReadBytes)).Returns(new Message { commandType = CommandType.GetRecord, record = expectedValue });
 
         // Act
-        var result = await sut.SendCommandWithResponse<Message.Record, Message>(new Command { commandType = CommandType.GetRecord }, m => m.record);
+        var result = await sut.SendCommandWithResponse<Message>(new Command { commandType = CommandType.GetRecord });
 
         // Assert
-        result.ShouldBe(expectedValue);
+        result.record.ShouldBe(expectedValue);
     }
 
     [Test]
@@ -38,7 +38,7 @@ internal class WhenSendCommandWithResponseIsCalled
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(200);
 
         // Act
-        var result = await sut.SendCommandWithResponse<Message.Record, Message>(new Command { commandType = CommandType.GetRecord }, m => m.record, cancellationTokenSource.Token);
+        var result = await sut.SendCommandWithResponse<Message>(new Command { commandType = CommandType.GetRecord }, cancellationTokenSource.Token);
 
         // Assert
         result.ShouldBe(null);

@@ -85,7 +85,7 @@ internal class TestBed
             versionNumber = 1,
         };
 
-        ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo), It.IsAny<Func<V1.Message, V1.Message.GaugeInfo>>())).ReturnsAsync(gaugeInfo);
+        ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo))).ReturnsAsync(new V1.Message { gaugeInfo = gaugeInfo });
 
         Device.SetupGet(g => g.Name).Returns("Test Gauge");
         Device.SetupGet(d => d.IsConnected).Returns(true);

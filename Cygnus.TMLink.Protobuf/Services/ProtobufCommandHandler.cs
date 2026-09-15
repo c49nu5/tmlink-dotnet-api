@@ -78,9 +78,8 @@ namespace Cygnus.TMLink.Protobuf.Services
             _requestCompletionSource = null;
         }
 
-        public async Task<T?> SendCommandWithResponse<T, M>(ICommand gaugeCommand, Func<M, T> responseHandler, CancellationToken? token = null)
-            where T : class
-            where M : IMessage
+        public async Task<M?> SendCommandWithResponse<M>(ICommand gaugeCommand, CancellationToken? token = null)
+            where M : class, IMessage
         {
             try
             {
@@ -119,7 +118,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                                 _logger.LogInformation("Received message from gauge {Command}", message.CommandType);
                                 if (message.CommandType == gaugeCommand.CommandType)
                                 {
-                                    return responseHandler(message);
+                                    return message;
                                 }
                             }
                         }
