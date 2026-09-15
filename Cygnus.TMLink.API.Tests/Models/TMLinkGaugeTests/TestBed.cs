@@ -59,7 +59,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
             return sut;
         }
 
-        internal Mock<ITMLinkDevice> CreateDevice(bool isConnectable = false, byte protobufVersion = 1)
+        internal Mock<ITMLinkDevice> CreateDevice(bool isConnectable = false, bool isConnected = false, byte protobufVersion = 1)
         {
             Mock<ITMLinkDevice> mock = new(MockBehavior.Strict);
             mock.Setup(d => d.AddObserver(It.IsAny<ITMLinkDeviceObserver>()));
@@ -72,6 +72,8 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
                 mock.Setup(d => d.Connect()).Returns(Task.CompletedTask);
                 mock.Setup(d => d.Disconnect());
             }
+
+            mock.SetupGet(d => d.IsConnected).Returns(isConnected);
 
             return mock;
         }

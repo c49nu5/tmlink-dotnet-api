@@ -36,7 +36,7 @@ internal class WhenSetDeviceIsCalled
     }
 
     [Test]
-    public void ShouldDeviceIdentifierToDeviceId()
+    public void ShouldSetDeviceIdentifierToDeviceId()
     {
         // Arrange
         var testBed = new TestBed();

@@ -30,7 +30,7 @@ internal class WhenConnectToGaugeIsCalled
         testBed.DeviceDiscoverer.Setup(g => g.Cancel());
         var gauge = new Mock<ITMLinkGauge>();
         gauge.Setup(g => g.Connect()).ReturnsAsync(true);
-        var sut = testBed.CreateSUT();
+        var sut = testBed.CreateSUT(true, gaugesConnect: true);
 
         // Act
         await sut.ConnectToGauge(gauge.Object);
@@ -47,7 +47,7 @@ internal class WhenConnectToGaugeIsCalled
         testBed.DeviceDiscoverer.Setup(g => g.Cancel());
         var gauge = new Mock<ITMLinkGauge>();
         gauge.Setup(g => g.Connect()).ReturnsAsync(true);
-        var sut = testBed.CreateSUT();
+        var sut = testBed.CreateSUT(true, gaugesConnect: true);
 
         // Act
         await sut.ConnectToGauge(gauge.Object);
@@ -64,7 +64,11 @@ internal class WhenConnectToGaugeIsCalled
         testBed.DeviceDiscoverer.Setup(g => g.Cancel());
         var gauge = new Mock<ITMLinkGauge>();
         gauge.Setup(g => g.Connect()).ReturnsAsync(false);
-        var sut = testBed.CreateSUT();
+        var sut = testBed.CreateSUT(true);
+        testBed.Observer.SetupSet(o => o.ConnectionState = Cygnus.Models.ConnectionState.Connecting);
+        testBed.Observer.SetupSet(o => o.ConnectionState = Cygnus.Models.ConnectionState.Disconnected);
+        testBed.Observer.Setup(o => o.AddConnectionMessage("Checking gauge ..."));
+        testBed.Observer.Setup(o => o.AddConnectionMessage("An error occurred while connecting to the gauge "));
 
         // Act
         await sut.ConnectToGauge(gauge.Object);
@@ -80,7 +84,7 @@ internal class WhenConnectToGaugeIsCalled
         var testBed = new TestBed();
         var gauge = Mock.Of<ITMLinkGauge>(g => g.IsConnected == true);
         testBed.DeviceDiscoverer.Setup(g => g.Cancel());
-        var sut = testBed.CreateSUT();
+        var sut = testBed.CreateSUT(true, gaugesConnect: true);
 
         // Act
         await sut.ConnectToGauge(gauge);

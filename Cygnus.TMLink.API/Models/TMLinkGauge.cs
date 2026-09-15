@@ -48,7 +48,7 @@ namespace Cygnus.TMLink.API.Models
         public uint SoftwareVersionNumber { get; set; } = 0;
         public GaugeVariant? GaugeVariant { get; set; }
         public uint GaugeId { get; set; } = 0;
-        public ProbeType Probe { get; private set; }
+        public ProbeType ProbeType { get; set; }
         public uint BatteryLevel { get; set; } = 0;
         public uint StatusMessageCount { get; set; }
 
@@ -110,7 +110,7 @@ namespace Cygnus.TMLink.API.Models
                                 GaugeVariant = gaugeInformation?.GaugeVariant;
                                 BatteryLevel = gaugeInformation?.BatteryLevel ?? 0;
                                 GaugeId = gaugeInformation?.GaugeId ?? 0;
-                                Probe = gaugeInformation?.ProbeType ?? ProbeType.None;
+                                ProbeType = gaugeInformation?.ProbeType ?? ProbeType.None;
                             }
                             else
                             {
@@ -199,7 +199,7 @@ namespace Cygnus.TMLink.API.Models
             {
                 BatteryLevel = liveMeasurement.BatteryLevel;
                 StatusMessageCount = liveMeasurement.PointIndex;
-                liveMeasurement.Probe = Probe;
+                liveMeasurement.Probe = ProbeType;
                 NotifyObservers(o => o.OnPropertiesUpdated(this));
             }
         }
@@ -346,8 +346,6 @@ namespace Cygnus.TMLink.API.Models
         }
 
         #region Methods only implemented in CygLink gauges at present, but not in TMLink gauges. These methods are here to satisfy the IGauge interface.
-        public ProbeType ProbeType => ProbeType.None;
-
         public DateTime? GaugeTime => null;
 
         public ErrorCode DoProbeZero() => throw new NotSupportedException();

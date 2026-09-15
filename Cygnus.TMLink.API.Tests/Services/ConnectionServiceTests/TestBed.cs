@@ -41,6 +41,14 @@ internal class TestBed
             Observer?.Setup(p => p.AddConnectionMessage("For TM-Link gauges, enable bluetooth and give the app the required permissions."));
         }
 
+        if (gaugesConnect)
+        {
+            Observer?.SetupSet(o => o.ConnectionState = Cygnus.Models.ConnectionState.Connecting);
+            Observer?.SetupSet(o => o.ConnectionState = Cygnus.Models.ConnectionState.Connected);
+            Observer?.Setup(o => o.AddConnectionMessage("Checking gauge ..."));
+            Observer?.Setup(o => o.GaugeConnected(It.IsAny<IGauge>()));
+        }
+
         return connectionService;
     }
 
