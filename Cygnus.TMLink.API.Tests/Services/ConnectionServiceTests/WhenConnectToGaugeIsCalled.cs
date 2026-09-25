@@ -1,5 +1,4 @@
-﻿using Cygnus.Interfaces;
-using Cygnus.TMLink.API.Interfaces;
+﻿using Cygnus.TMLink.API.Interfaces;
 using Moq;
 using Shouldly;
 
@@ -7,27 +6,10 @@ namespace Cygnus.TMLink.API.Tests.Services.ConnectionServiceTests;
 internal class WhenConnectToGaugeIsCalled
 {
     [Test]
-    public async Task ShouldCancelDiscovery()
-    {
-        // Arrange
-        var testBed = new TestBed();
-        testBed.DeviceDiscoverer.Setup(g => g.Cancel());
-        var gauge = Mock.Of<IGauge>();
-        var sut = testBed.CreateSUT();
-
-        // Act
-        await sut.ConnectToGauge(gauge);
-
-        // Assert
-        testBed.DeviceDiscoverer.Verify(g => g.Cancel(), Times.Once);
-    }
-
-    [Test]
     public async Task AndGaugeIsNotConnected_ShouldCallConnectOnGauge()
     {
         // Arrange
         var testBed = new TestBed();
-        testBed.DeviceDiscoverer.Setup(g => g.Cancel());
         var gauge = new Mock<ITMLinkGauge>();
         gauge.Setup(g => g.Connect()).ReturnsAsync(true);
         var sut = testBed.CreateSUT(true, gaugesConnect: true);
@@ -44,7 +26,6 @@ internal class WhenConnectToGaugeIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        testBed.DeviceDiscoverer.Setup(g => g.Cancel());
         var gauge = new Mock<ITMLinkGauge>();
         gauge.Setup(g => g.Connect()).ReturnsAsync(true);
         var sut = testBed.CreateSUT(true, gaugesConnect: true);
@@ -61,7 +42,6 @@ internal class WhenConnectToGaugeIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        testBed.DeviceDiscoverer.Setup(g => g.Cancel());
         var gauge = new Mock<ITMLinkGauge>();
         gauge.Setup(g => g.Connect()).ReturnsAsync(false);
         var sut = testBed.CreateSUT(true);
@@ -83,7 +63,6 @@ internal class WhenConnectToGaugeIsCalled
         // Arrange
         var testBed = new TestBed();
         var gauge = Mock.Of<ITMLinkGauge>(g => g.IsConnected == true);
-        testBed.DeviceDiscoverer.Setup(g => g.Cancel());
         var sut = testBed.CreateSUT(true, gaugesConnect: true);
 
         // Act

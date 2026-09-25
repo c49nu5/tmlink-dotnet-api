@@ -12,6 +12,14 @@ namespace Cygnus.TMLink.Protobuf.Services
         protected IProtobufMessageConverter _protobufMessageConverter;
 
         public Protobuf1Channel(
+            ILogger<Protobuf1Channel> logger,
+            IProtobufMessageConverter protobufMessageConverter,
+            Protobuf1CommandHandler protobuf1CommandHandler)
+            : this(protobuf1CommandHandler, logger, protobufMessageConverter)
+        {
+        }
+
+        internal Protobuf1Channel(
             IProtobufCommandHandler protobuf1CommandHandler,
             ILogger<Protobuf1Channel> logger,
             IProtobufMessageConverter protobufMessageConverter)

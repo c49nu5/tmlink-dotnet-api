@@ -57,8 +57,6 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
     {
         try
         {
-            _deviceDiscoverer.Cancel();
-
             ConnectedGauge?.Disconnect();
 
             NotifyObservers(o => o.ConnectionState = ConnectionState.Connecting);
@@ -91,7 +89,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
         }
     }
 
-    public async Task DiscoverGauges()
+    public async Task DiscoverGauges(CancellationToken cancellationToken)
     {
         NotifyObservers(o => o.ConnectionState = ConnectionState.Connecting);
         NotifyObservers(o => o.AddConnectionMessage(ScanningMessage));
@@ -110,27 +108,30 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
             try
             {
                 bool gaugeDiscovered = false;
-                var discoveredDevices = await _deviceDiscoverer.FindDevices();
+                var discoveredDevices = await _deviceDiscoverer.FindDevices(cancellationToken);
                 foreach (var device in discoveredDevices)
                 {
-                    var gauge = _gaugeFactory();
-                    gauge.SetDevice(device);
-                    _logger.LogInformation("Found device: {Name} ({DeviceIdentifier})", gauge.Name, gauge.DeviceIdentifier);
-                    NotifyObservers(o =>
+                    if (!cancellationToken.IsCancellationRequested)
                     {
-                        o.AddConnectionMessage(string.Format(CheckingGaugeMessageFormat, gauge.Name));
-                    });
+                        var gauge = _gaugeFactory();
+                        gauge.SetDevice(device);
+                        _logger.LogInformation("Found device: {Name} ({DeviceIdentifier})", gauge.Name, gauge.DeviceIdentifier);
+                        NotifyObservers(o =>
+                        {
+                            o.AddConnectionMessage(string.Format(CheckingGaugeMessageFormat, gauge.Name));
+                        });
 
-                    if (await gauge.Connect() && gauge.SerialNumber != 0)
-                    {
-                        gaugeDiscovered = true;
-                        await gauge.Disconnect();
-                        await Task.Delay(300);
-                        NotifyObservers(o => o.GaugeDiscovered(gauge));
+                        if (await gauge.Connect() && gauge.SerialNumber != 0)
+                        {
+                            gaugeDiscovered = true;
+                            await gauge.Disconnect();
+                            await Task.Delay(300);
+                            NotifyObservers(o => o.GaugeDiscovered(gauge));
+                        }
                     }
                 }
 
-                if (!gaugeDiscovered)
+                if (!gaugeDiscovered && !cancellationToken.IsCancellationRequested)
                 {
                     NotifyObservers(o =>
                     {
@@ -153,12 +154,6 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
                 });
             }
         }
-    }
-
-    public void CancelDiscover()
-    {
-        _deviceDiscoverer.Cancel();
-        NotifyObservers(o => o.ConnectionState = ConnectionState.Disconnected);
     }
 
     public void GaugeIsDisconnected(string deviceIdentifier)

@@ -4,8 +4,7 @@
     {
         void AddObserver(IConnectionObserver connectionObserver);
 
-        Task DiscoverGauges();
-        void CancelDiscover();
+        Task DiscoverGauges(CancellationToken cancellationToken);
 
         Task ConnectToGauge(IConnectionInformation gauge);
         IGauge? ConnectedGauge { get; }
