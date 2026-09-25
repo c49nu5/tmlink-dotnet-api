@@ -16,7 +16,7 @@ internal class WhenDiscoverGaugesIsCalled
         testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
 
         // Act
-        await sut.DiscoverGauges();
+        await sut.DiscoverGauges(CancellationToken.None);
 
         // Assert
         testBed.Observer.VerifySet(o => o.ConnectionState = ConnectionState.Connecting, Times.Once);
@@ -30,7 +30,7 @@ internal class WhenDiscoverGaugesIsCalled
         var sut = testBed.CreateSUT(bluetoothEnabled: false);
 
         // Act
-        await sut.DiscoverGauges();
+        await sut.DiscoverGauges(CancellationToken.None);
 
         // Assert
         testBed.PlatformService.Verify(p => p.CheckBluetoothConfiguration(), Times.Once);
@@ -46,7 +46,7 @@ internal class WhenDiscoverGaugesIsCalled
         testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
 
         // Act
-        await sut.DiscoverGauges();
+        await sut.DiscoverGauges(CancellationToken.None);
 
         // Assert
         testBed.Observer.VerifySet(o => o.ConnectionState = ConnectionState.Errored, Times.Once);
@@ -57,14 +57,14 @@ internal class WhenDiscoverGaugesIsCalled
     {
         // Arrange
         var testBed = new TestBed();
-        testBed.DeviceDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync([]);
+        testBed.DeviceDiscoverer.Setup(g => g.FindDevices(CancellationToken.None)).ReturnsAsync([]);
         var sut = testBed.CreateSUT(bluetoothEnabled: true);
 
         // Act
-        await sut.DiscoverGauges();
+        await sut.DiscoverGauges(CancellationToken.None);
 
         // Assert
-        testBed.DeviceDiscoverer.Verify(g => g.FindDevices(), Times.Once);
+        testBed.DeviceDiscoverer.Verify(g => g.FindDevices(CancellationToken.None), Times.Once);
     }
 
     [Test]
@@ -73,11 +73,11 @@ internal class WhenDiscoverGaugesIsCalled
         // Arrange
         var testBed = new TestBed();
         var devices = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(i => Mock.Of<ITMLinkDevice>()).ToList();
-        testBed.DeviceDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
+        testBed.DeviceDiscoverer.Setup(g => g.FindDevices(CancellationToken.None)).ReturnsAsync(devices);
         var sut = testBed.CreateSUT(bluetoothEnabled: true);
 
         // Act
-        await sut.DiscoverGauges();
+        await sut.DiscoverGauges(CancellationToken.None);
 
         // Assert
         foreach (var gauge in testBed.Gauges)
@@ -92,13 +92,13 @@ internal class WhenDiscoverGaugesIsCalled
         // Arrange
         var testBed = new TestBed();
         var devices = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(i => Mock.Of<ITMLinkDevice>()).ToList();
-        testBed.DeviceDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
+        testBed.DeviceDiscoverer.Setup(g => g.FindDevices(CancellationToken.None)).ReturnsAsync(devices);
         var sut = testBed.CreateSUT(true, true, false);
         testBed.Observer.Setup(o => o.AddConnectionMessage(It.IsAny<string>()));
         testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
 
         // Act
-        await sut.DiscoverGauges();
+        await sut.DiscoverGauges(CancellationToken.None);
 
         // Assert
         testBed.Observer.Verify(o => o.GaugeDiscovered(It.IsAny<IGauge>()), Times.Never);
@@ -110,13 +110,13 @@ internal class WhenDiscoverGaugesIsCalled
         // Arrange
         var testBed = new TestBed();
         var devices = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(i => Mock.Of<ITMLinkDevice>()).ToList();
-        testBed.DeviceDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
+        testBed.DeviceDiscoverer.Setup(g => g.FindDevices(CancellationToken.None)).ReturnsAsync(devices);
         var sut = testBed.CreateSUT(true, true, true, false);
         testBed.Observer.Setup(o => o.AddConnectionMessage(It.IsAny<string>()));
         testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
 
         // Act
-        await sut.DiscoverGauges();
+        await sut.DiscoverGauges(CancellationToken.None);
 
         // Assert
         testBed.Observer.Verify(o => o.GaugeDiscovered(It.IsAny<IGauge>()), Times.Never);
@@ -128,14 +128,14 @@ internal class WhenDiscoverGaugesIsCalled
         // Arrange
         var testBed = new TestBed();
         var devices = Enumerable.Range(1, Random.Shared.Next(1, 20)).Select(i => Mock.Of<ITMLinkDevice>()).ToList();
-        testBed.DeviceDiscoverer.Setup(g => g.FindDevices()).ReturnsAsync(devices);
+        testBed.DeviceDiscoverer.Setup(g => g.FindDevices(CancellationToken.None)).ReturnsAsync(devices);
         var sut = testBed.CreateSUT(true, true);
         testBed.Observer.SetupSet(o => o.ConnectionState = It.IsAny<ConnectionState>());
         testBed.Observer.Setup(o => o.AddConnectionMessage(It.IsAny<string>()));
         testBed.Observer.Setup(o => o.GaugeDiscovered(It.IsAny<IGauge>()));
         
         // Act
-        await sut.DiscoverGauges();
+        await sut.DiscoverGauges(CancellationToken.None);
 
         // Assert
         foreach (var gauge in testBed.Gauges)

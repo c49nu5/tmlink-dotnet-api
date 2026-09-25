@@ -9,7 +9,6 @@ internal class TMLinkDeviceDiscoverer : ITMLinkDeviceDiscoverer
     private readonly BluetoothUuid TMLinkServiceUuid = new Guid(Constants.TMLinkServiceId);
     private readonly Func<BluetoothDevice, ITMLinkDevice> _deviceFactory;
     private readonly ILogger<TMLinkDeviceDiscoverer> _logger;
-    private CancellationTokenSource? _scanCancellationTokenSource = null;
 
     public TMLinkDeviceDiscoverer(
         ILogger<TMLinkDeviceDiscoverer> logger,
@@ -19,15 +18,9 @@ internal class TMLinkDeviceDiscoverer : ITMLinkDeviceDiscoverer
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public void Cancel()
-    {
-        _scanCancellationTokenSource?.Cancel();
-    }
-
-    public async Task<IEnumerable<ITMLinkDevice>> FindDevices()
+    public async Task<IEnumerable<ITMLinkDevice>> FindDevices(CancellationToken cancellationToken)
     {
         Dictionary<string, ITMLinkDevice> gauges = [];
-        _scanCancellationTokenSource = new(TimeSpan.FromSeconds(20));
         EventHandler<BluetoothAdvertisingEvent> onAdvertisementReceived = (object? s, BluetoothAdvertisingEvent ad) =>
         {
             _logger.LogTrace("BLE advert received from {Device} with {UuidCount} uuids containing TML Service {HasServiceId}", ad?.Device?.Id, ad?.Uuids?.Length, ad?.Uuids?.Contains(TMLinkServiceUuid));
@@ -50,7 +43,7 @@ internal class TMLinkDeviceDiscoverer : ITMLinkDeviceDiscoverer
             _logger.LogInformation("BLE scan starting.");
             bleScan = await Bluetooth.RequestLEScanAsync(options);
             _logger.LogInformation("BLE scan in progress.");
-            await Task.Delay(TimeSpan.FromSeconds(5), _scanCancellationTokenSource.Token);
+            await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
         }
         catch (TaskCanceledException)
         {
@@ -62,8 +55,6 @@ internal class TMLinkDeviceDiscoverer : ITMLinkDeviceDiscoverer
             _logger.LogInformation("BLE scan complete.");
             bleScan?.Stop();
             bleScan = null;
-            _scanCancellationTokenSource?.Dispose();
-            _scanCancellationTokenSource = null;
         }
 
         return gauges.Values;

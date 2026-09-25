@@ -2,6 +2,5 @@
 
 public interface ITMLinkDeviceDiscoverer
 {
-    void Cancel();
-    Task<IEnumerable<ITMLinkDevice>> FindDevices();
+    Task<IEnumerable<ITMLinkDevice>> FindDevices(CancellationToken cancellationToken);
 }
