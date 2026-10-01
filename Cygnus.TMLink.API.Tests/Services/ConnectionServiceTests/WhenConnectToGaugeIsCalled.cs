@@ -46,7 +46,7 @@ internal class WhenConnectToGaugeIsCalled
         gauge.Setup(g => g.Connect()).ReturnsAsync(false);
         var sut = testBed.CreateSUT(true);
         testBed.Observer.SetupSet(o => o.ConnectionState = Cygnus.Models.ConnectionState.Connecting);
-        testBed.Observer.SetupSet(o => o.ConnectionState = Cygnus.Models.ConnectionState.Disconnected);
+        testBed.Observer.SetupSet(o => o.ConnectionState = Cygnus.Models.ConnectionState.Errored);
         testBed.Observer.Setup(o => o.AddConnectionMessage("Checking gauge ..."));
         testBed.Observer.Setup(o => o.AddConnectionMessage("An error occurred while connecting to the gauge "));
 
