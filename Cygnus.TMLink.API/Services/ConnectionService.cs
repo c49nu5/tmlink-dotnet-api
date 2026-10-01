@@ -38,7 +38,6 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
             NotifyObservers(o =>
             {
                 o.GaugeConnected(value);
-                o.ConnectionState = value != null ? ConnectionState.Connected : ConnectionState.Disconnected;
             });
         }
     }
@@ -50,7 +49,6 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
     public string ScanningErrorMessageFormat { private get; set; } = "An error occurred while scanning for TM-Link gauges. ({0})";
     public string ErrorConnectingMessageFormat { private get; set; } = "An error occurred while connecting to the gauge {0}";
     #endregion
-
 
     #region Methods
     public async Task ConnectToGauge(IConnectionInformation connectionInformation)
@@ -67,14 +65,18 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
             if (internalGauge != null && (internalGauge.IsConnected == true || await internalGauge.Connect()))
             {
                 ConnectedGauge = internalGauge;
-
+                NotifyObservers(o => o.ConnectionState = ConnectionState.Connected);
                 _logger.LogInformation("Connected to gauge {Name}", connectionInformation.Name);
             }
             else
             {
                 _logger.LogInformation("Connect to gauge {Name} failed", connectionInformation.Name);
-                NotifyObservers(o => o.AddConnectionMessage(string.Format(ErrorConnectingMessageFormat, connectionInformation.Name)));
                 ConnectedGauge = null;
+                NotifyObservers(o =>
+                {
+                    o.ConnectionState = ConnectionState.Errored;
+                    o.AddConnectionMessage(string.Format(ErrorConnectingMessageFormat, connectionInformation.Name));
+                });
             }
         }
         catch (OperationCanceledException)
@@ -84,8 +86,12 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
         catch (Exception ex)
         {
             _logger.LogError(ex, "Problem connecting to {Name}", connectionInformation.Name);
-            NotifyObservers(o => o.AddConnectionMessage(string.Format(ErrorConnectingMessageFormat, connectionInformation.Name)));
             ConnectedGauge = null;
+            NotifyObservers(o =>
+            {
+                o.ConnectionState = ConnectionState.Errored;
+                o.AddConnectionMessage(string.Format(ErrorConnectingMessageFormat, connectionInformation.Name)); 
+            });
         }
     }
 
@@ -163,6 +169,7 @@ internal class ConnectionService : ObservableModel<IConnectionObserver>, ITMLink
         {
             _logger.LogInformation("Device {Name} disconnected", connectedGauge.Name);
             ConnectedGauge = null;
+            NotifyObservers(o => o.ConnectionState = ConnectionState.Disconnected);
         }
     }
     #endregion
