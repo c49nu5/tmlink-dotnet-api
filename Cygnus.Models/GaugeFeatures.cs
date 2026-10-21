@@ -39,4 +39,5 @@ public enum GaugeFeatures : long
     SendsLiveMeasurements =      0b100000000000000000000000000000000,
     SendsFrozenMeasurements =    0b1000000000000000000000000000000000,
     SendsOnlyValidMeasurements = 0b10000000000000000000000000000000000,
+    CanSendTemplates =           0b100000000000000000000000000000000000,
 }

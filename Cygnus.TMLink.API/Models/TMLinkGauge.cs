@@ -151,6 +151,11 @@ namespace Cygnus.TMLink.API.Models
             await _protobufChannel.DeleteAllRecords();
         }
 
+        public async Task DeleteAllTemplates()
+        {
+            await _protobufChannel.DeleteAllTemplates();
+        }
+
         public async Task DeleteRecord(IFileTransferRequest deleteRequest)
         {
             await _protobufChannel.DeleteRecord(new TMLinkTransferMonitor(i => IsDataTransferInProgress = i, deleteRequest));
@@ -159,6 +164,11 @@ namespace Cygnus.TMLink.API.Models
         public async Task NewRecord(BlankRecord record)
         {
             await _protobufChannel.NewRecord(record);
+        }
+
+        public async Task NewTemplate(BlankTemplate template)
+        {
+            await _protobufChannel.NewTemplate(template);
         }
 
         public async Task<List<GaugeRecordSummary>?> GetRecordList()
@@ -318,7 +328,8 @@ namespace Cygnus.TMLink.API.Models
             GaugeFeatures.SendsFrozenMeasurements |
             GaugeFeatures.SendsOnlyValidMeasurements |
             GaugeFeatures.CanSendBScanList |
-            GaugeFeatures.CanSendRecordList;
+            GaugeFeatures.CanSendRecordList |
+            GaugeFeatures.CanSendTemplates;
 
         protected virtual void Dispose(bool disposing)
         {

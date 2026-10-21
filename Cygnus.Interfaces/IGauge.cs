@@ -34,6 +34,8 @@ namespace Cygnus.Interfaces
         Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans);
         Task CancelRecordTransfer();
         Task DeleteAllRecords();
+        Task DeleteAllTemplates();
+        Task NewTemplate(BlankTemplate template);
         Task DeleteRecord(IFileTransferRequest deleteRequest);
 
         void SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver);

@@ -25,6 +25,10 @@
         public uint NumberOfPointsTaken;
 
         public ProtectionState ProtectionState = ProtectionState.Open;
+
+        public string? TemplateName;
+
+        public UserFieldValue[] UserFields = [];
     }
 
     public record GaugeLinearRecord : GaugeRecord

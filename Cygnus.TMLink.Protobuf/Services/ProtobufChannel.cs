@@ -101,8 +101,10 @@ namespace Cygnus.TMLink.Protobuf.Services
         }
 
         public abstract Task DeleteAllRecords();
+        public abstract Task DeleteAllTemplates();
         public abstract Task DeleteRecord(IFileTransferRequest deleteRequest);
         public abstract Task NewRecord(BlankRecord record);
+        public abstract Task NewTemplate(BlankTemplate template);
         public abstract Task<List<GaugeRecordSummary>?> GetRecordList();
 
         protected abstract void ProcessLiveMeasurement(byte[] value);

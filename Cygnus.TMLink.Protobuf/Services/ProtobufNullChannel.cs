@@ -15,10 +15,12 @@ namespace Cygnus.TMLink.Protobuf.Services
 
         public Task<bool> Connect(ITMLinkDevice device, ILiveMeasurementObserver gauge) => throw new NotImplementedException();
         public Task DeleteAllRecords() => throw new NotImplementedException();
+        public Task DeleteAllTemplates() => throw new NotImplementedException();
         public Task DeleteRecord(IFileTransferRequest deleteRequest) => throw new NotImplementedException();
         public Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans) => throw new NotImplementedException();
         public Task<List<GaugeRecordSummary>?> GetRecordList() => throw new NotImplementedException();
         public Task NewRecord(BlankRecord record) => throw new NotImplementedException();
+        public Task NewTemplate(BlankTemplate template) => throw new NotImplementedException();
         public void AddObserver(ILiveMeasurementObserver observer) => throw new NotImplementedException();
         public void RemoveObserver(ILiveMeasurementObserver observer) => throw new NotImplementedException();
         public Task<GaugeInformation?> GetGaugeInformation() => throw new NotImplementedException();
