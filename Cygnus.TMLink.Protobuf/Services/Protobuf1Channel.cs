@@ -460,20 +460,37 @@ namespace Cygnus.TMLink.Protobuf.Services
                 };
             }
         }
+        
+        public override async Task SendCommentList(string[] comments)
+        {
+            if (comments.Any())
+            {
+                CommentList commentList = new();
+                commentList.Comments.AddRange(comments);
+                Command pointsCommand = new()
+                {
+                    commandType = V1.CommandType.SetCommentList,
+                    commentList = commentList
+                };
+
+                await _protobufCommandHandler.SendCommand(pointsCommand);
+            }
+        }
 
         public override async Task SendMaterialList(List<Material> materials)
         {
             if (materials.Any())
             {
                 Command.MaterialList materialList = new();                
-                materials.ForEach(m =>
-                    materialList.materialLists.Add(
-                        new Command.MaterialList.Material
-                        {
-                            Name = m.Name,
-                            Velocity = m.Velocity,
-                            Uom = (Uom)m.MeasurementUnits
-                        }));
+                    materialList.materialLists.AddRange(
+                        materials.Select(m =>
+                            new Command.MaterialList.Material
+                            {
+                                Name = m.Name,
+                                Velocity = m.Velocity,
+                                Uom = (Uom)m.MeasurementUnits
+                            })
+                    );
 
                 Command pointsCommand = new()
                 {

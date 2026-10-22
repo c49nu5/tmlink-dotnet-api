@@ -25,6 +25,7 @@ namespace Cygnus.TMLink.Protobuf.Interfaces
         Task NewRecord(BlankRecord record);
         Task NewTemplate(BlankTemplate template);
         Task<GaugeInformation?> GetGaugeInformation();
+        Task SendCommentList(string[] comments);
         Task SendMaterialList(List<Material> materialList);
 
         /// <summary>

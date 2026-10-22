@@ -181,6 +181,17 @@ namespace Cygnus.TMLink.API.Models
             await _protobufChannel.SendMaterialList(materialList);
         }
 
+        public async Task SendCommentList(string[] commentsList)
+        {
+            await _protobufChannel.SendCommentList(commentsList);
+        }
+
+        public async Task SetGaugeTime(DateTime gaugeTime)
+        {
+            // When we send a get gauge information command with the current time, a side-effect is that the gauge time is updated.
+            await _protobufChannel.GetGaugeInformation();
+        }
+
         public void SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver)
         {
             _protobufChannel.AddObserver(liveMeasurementObserver);
@@ -335,7 +346,9 @@ namespace Cygnus.TMLink.API.Models
             GaugeFeatures.CanSendBScanList |
             GaugeFeatures.CanSendRecordList |
             GaugeFeatures.CanSendTemplates |
-            GaugeFeatures.CanSendMaterialTable;
+            GaugeFeatures.CanSendCommentList |
+            GaugeFeatures.CanSendMaterialTable |
+            GaugeFeatures.CanSetDateTime;
 
         protected virtual void Dispose(bool disposing)
         {
@@ -367,20 +380,11 @@ namespace Cygnus.TMLink.API.Models
 
         public ErrorCode DoProbeZero() => throw new NotSupportedException();
 
-        public void SendCommentList(string[] commentsList) => throw new NotSupportedException();
-
         public ErrorCode SendVelocity(uint velocity, MeasurementUnits units) => throw new NotSupportedException();
 
         public ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units, MeasurementResolution resolution) => throw new NotSupportedException();
 
         public ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution) => throw new NotSupportedException();
-
-        public ErrorCode SetGaugeTime(DateTime gaugeTime) 
-        {
-            // When the gauge is connected it sends a get gauge information command with the current time,
-            // a side-effect of which is that the gauge time is automatically updated, so we don't need to set the time on the gauge.
-            return ErrorCode.Success; 
-        }
         #endregion
     }
 }
