@@ -25,6 +25,7 @@ namespace Cygnus.TMLink.Protobuf.Interfaces
         Task NewRecord(BlankRecord record);
         Task NewTemplate(BlankTemplate template);
         Task<GaugeInformation?> GetGaugeInformation();
+        Task SendMaterialList(List<Material> materialList);
 
         /// <summary>
         /// Cancel any record transfer currently in progress

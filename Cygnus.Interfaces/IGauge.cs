@@ -37,6 +37,7 @@ namespace Cygnus.Interfaces
         Task DeleteAllTemplates();
         Task NewTemplate(BlankTemplate template);
         Task DeleteRecord(IFileTransferRequest deleteRequest);
+        Task SendMaterialList(List<Material> materialList);
 
         void SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver);
         void UnsubscribeFromLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver);
@@ -49,7 +50,6 @@ namespace Cygnus.Interfaces
         // Cyglink specific methods
         ErrorCode DoProbeZero();
         void SendCommentList(string[] commentsList);
-        void SendMaterialList(List<Material> materialList);
         ErrorCode SendVelocity(uint velocity, MeasurementUnits units);
         ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units, MeasurementResolution resolution);
         ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution);

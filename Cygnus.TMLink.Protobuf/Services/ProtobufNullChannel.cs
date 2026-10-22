@@ -24,8 +24,8 @@ namespace Cygnus.TMLink.Protobuf.Services
         public void AddObserver(ILiveMeasurementObserver observer) => throw new NotImplementedException();
         public void RemoveObserver(ILiveMeasurementObserver observer) => throw new NotImplementedException();
         public Task<GaugeInformation?> GetGaugeInformation() => throw new NotImplementedException();
+        public Task SendMaterialList(List<Material> materialList) => throw new NotImplementedException();
 
         public void Dispose() {}
-
     }
 }

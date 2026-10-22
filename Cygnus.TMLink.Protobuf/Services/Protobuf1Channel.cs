@@ -461,6 +461,30 @@ namespace Cygnus.TMLink.Protobuf.Services
             }
         }
 
+        public override async Task SendMaterialList(List<Material> materials)
+        {
+            if (materials.Any())
+            {
+                Command.MaterialList materialList = new();                
+                materials.ForEach(m =>
+                    materialList.materialLists.Add(
+                        new Command.MaterialList.Material
+                        {
+                            Name = m.Name,
+                            Velocity = m.Velocity,
+                            Uom = (Uom)m.MeasurementUnits
+                        }));
+
+                Command pointsCommand = new()
+                {
+                    commandType = V1.CommandType.SetMaterialList,
+                    materialList = materialList
+                };
+
+                await _protobufCommandHandler.SendCommand(pointsCommand);
+            }
+        }
+
         protected override void ProcessLiveMeasurement(byte[] value)
         {
             NotifyLiveMeasurement protobufMeasurement = _protobufMessageConverter.FromProtobuf<NotifyLiveMeasurement>(value);

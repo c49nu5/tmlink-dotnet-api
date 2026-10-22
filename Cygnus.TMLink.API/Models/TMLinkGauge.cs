@@ -176,6 +176,11 @@ namespace Cygnus.TMLink.API.Models
             return await _protobufChannel.GetRecordList();
         }
 
+        public async Task SendMaterialList(List<Material> materialList)
+        {
+            await _protobufChannel.SendMaterialList(materialList);
+        }
+
         public void SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver)
         {
             _protobufChannel.AddObserver(liveMeasurementObserver);
@@ -329,7 +334,8 @@ namespace Cygnus.TMLink.API.Models
             GaugeFeatures.SendsOnlyValidMeasurements |
             GaugeFeatures.CanSendBScanList |
             GaugeFeatures.CanSendRecordList |
-            GaugeFeatures.CanSendTemplates;
+            GaugeFeatures.CanSendTemplates |
+            GaugeFeatures.CanSendMaterialTable;
 
         protected virtual void Dispose(bool disposing)
         {
@@ -362,8 +368,6 @@ namespace Cygnus.TMLink.API.Models
         public ErrorCode DoProbeZero() => throw new NotSupportedException();
 
         public void SendCommentList(string[] commentsList) => throw new NotSupportedException();
-
-        public void SendMaterialList(List<Material> materialList) => throw new NotSupportedException();
 
         public ErrorCode SendVelocity(uint velocity, MeasurementUnits units) => throw new NotSupportedException();
 

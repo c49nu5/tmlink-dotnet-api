@@ -198,6 +198,8 @@ namespace Cygnus.TMLink.Protobuf.Services
 
         public abstract Task<GaugeInformation?> GetGaugeInformation();
 
+        public abstract Task SendMaterialList(List<Material> materialList);
+
         public async Task Disconnect()
         {
             RemoveAllObservers();
