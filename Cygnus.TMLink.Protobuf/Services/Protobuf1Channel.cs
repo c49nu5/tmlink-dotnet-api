@@ -98,7 +98,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             {
                 commandType = V1.CommandType.GetRecord,
                 Name = transferRequest.Name,
-                Timestamp = DateTime.Now
+                Timestamp = DateTime.Now,
             };
 
             var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command, _recordTransferCts?.Token);
@@ -138,12 +138,13 @@ namespace Cygnus.TMLink.Protobuf.Services
             return null;
         }
 
-        protected override async Task<GaugeMeasurement?> GetMeasurementPoint(string recordName, Dictionary<byte, string> comments, bool withAscans = false)
+        protected override async Task<GaugeMeasurement?> GetMeasurementPoint(string recordName, Dictionary<byte, string> comments, bool withAscans, bool withWiderAScans)
         {
             Command command = new()
             {
                 commandType = withAscans ? V1.CommandType.GetRecordPointAScan : V1.CommandType.GetRecordPoint,
-                Name = recordName
+                Name = recordName,
+                aScanSize = withWiderAScans ? V1.AScanSize.U640 : V1.AScanSize.U320
             };
 
             var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command, _recordTransferCts?.Token);
@@ -212,12 +213,13 @@ namespace Cygnus.TMLink.Protobuf.Services
             return null;
         }
 
-        protected override async Task<GaugeMeasurement?> GetBScanPoint(string recordName, bool withAscans = false)
+        protected override async Task<GaugeMeasurement?> GetBScanPoint(string recordName, bool withAscans, bool withWiderAScans)
         {
             Command command = new()
             {
                 commandType = withAscans ? V1.CommandType.GetBScanPointAScan : V1.CommandType.GetBScanPoint,
-                Name = recordName
+                Name = recordName,
+                aScanSize = withWiderAScans ? V1.AScanSize.U640 : V1.AScanSize.U320
             };
 
             var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command, _recordTransferCts?.Token);
@@ -439,12 +441,12 @@ namespace Cygnus.TMLink.Protobuf.Services
             return false;
         }
 
-        public override async Task<GaugeInformation?> GetGaugeInformation()
+        public override async Task<GaugeInformation?> GetGaugeInformation(DateTime dateTime)
         {
             Command command = new()
             {
                 commandType = V1.CommandType.GetGaugeInfo,
-                Timestamp = DateTime.Now
+                Timestamp = dateTime
             };
 
             var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command);

@@ -19,7 +19,7 @@ internal class WhenGetRecordIsCalled
         IFileTransferRequest transferRequestMock = ConfigureTransfer(recordType, testBed, recordName, CommandType.GetRecord);
 
         // Act
-        await sut.GetRecord(transferRequestMock, false);
+        await sut.GetRecord(transferRequestMock, false, true);
 
         // Assert
         testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetRecord), It.IsAny<CancellationToken>()), Times.Once());
@@ -37,7 +37,7 @@ internal class WhenGetRecordIsCalled
         IFileTransferRequest transferRequestMock = ConfigureTransfer(recordType, testBed, recordName, CommandType.GetRecord);
 
         // Act
-        var record = await sut.GetRecord(transferRequestMock, false);
+        var record = await sut.GetRecord(transferRequestMock, false, false);
 
         // Assert
         record.Name.ShouldBe(recordName);
@@ -45,23 +45,23 @@ internal class WhenGetRecordIsCalled
     }
 
     [Test]
-    public async Task AndRecordTypeIsGrid2D_ShouldSendACommandWithGetRecordPointCommandTypeCorrectly([Random(10, 15, 1)] int measurementCount, [Values] bool withAScans)
+    public async Task AndRecordTypeIsGrid2D_ShouldSendACommandWithGetRecordPointCommandTypeCorrectly([Random(10, 15, 1)] int measurementCount, [Values] bool withAScans, [Values] bool withWiderAscans)
     {
         // Arrange
         var testBed = new TestBed();
-        var sut = await testBed.CreateConnectedSUT(true);
+        var sut = await testBed.CreateConnectedSUT(false);
         string recordName = "test_record";
         IFileTransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.Grid2D, testBed, recordName, CommandType.GetRecord, measurementCount, withAScans);
 
         // Act
-        await sut.GetRecord(transferRequestMock, withAScans);
+        await sut.GetRecord(transferRequestMock, withAScans, withWiderAscans);
 
         // Assert
-        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == (withAScans ? CommandType.GetRecordPointAScan : CommandType.GetRecordPoint)), It.IsAny<CancellationToken>()), Times.Exactly(measurementCount));
+        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse<V1.Message>(It.Is<V1.Command>(m => m.CommandType == (withAScans ? CommandType.GetRecordPointAScan : CommandType.GetRecordPoint) && m.aScanSize == (withWiderAscans ? V1.AScanSize.U640 : V1.AScanSize.U320) && m.aScanSize == (withWiderAscans ? V1.AScanSize.U640 : V1.AScanSize.U320)), It.IsAny<CancellationToken>()), Times.Exactly(measurementCount));
     }
 
     [Test]
-    public async Task AndRecordTypeIsLinear_ShouldSendACommandWithGetRecordPointCommandTypeCorrectly([Random(10, 15, 1)] int measurementCount, [Values] bool withAScans)
+    public async Task AndRecordTypeIsLinear_ShouldSendACommandWithGetRecordPointCommandTypeCorrectly([Random(10, 15, 1)] int measurementCount, [Values] bool withAScans, [Values] bool withWiderAscans)
     {
         // Arrange
         var testBed = new TestBed();
@@ -70,10 +70,10 @@ internal class WhenGetRecordIsCalled
         IFileTransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.Linear, testBed, recordName, CommandType.GetRecord, measurementCount, withAScans);
 
         // Act
-        await sut.GetRecord(transferRequestMock, withAScans);
+        await sut.GetRecord(transferRequestMock, withAScans, withWiderAscans);
 
         // Assert
-        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == (withAScans ? CommandType.GetRecordPointAScan : CommandType.GetRecordPoint)), It.IsAny<CancellationToken>()), Times.Exactly(measurementCount));
+        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse<V1.Message>(It.Is<V1.Command>(m => m.CommandType == (withAScans ? CommandType.GetRecordPointAScan : CommandType.GetRecordPoint) && m.aScanSize == (withWiderAscans ? V1.AScanSize.U640 : V1.AScanSize.U320)), It.IsAny<CancellationToken>()), Times.Exactly(measurementCount));
     }
 
     [Test]
@@ -86,7 +86,7 @@ internal class WhenGetRecordIsCalled
         IFileTransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.BScan, testBed, recordName, CommandType.GetBScan);
 
         // Act
-        await sut.GetRecord(transferRequestMock, false);
+        await sut.GetRecord(transferRequestMock, false, false);
 
         // Assert
         testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetBScan), It.IsAny<CancellationToken>()), Times.Once());
@@ -102,7 +102,7 @@ internal class WhenGetRecordIsCalled
         IFileTransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.BScan, testBed, recordName, CommandType.GetBScan);
 
         // Act
-        var record = await sut.GetRecord(transferRequestMock, false);
+        var record = await sut.GetRecord(transferRequestMock, false, false);
 
         // Assert
         record.Name.ShouldBe(recordName);
@@ -110,7 +110,7 @@ internal class WhenGetRecordIsCalled
     }
 
     [Test]
-    public async Task AndRecordTypeIsBScan_ShouldSendACommandWithGetBScanPointCommandTypeCorrectly([Random(10, 15, 1)] int measurementCount, [Values] bool withAScans)
+    public async Task AndRecordTypeIsBScan_ShouldSendACommandWithGetBScanPointCommandTypeCorrectly([Random(10, 15, 1)] int measurementCount, [Values] bool withAScans, [Values] bool withWiderAscans)
     {
         // Arrange
         var testBed = new TestBed();
@@ -119,10 +119,10 @@ internal class WhenGetRecordIsCalled
         IFileTransferRequest transferRequestMock = ConfigureTransfer(Models.RecordType.BScan, testBed, recordName, CommandType.GetBScan, measurementCount, withAScans);
 
         // Act
-        await sut.GetRecord(transferRequestMock, withAScans);
+        await sut.GetRecord(transferRequestMock, withAScans, withWiderAscans);
 
         // Assert
-        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == (withAScans ? CommandType.GetBScanPointAScan : CommandType.GetBScanPoint)), It.IsAny<CancellationToken>()), Times.Exactly(measurementCount));
+        testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse<V1.Message>(It.Is<V1.Command>(m => m.CommandType == (withAScans ? CommandType.GetBScanPointAScan : CommandType.GetBScanPoint) && m.aScanSize == (withWiderAscans ? V1.AScanSize.U640 : V1.AScanSize.U320)), It.IsAny<CancellationToken>()), Times.Exactly(measurementCount));
     }
 
     private static IFileTransferRequest ConfigureTransfer(Models.RecordType recordType, TestBed testBed, string recordName, CommandType command, int measurementCount, bool withAScans)

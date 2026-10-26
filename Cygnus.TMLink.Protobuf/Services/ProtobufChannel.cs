@@ -3,7 +3,6 @@ using Cygnus.Models;
 using Cygnus.TMLink.Interfaces;
 using Cygnus.TMLink.Protobuf.Interfaces;
 using Microsoft.Extensions.Logging;
-using System.ComponentModel.Design.Serialization;
 
 namespace Cygnus.TMLink.Protobuf.Services
 {
@@ -125,7 +124,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             return Task.FromResult(transferInProgress);
         }
 
-        public async Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans)
+        public async Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans, bool withWiderAscans)
         {
             await CancelRecordTransfer();
             using (var recordTransferCts = _recordTransferCts = new(TimeSpan.FromMinutes(45))) // Allow time for 5000 measurements with A-Scans to transfer
@@ -146,8 +145,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                             recordTransferCts.Token.ThrowIfCancellationRequested();
                             _logger.LogInformation("Transferring point {PointIndex} of {TotalPoints} for record {RecordName}", i + 1, gaugeRecord.NumberOfPointsTaken, gaugeRecord.Name);
                             GaugeMeasurement? measurement = transferRequest.RecordType == RecordType.BScan
-                                ? await GetBScanPoint(transferRequest.Name, withAScans)
-                                : await GetMeasurementPoint(transferRequest.Name, commentList, withAScans);
+                                ? await GetBScanPoint(transferRequest.Name, withAScans, withWiderAscans)
+                                : await GetMeasurementPoint(transferRequest.Name, commentList, withAScans, withWiderAscans);
                             if (measurement != null)
                             {
                                 transferRequest.PercentageTransferred = (double)(i + 1) / gaugeRecord.NumberOfPointsTaken;
@@ -192,13 +191,13 @@ namespace Cygnus.TMLink.Protobuf.Services
 
         protected abstract Task<GaugeRecord?> GetGaugeRecord(IFileTransferRequest transferRequest);
 
-        protected abstract Task<GaugeMeasurement?> GetMeasurementPoint(string name, Dictionary<byte, string> comments, bool withAScans);
+        protected abstract Task<GaugeMeasurement?> GetMeasurementPoint(string name, Dictionary<byte, string> comments, bool withAScans, bool withWiderAscans);
 
         protected abstract Task<GaugeRecord?> GetGaugeBScan(IFileTransferRequest transferRequest);
 
-        protected abstract Task<GaugeMeasurement?> GetBScanPoint(string name, bool withAScans);
+        protected abstract Task<GaugeMeasurement?> GetBScanPoint(string name, bool withAScans, bool withWiderAscans);
 
-        public abstract Task<GaugeInformation?> GetGaugeInformation();
+        public abstract Task<GaugeInformation?> GetGaugeInformation(DateTime dateTime);
 
         public abstract Task SendCommentList(string[] comments);
 

@@ -17,13 +17,13 @@ namespace Cygnus.TMLink.Protobuf.Services
         public Task DeleteAllRecords() => throw new NotImplementedException();
         public Task DeleteAllTemplates() => throw new NotImplementedException();
         public Task DeleteRecord(IFileTransferRequest deleteRequest) => throw new NotImplementedException();
-        public Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans) => throw new NotImplementedException();
+        public Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans, bool withWiderAScans) => throw new NotImplementedException();
         public Task<List<GaugeRecordSummary>?> GetRecordList() => throw new NotImplementedException();
         public Task NewRecord(BlankRecord record) => throw new NotImplementedException();
         public Task NewTemplate(BlankTemplate template) => throw new NotImplementedException();
         public void AddObserver(ILiveMeasurementObserver observer) => throw new NotImplementedException();
         public void RemoveObserver(ILiveMeasurementObserver observer) => throw new NotImplementedException();
-        public Task<GaugeInformation?> GetGaugeInformation() => throw new NotImplementedException();
+        public Task<GaugeInformation?> GetGaugeInformation(DateTime dateTime) => throw new NotImplementedException();
         public Task SendCommentList(string[] commentsList) => throw new NotImplementedException();
         public Task SendMaterialList(List<Material> materialList) => throw new NotImplementedException();
 

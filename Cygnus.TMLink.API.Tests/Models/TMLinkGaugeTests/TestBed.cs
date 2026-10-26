@@ -28,15 +28,17 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
         public Mock<IProtobufChannel> Protobuf1Channel { get; set; } = new Mock<IProtobufChannel>(MockBehavior.Strict);
         public Mock<IProtobufChannel> Protobuf2Channel { get; set; } = new Mock<IProtobufChannel>(MockBehavior.Strict);
         public Mock<ITMLinkConnectionService> ConnectionService { get; set; } = new Mock<ITMLinkConnectionService>(MockBehavior.Strict);
+        public Mock<IPlatformService> PlatformService { get; set; } = new Mock<IPlatformService>(MockBehavior.Strict);
         public Mock<IGaugeObserver> Observer { get; private set; }
         public Func<byte, IProtobufChannel> ProtobufChannelFactory { get; set; }
         public Mock<ITMLinkDevice> ConnectedDevice { get; private set; }
 
-        internal TMLinkGauge CreateSUT(bool configureObserver = false)
+        internal TMLinkGauge CreateSUT(bool configureObserver = false, bool withWiderAScans = false)
         {
+            PlatformService?.SetupGet(s => s.SupportsWiderAScans).Returns(withWiderAScans);
             Protobuf1Channel.SetupGet(p => p.IsInitialized).Returns(true);
             Protobuf2Channel.SetupGet(p => p.IsInitialized).Returns(true);
-            TMLinkGauge gauge = new(Logger, ProtobufChannelFactory, ConnectionService?.Object);
+            TMLinkGauge gauge = new(Logger, PlatformService?.Object, ProtobufChannelFactory, ConnectionService?.Object);
             if (configureObserver)
             {
                 Observer = new Mock<IGaugeObserver>(MockBehavior.Strict);
@@ -46,12 +48,12 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
             return gauge;
         }
 
-        internal async Task<TMLinkGauge> CreateConnectedSUT()
+        internal async Task<TMLinkGauge> CreateConnectedSUT(bool withWiderAScans = false)
         {
-            var sut = CreateSUT(true);
+            var sut = CreateSUT(true, withWiderAScans);
             var device = ConnectedDevice = CreateDevice(true);
             Protobuf1Channel.Setup(p => p.Connect(device.Object, sut)).ReturnsAsync(true);
-            Protobuf1Channel.Setup(p => p.GetGaugeInformation()).ReturnsAsync(new Cygnus.Models.GaugeInformation { SerialNumber = (uint)Random.Shared.Next(23132, 41232) });
+            Protobuf1Channel.Setup(p => p.GetGaugeInformation(It.IsAny<DateTime>())).ReturnsAsync(new Cygnus.Models.GaugeInformation { SerialNumber = (uint)Random.Shared.Next(23132, 41232) });
             Protobuf1Channel.Setup(p => p.AddObserver(sut));
             device.Setup(d => d.IsConnected).Returns(true);
             sut.SetDevice(device.Object);

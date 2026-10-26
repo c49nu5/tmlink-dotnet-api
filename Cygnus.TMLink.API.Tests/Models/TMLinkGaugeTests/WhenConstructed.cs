@@ -63,4 +63,20 @@ internal class WhenConstructed
         // Assert
         getSut.ShouldThrow<ArgumentNullException>();
     }
+
+    [Test]
+    public void ShouldThrowIfPlatformServiceIsNull()
+    {
+        // Arrange
+        var testBed = new TestBed
+        {
+            PlatformService = null
+        };
+
+        // Act
+        var getSut = () => testBed.CreateSUT();
+
+        // Assert
+        getSut.ShouldThrow<ArgumentNullException>();
+    }
 }

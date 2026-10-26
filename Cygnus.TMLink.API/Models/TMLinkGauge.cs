@@ -11,6 +11,7 @@ namespace Cygnus.TMLink.API.Models
     internal class TMLinkGauge : ObservableModel<IGaugeObserver>, ITMLinkGauge, ITMLinkDeviceObserver, ILiveMeasurementObserver
     {
         private readonly ILogger _logger;
+        private readonly IPlatformService _platform;
         private readonly Func<byte, IProtobufChannel?> _protobufChannelFactory;
         private readonly ITMLinkConnectionService _connectionService;
         private IProtobufChannel _protobufChannel = new ProtobufNullChannel();
@@ -19,10 +20,12 @@ namespace Cygnus.TMLink.API.Models
         private bool _isDisposed;
 
         public TMLinkGauge(ILogger<TMLinkGauge> logger,
-                        Func<byte, IProtobufChannel?> protobufChannelFactory,
-                        ITMLinkConnectionService connectionService)
+            IPlatformService platform,
+            Func<byte, IProtobufChannel?> protobufChannelFactory,
+            ITMLinkConnectionService connectionService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _platform = platform ?? throw new ArgumentNullException(nameof(platform));
             _protobufChannelFactory = protobufChannelFactory ?? throw new ArgumentNullException(nameof(protobufChannelFactory));
             _connectionService = connectionService ?? throw new ArgumentNullException(nameof(connectionService));
         }
@@ -102,7 +105,7 @@ namespace Cygnus.TMLink.API.Models
 
                         if (await _protobufChannel.Connect(_device, this))
                         {
-                            var gaugeInformation = await _protobufChannel.GetGaugeInformation();
+                            var gaugeInformation = await _protobufChannel.GetGaugeInformation(DateTime.Now);
                             if (gaugeInformation != null)
                             {
                                 IsConnected = true;
@@ -144,7 +147,7 @@ namespace Cygnus.TMLink.API.Models
 
         public async Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans)
         {
-            return await _protobufChannel.GetRecord(new TMLinkTransferMonitor(i => IsDataTransferInProgress = i, transferRequest), withAScans);
+            return await _protobufChannel.GetRecord(new TMLinkTransferMonitor(i => IsDataTransferInProgress = i, transferRequest), withAScans, _platform.SupportsWiderAScans);
         }
 
         public async Task DeleteAllRecords()
@@ -190,7 +193,7 @@ namespace Cygnus.TMLink.API.Models
         public async Task SetGaugeTime(DateTime gaugeTime)
         {
             // When we send a get gauge information command with the current time, a side-effect is that the gauge time is updated.
-            await _protobufChannel.GetGaugeInformation();
+            await _protobufChannel.GetGaugeInformation(gaugeTime);
         }
 
         public void SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver)

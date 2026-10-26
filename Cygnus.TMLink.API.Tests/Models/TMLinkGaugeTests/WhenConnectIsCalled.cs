@@ -95,7 +95,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
             var device = tb.CreateDevice(true);
 
             tb.Protobuf1Channel.Setup(p => p.Connect(device.Object, sut)).ReturnsAsync(true);
-            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation()).ReturnsAsync((GaugeInformation?)null);
+            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation(It.IsAny<DateTime>())).ReturnsAsync((GaugeInformation?)null);
             tb.Protobuf1Channel.Setup(p => p.Dispose());
 
             sut.SetDevice(device.Object);
@@ -116,7 +116,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
             var device = tb.CreateDevice(true);
 
             tb.Protobuf1Channel.Setup(p => p.Connect(device.Object, sut)).ReturnsAsync(true);
-            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation()).ReturnsAsync((GaugeInformation?)null);
+            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation(It.IsAny<DateTime>())).ReturnsAsync((GaugeInformation?)null);
             tb.Protobuf1Channel.Setup(p => p.Dispose());
 
             sut.SetDevice(device.Object);
@@ -137,7 +137,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
             var device = tb.CreateDevice(true, true);
 
             tb.Protobuf1Channel.Setup(p => p.Connect(device.Object, sut)).ReturnsAsync(true);
-            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation()).ReturnsAsync((GaugeInformation?)null);
+            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation(It.IsAny<DateTime>())).ReturnsAsync((GaugeInformation?)null);
             tb.Protobuf1Channel.Setup(p => p.Dispose());
             tb.Protobuf1Channel.Setup(p => p.AddObserver(sut));
 
@@ -161,7 +161,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
             var gaugeInfo = new GaugeInformation { SerialNumber = 12345 };
 
             tb.Protobuf1Channel.Setup(p => p.Connect(device.Object, sut)).ReturnsAsync(true);
-            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation()).ReturnsAsync(gaugeInfo);
+            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation(It.IsAny<DateTime>())).ReturnsAsync(gaugeInfo);
             tb.Protobuf1Channel.Setup(p => p.AddObserver(sut));
 
             sut.SetDevice(device.Object);
@@ -184,7 +184,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
             var gaugeInfo = new GaugeInformation { SoftwareVersionNumber = 2 };
 
             tb.Protobuf1Channel.Setup(p => p.Connect(device.Object, sut)).ReturnsAsync(true);
-            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation()).ReturnsAsync(gaugeInfo);
+            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation(It.IsAny<DateTime>())).ReturnsAsync(gaugeInfo);
             tb.Protobuf1Channel.Setup(p => p.AddObserver(sut));
 
             sut.SetDevice(device.Object);
@@ -207,7 +207,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
             var gaugeInfo = new GaugeInformation { GaugeVariant = Cygnus.Models.GaugeVariant.BasicSC };
 
             tb.Protobuf1Channel.Setup(p => p.Connect(device.Object, sut)).ReturnsAsync(true);
-            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation()).ReturnsAsync(gaugeInfo);
+            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation(It.IsAny<DateTime>())).ReturnsAsync(gaugeInfo);
             tb.Protobuf1Channel.Setup(p => p.AddObserver(sut));
 
             sut.SetDevice(device.Object);
@@ -230,7 +230,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
             var gaugeInfo = new GaugeInformation { BatteryLevel = 75 };
 
             tb.Protobuf1Channel.Setup(p => p.Connect(device.Object, sut)).ReturnsAsync(true);
-            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation()).ReturnsAsync(gaugeInfo);
+            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation(It.IsAny<DateTime>())).ReturnsAsync(gaugeInfo);
             tb.Protobuf1Channel.Setup(p => p.AddObserver(sut));
 
             sut.SetDevice(device.Object);
@@ -253,7 +253,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
             var gaugeInfo = new GaugeInformation { GaugeId = 999 };
 
             tb.Protobuf1Channel.Setup(p => p.Connect(device.Object, sut)).ReturnsAsync(true);
-            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation()).ReturnsAsync(gaugeInfo);
+            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation(It.IsAny<DateTime>())).ReturnsAsync(gaugeInfo);
             tb.Protobuf1Channel.Setup(p => p.AddObserver(sut));
 
             sut.SetDevice(device.Object);
@@ -276,7 +276,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
             var gaugeInfo = new GaugeInformation { ProbeType = Cygnus.Models.ProbeType.T5A };
 
             tb.Protobuf1Channel.Setup(p => p.Connect(device.Object, sut)).ReturnsAsync(true);
-            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation()).ReturnsAsync(gaugeInfo);
+            tb.Protobuf1Channel.Setup(p => p.GetGaugeInformation(It.IsAny<DateTime>())).ReturnsAsync(gaugeInfo);
             tb.Protobuf1Channel.Setup(p => p.AddObserver(sut));
 
             sut.SetDevice(device.Object);
