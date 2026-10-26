@@ -7,14 +7,18 @@ namespace Cygnus.TMLink.Protobuf.Tests.Services.Protobuf1ChannelTests;
 internal class WhenNewRecordIsCalled
 {
     [Test]
-    public async Task ShouldSendACommandWithNewRecordCommandType([Values(RecordType.Linear, RecordType.Grid2D)] RecordType recordType, [Random(3,10,1) ] int measurementCount)
+    public async Task ShouldSendACommandWithNewRecordCommandType([Values(RecordType.Linear, RecordType.Grid2D)] RecordType recordType, [Random(3,10,1) ] int measurementCount, [Random(0, 4, 1)] int userFieldCount)
     {
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
         testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.NewRecord), false)).ReturnsAsync(true);
         testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordPoints), false)).ReturnsAsync(true);
-        var blankRecord = CreateBlankRecord(recordType, measurementCount);
+        if (userFieldCount > 0)
+        {
+            testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordUserField), false)).ReturnsAsync(true);
+        }
+        var blankRecord = CreateBlankRecord(recordType, measurementCount, userFieldCount);
 
         // Act
         await sut.NewRecord(blankRecord);
@@ -24,14 +28,18 @@ internal class WhenNewRecordIsCalled
     }
 
     [Test]
-    public async Task ShouldSendCommandWithAddRecordPointsTheExpectedNumberOfTimes([Values(RecordType.Linear, RecordType.Grid2D)] RecordType recordType, [Random(9, 100, 3)] int measurementCount)
+    public async Task ShouldSendCommandWithAddRecordPointsTheExpectedNumberOfTimes([Values(RecordType.Linear, RecordType.Grid2D)] RecordType recordType, [Random(9, 100, 3)] int measurementCount, [Random(0, 4, 1)] int userFieldCount)
     {
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
         testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.NewRecord), false)).ReturnsAsync(true);
         testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordPoints), false)).ReturnsAsync(true);
-        var blankRecord = CreateBlankRecord(recordType, measurementCount);
+        if (userFieldCount > 0)
+        {
+            testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordUserField), false)).ReturnsAsync(true);
+        }
+        var blankRecord = CreateBlankRecord(recordType, measurementCount, userFieldCount);
 
         // Act
         await sut.NewRecord(blankRecord);
@@ -41,14 +49,39 @@ internal class WhenNewRecordIsCalled
     }
 
     [Test]
-    public async Task ShouldSendACommandWithExpectedNewRecord([Values(RecordType.Linear, RecordType.Grid2D)] RecordType recordType, [Random(3, 10, 1)] int measurementCount)
+    public async Task ShouldSendCommandWithAddRecordUserFieldTheExpectedNumberOfTimes([Values(RecordType.Linear, RecordType.Grid2D)] RecordType recordType, [Random(9, 100, 3)] int measurementCount, [Random(0, 4, 1)] int userFieldCount)
     {
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(true);
         testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.NewRecord), false)).ReturnsAsync(true);
         testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordPoints), false)).ReturnsAsync(true);
-        var blankRecord = CreateBlankRecord(recordType, measurementCount);
+        if (userFieldCount > 0)
+        {
+            testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordUserField), false)).ReturnsAsync(true);
+        }
+        var blankRecord = CreateBlankRecord(recordType, measurementCount, userFieldCount);
+
+        // Act
+        await sut.NewRecord(blankRecord);
+
+        // Assert
+        testBed.ProtobufCommandHandler.Verify(c => c.SendCommand(It.Is<V1.Command>(m => m.CommandType == CommandType.AddRecordUserField), false), Times.Exactly(userFieldCount));
+    }
+
+    [Test]
+    public async Task ShouldSendACommandWithExpectedNewRecord([Values(RecordType.Linear, RecordType.Grid2D)] RecordType recordType, [Random(3, 10, 1)] int measurementCount, [Random(0, 4, 1)] int userFieldCount)
+    {
+        // Arrange
+        var testBed = new TestBed();
+        var sut = await testBed.CreateConnectedSUT(true);
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.NewRecord), false)).ReturnsAsync(true);
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordPoints), false)).ReturnsAsync(true);
+        if (userFieldCount > 0)
+        {
+            testBed.ProtobufCommandHandler.Setup(c => c.SendCommand(It.Is<ICommand>(m => m.CommandType == CommandType.AddRecordUserField), false)).ReturnsAsync(true);
+        }
+        var blankRecord = CreateBlankRecord(recordType, measurementCount, userFieldCount);
 
         // Act
         await sut.NewRecord(blankRecord);
@@ -69,7 +102,7 @@ internal class WhenNewRecordIsCalled
         return true;
     }
 
-    private static BlankRecord CreateBlankRecord(RecordType recordType, int measurementCount)
+    private static BlankRecord CreateBlankRecord(RecordType recordType, int measurementCount, int userFieldCount)
     {
         int index = 0;
         return new()
@@ -91,6 +124,17 @@ internal class WhenNewRecordIsCalled
                     Name = index++.ToString(),
                     ThicknessMaxLimit = (uint)(Random.Shared.NextDouble() * 100),
                     ThicknessMinLimit = (uint)(Random.Shared.NextDouble() * 100),
+                }).ToArray(),
+            UserFields = Enumerable.Range(0, userFieldCount)
+                .Select(i =>
+                {
+                    UserFieldType userFieldType = (UserFieldType)Random.Shared.Next(7);
+                    return new UserField
+                    {
+                        List = userFieldType == UserFieldType.List ? [.. Enumerable.Range(1, Random.Shared.Next(5)).Select(u => $"uf{u}")] : [],
+                        Name = $"User field {i}",
+                        Type = userFieldType
+                    };
                 }).ToArray()
         };
     }

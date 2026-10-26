@@ -14,7 +14,7 @@ public interface IMeasurementConverter
     string GetDisplayedThickness(uint thicknessTime, uint measurementVelocity, MeasurementUnits measurementUnits, bool includeUnits = true);
     string GetDisplayedVelocity(uint velocity, bool includeUnits = true);
     string GetDisplayedVelocity(uint measurementVelocity, MeasurementUnits measurementUnits, bool includeUnits = true);
-    double GetDisplayedVelocity(double displayedVelocity, MeasurementUnits measurementUnits);
+    double GetDisplayedVelocityValue(double displayedVelocity, MeasurementUnits measurementUnits);
     uint GetVelocity(string value);
     uint GetMeasuredVelocityAdjustedForDisplayUnits(uint measuredVelocity, MeasurementUnits measurementUnits);
     double GetMeasuredVelocityAdjustedForMeasurementUnits(double measurementVelocity, MeasurementUnits sourceUnits, MeasurementUnits destinationUnits);
@@ -27,13 +27,11 @@ public interface IMeasurementConverter
     string GetDisplayedTemperature(int temperatureInCelsius);
     string GetDisplayedDepth(int depthCentimetres);
     double GetDisplayedThicknessValue(uint thicknessTime, uint measurementVelocity, MeasurementUnits measurementUnits);
-    double GetDisplayedThicknessValue(double thicknessTime, MeasurementUnits measurementUnits);
     double ConvertThickness(double thickness, MeasurementUnits sourceUnits, MeasurementUnits destinationUnits);
     double ConvertThickness(double thickness, MeasurementUnits sourceUnits);
     double GetThicknessFromDisplayedValue(double thickness, MeasurementUnits sourceUnits);
     double GetThicknessIncrement();
     double? GetWastage(string displayedThickness, string displayedReference, string displayedMinimum, string? parentReference, string? parentMinimum);
-    uint GetVelocityForMaterialList(double velocity, MeasurementUnits units);
     string GetRelayThickness(uint thicknessTime, uint velocity, MeasurementUnits units);
     string GetRelayVelocity(uint velocity, MeasurementUnits units);
     double GetThicknessFromDisplayedThickness(string value, MeasurementUnits measurementUnits);
@@ -42,5 +40,5 @@ public interface IMeasurementConverter
     uint GetTargetVelocityForThicknessTime(double targetThickness, uint calibrationThicknessTime);
     double GetMinVelocity();
     double GetMaxVelocity();
-    double GetMaximumThickness { get; }
+    double MaximumThickness { get; }
 }

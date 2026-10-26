@@ -2,7 +2,7 @@
 using Shouldly;
 
 namespace Cygnus.Services.Test.MeasurementConverterTests;
-internal class WhenGetThicknessAdjustedForMeasurementUnitsIsCalled
+internal class WhenGetThicknessFromDisplayedValueIsCalled
 {
     [Test]
     [TestCase(10.14343, 10.14343, MeasurementUnits.Metric, MeasurementUnits.Metric)]

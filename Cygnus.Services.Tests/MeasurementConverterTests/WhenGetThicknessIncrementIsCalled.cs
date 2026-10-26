@@ -7,7 +7,7 @@ using Cygnus.Models;
 using Shouldly;
 
 namespace Cygnus.Services.Test.MeasurementConverterTests;
-internal class WhenGetIncreaseForUpdateIsCalled
+internal class WhenGetThicknessIncrementIsCalled
 {
     [Test]
     [TestCase(MeasurementUnits.Metric, MeasurementResolution.Low, .1)]

@@ -73,17 +73,22 @@ namespace Cygnus.TMLink.Protobuf.Services
             _logger.LogInformation("Received record list from gauge {Device}: {RecordCount}", _device?.Name, recordList?.Items.Count);
 
             return recordList?.Items
-                .Select(i => new GaugeRecordSummary(
-                    default,
-                    i.Name,
-                    default,
-                    i.recordType == V1.RecordType.Linear ? Models.RecordType.Linear : Models.RecordType.Grid2D,
-                    i.fileSize,
-                    i.Created,
-                    i.Updated,
-                    i.Key,
-                    i.numPointsRequired,
-                    i.numPointsTaken))
+                .Select(i =>
+                {
+                    Models.RecordType recordType = i.recordType == V1.RecordType.Linear ? Models.RecordType.Linear : Models.RecordType.Grid2D;
+                    GaugeRecordSummary gaugeRecordSummary = new(
+                                        default,
+                                        i.Name,
+                                        default,
+                                        recordType,
+                                        i.fileSize,
+                                        i.Created,
+                                        i.Updated,
+                                        i.Key,
+                                        i.numPointsRequired,
+                                        i.numPointsTaken);
+                    return gaugeRecordSummary;
+                })
                 .ToList() ?? [];
         }
 
@@ -124,6 +129,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                 gaugeRecord.NumberOfPointsTaken = record.numPointsTaken;
                 gaugeRecord.TemplateName = string.IsNullOrWhiteSpace(record.templateName) ? null : record.templateName;
                 gaugeRecord.UserFields = [.. record.userFieldValues?.Items?.Select(v => new UserFieldValue { Name = v.ufName, Type = ConvertFieldType(v.ufType), Value = v.ufValue }) ?? []];
+                gaugeRecord.Comments = [.. record.commentList.Comments];
 
                 return gaugeRecord;
             }
@@ -132,7 +138,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             return null;
         }
 
-        protected override async Task<GaugeMeasurement?> GetMeasurementPoint(string recordName, bool withAscans = false)
+        protected override async Task<GaugeMeasurement?> GetMeasurementPoint(string recordName, Dictionary<byte, string> comments, bool withAscans = false)
         {
             Command command = new()
             {
@@ -164,6 +170,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                     EchoPoints = [.. GetEchoPoints(measurement.Ascan, measurement.Velocity, uom)],
                     HasAScan = measurement.Ascan?.ascanPoints?.Length > 0,
                     ThicknessTime = GetThicknessTime(measurement.Thickness, measurement.Velocity, uom),
+                    Comments = measurement.commentByte > 0 ? string.Join(",", GetCommentStrings(comments, measurement.commentByte)) : null
                 };
             }
 
@@ -371,7 +378,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Name = template.Name,
                 Uom = (Uom)template.Units,
                 Velocity = template.Velocity,
-                numMPoints = template.NumberOfPoints
+                numMPoints = (uint)template.MeasurementPoints.Length
             };
 
             Command command = new()
@@ -581,7 +588,7 @@ namespace Cygnus.TMLink.Protobuf.Services
 
         private async Task AddUserFields(UserField[] userFields, string parentName, V1.CommandType addUserFieldCommand)
         {
-            for (uint i = 0; i < userFields.Length && i <= 7; i = i++)
+            for (uint i = 0; i < userFields.Length && i <= 7; i++)
             {
                 var currentField = userFields[i];
                 Command.AddUserField addUserField = new()
@@ -728,6 +735,18 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Models.UserFieldType.YesNo => V1.UserFieldType.YesNo,
                 _ => V1.UserFieldType.NotUsed,
             };
+        }
+
+        private IEnumerable<string> GetCommentStrings(Dictionary<byte, string> comments, uint commentBits)
+        {
+            for (byte commentByte = 1; commentByte > 0; commentByte <<= 1)
+            {
+                if ((commentByte & commentBits) > 0
+                    && comments.TryGetValue(commentByte, out string comment))
+                {
+                    yield return comment;
+                }
+            }
         }
     }
 }

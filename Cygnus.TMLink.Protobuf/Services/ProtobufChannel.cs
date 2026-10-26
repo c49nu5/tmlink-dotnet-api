@@ -3,6 +3,7 @@ using Cygnus.Models;
 using Cygnus.TMLink.Interfaces;
 using Cygnus.TMLink.Protobuf.Interfaces;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel.Design.Serialization;
 
 namespace Cygnus.TMLink.Protobuf.Services
 {
@@ -139,13 +140,14 @@ namespace Cygnus.TMLink.Protobuf.Services
                     if (gaugeRecord != null)
                     {
                         transferRequest.Status = FileTransferState.Receiving;
+                        Dictionary<byte, string> commentList = GetCommentList(gaugeRecord.Comments);
                         for (int i = 0; i < gaugeRecord.NumberOfPointsTaken; i++)
                         {
                             recordTransferCts.Token.ThrowIfCancellationRequested();
                             _logger.LogInformation("Transferring point {PointIndex} of {TotalPoints} for record {RecordName}", i + 1, gaugeRecord.NumberOfPointsTaken, gaugeRecord.Name);
                             GaugeMeasurement? measurement = transferRequest.RecordType == RecordType.BScan
                                 ? await GetBScanPoint(transferRequest.Name, withAScans)
-                                : await GetMeasurementPoint(transferRequest.Name, withAScans);
+                                : await GetMeasurementPoint(transferRequest.Name, commentList, withAScans);
                             if (measurement != null)
                             {
                                 transferRequest.PercentageTransferred = (double)(i + 1) / gaugeRecord.NumberOfPointsTaken;
@@ -190,7 +192,7 @@ namespace Cygnus.TMLink.Protobuf.Services
 
         protected abstract Task<GaugeRecord?> GetGaugeRecord(IFileTransferRequest transferRequest);
 
-        protected abstract Task<GaugeMeasurement?> GetMeasurementPoint(string name, bool withAScans);
+        protected abstract Task<GaugeMeasurement?> GetMeasurementPoint(string name, Dictionary<byte, string> comments, bool withAScans);
 
         protected abstract Task<GaugeRecord?> GetGaugeBScan(IFileTransferRequest transferRequest);
 
@@ -231,7 +233,7 @@ namespace Cygnus.TMLink.Protobuf.Services
 
         protected void OnLiveMeasurementReceived(LiveMeasurement liveMeasurement)
         {
-            // Initially notify the gauge of the live measurement, which will update the measurement, then notify any other observers
+            // Initially notify the gauge of the live measurement, which will update the gauge properties, then notify any other observers
             _gauge?.OnLiveMeasurementReceived(liveMeasurement);
             _lastLiveMeasurement = liveMeasurement;
             NotifyObservers(o => o.OnLiveMeasurementReceived(liveMeasurement));
@@ -251,6 +253,12 @@ namespace Cygnus.TMLink.Protobuf.Services
         private static double GetNsToThicknessDivisor(uint velocity, MeasurementUnits measurementUnits)
         {
             return velocity / (measurementUnits == MeasurementUnits.Imperial ? 2e4 : 2e3);
+        }
+
+        private Dictionary<byte, string> GetCommentList(string[] comments)
+        {
+            int index = 0;
+            return comments.ToDictionary(c => (byte)(2 ^ index++), c => c);
         }
 
         protected virtual void Dispose(bool disposing)

@@ -19,5 +19,12 @@
         GetBScanPointAScan = 14,
         DeleteBScan = 15,
         DeleteAllBScans = 16,
+        DeleteAllTemplates = 17,
+        NewTemplate = 18,
+        AddTemplatePoints = 19,
+        AddTemplateUserField = 20,
+        AddRecordUserField = 21,
+        SetCommentList = 22,
+        SetMaterialList = 23,
     }
 }

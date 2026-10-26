@@ -20,7 +20,8 @@ namespace Cygnus.Interfaces
         bool IsDataTransferInProgress { get; }
 
         int MaxMaterialCount { get; }
-        int MinCommentCount { get; }
+        int MaxCommentCount { get; }
+        int MaxUserFieldCount { get; }
 
         // Shared methods for all gauge types
 

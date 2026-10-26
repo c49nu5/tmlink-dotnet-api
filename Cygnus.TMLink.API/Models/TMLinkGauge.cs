@@ -66,7 +66,8 @@ namespace Cygnus.TMLink.API.Models
         }
 
         public int MaxMaterialCount => 100; // From the M5EX manual, the gauge supports up to 100 materials
-        public int MinCommentCount => 8;
+        public int MaxCommentCount => 8;
+        public int MaxUserFieldCount => 8;
 
         public async Task<bool> Connect()
         {
