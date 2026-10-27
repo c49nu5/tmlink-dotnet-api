@@ -16,7 +16,7 @@ internal class WhenGetVelocityIncrementIsCalled
         testBed.MeasurementSettingsService.Setup(m => m.Units).Returns(units);
 
         // Act
-        var result = sut.GetVelocityIncrement();
+        var result = sut.VelocityIncrement;
 
         // Assert
         result.ShouldBe(expected);
