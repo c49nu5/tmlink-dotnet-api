@@ -9,6 +9,7 @@ internal class WhenGetThicknessTimeFromDisplayedThicknessIsCalled
     [TestCase("3.2", 5920u, MeasurementUnits.Metric, 1081u)]
     [TestCase("0.5940" , 7567u, MeasurementUnits.Imperial, 1570u)]
     [TestCase("1.230", 6200u, MeasurementUnits.Imperial, 3968u)]
+    [TestCase("sdf230", 6200u, MeasurementUnits.Imperial, 0u)]
     public void CorrectValueShouldBeReturned(string displayedThickness, double velocity, MeasurementUnits units, uint expected)
     {
         // Arrange

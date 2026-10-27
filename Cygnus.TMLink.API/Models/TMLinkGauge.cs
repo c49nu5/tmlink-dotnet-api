@@ -11,6 +11,7 @@ namespace Cygnus.TMLink.API.Models
     internal class TMLinkGauge : ObservableModel<IGaugeObserver>, ITMLinkGauge, ITMLinkDeviceObserver, ILiveMeasurementObserver
     {
         private readonly ILogger _logger;
+        private readonly IPlatformService _platform;
         private readonly Func<byte, IProtobufChannel?> _protobufChannelFactory;
         private readonly ITMLinkConnectionService _connectionService;
         private IProtobufChannel _protobufChannel = new ProtobufNullChannel();
@@ -19,10 +20,12 @@ namespace Cygnus.TMLink.API.Models
         private bool _isDisposed;
 
         public TMLinkGauge(ILogger<TMLinkGauge> logger,
-                        Func<byte, IProtobufChannel?> protobufChannelFactory,
-                        ITMLinkConnectionService connectionService)
+            IPlatformService platform,
+            Func<byte, IProtobufChannel?> protobufChannelFactory,
+            ITMLinkConnectionService connectionService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _platform = platform ?? throw new ArgumentNullException(nameof(platform));
             _protobufChannelFactory = protobufChannelFactory ?? throw new ArgumentNullException(nameof(protobufChannelFactory));
             _connectionService = connectionService ?? throw new ArgumentNullException(nameof(connectionService));
         }
@@ -43,7 +46,7 @@ namespace Cygnus.TMLink.API.Models
         public uint SerialNumber { get; set; } = 0;
         public Version? FirmwareVersion { get; set; }
         public bool IsConnected { get; set; }
-        public GaugeType GaugeType => GaugeType.M5EX; // TODO : Only one gauge type for now, but may need to be dynamic if we support more in the future
+        public GaugeType GaugeType { get; set; } = GaugeType.M5EX;
         public string Port => "BLE";
         public uint SoftwareVersionNumber { get; set; } = 0;
         public GaugeVariant? GaugeVariant { get; set; }
@@ -66,51 +69,53 @@ namespace Cygnus.TMLink.API.Models
         }
 
         public int MaxMaterialCount => 100; // From the M5EX manual, the gauge supports up to 100 materials
-        public int MinCommentCount => 8;
+        public int MaxCommentCount => 8;
+        public int MaxUserFieldCount => 8;
 
         public async Task<bool> Connect()
         {
             try
             {
                 _logger.LogInformation("Connect called for gauge {DeviceIdentifier}", DeviceIdentifier);
-
-                if (_device == null)
+                var device = _device;
+                if (device == null)
                 {
                     _logger.LogError("No device to connect to for gauge {DeviceIdentifier}", DeviceIdentifier);
                     return false;
                 }
 
-                if (!_device.IsConnected)
+                if (!device.IsConnected)
                 {
                     _logger.LogInformation("Device not connected, calling connect for gauge {DeviceIdentifier}", DeviceIdentifier);
-                    await _device.Connect();
+                    await device.Connect();
                 }
 
-                if (_device.IsConnected)
+                if (device.IsConnected)
                 {
                     _logger.LogInformation("Device connected gauge {DeviceIdentifier}", DeviceIdentifier);
                     if (!_protobufChannel.IsInitialized)
                     {
                         _logger.LogInformation("Initializing protobuf channel for gauge {DeviceIdentifier}", DeviceIdentifier);
-                        await InitializeProtobufChannel();
+                        await InitializeProtobufChannel(device);
                     }
 
                     if (_protobufChannel.IsInitialized)
                     {
                         _logger.LogInformation("Connecting protobuf channel for gauge {DeviceIdentifier}", DeviceIdentifier);
 
-                        if (await _protobufChannel.Connect(_device, this))
+                        if (await _protobufChannel.Connect(device, this))
                         {
-                            var gaugeInformation = await _protobufChannel.GetGaugeInformation();
-                            if (gaugeInformation != null)
+                            var gaugeInformation = await _protobufChannel.GetGaugeInformation(DateTime.Now);
+                            if (gaugeInformation.HasValue)
                             {
+                                SerialNumber = gaugeInformation.Value.SerialNumber;
+                                SoftwareVersionNumber = gaugeInformation.Value.SoftwareVersionNumber;
+                                GaugeType = gaugeInformation.Value.GaugeType;
+                                GaugeVariant = gaugeInformation.Value.GaugeVariant;
+                                BatteryLevel = gaugeInformation.Value.BatteryLevel;
+                                GaugeId = gaugeInformation.Value.GaugeId;
+                                ProbeType = gaugeInformation.Value.ProbeType;
                                 IsConnected = true;
-                                SerialNumber = gaugeInformation?.SerialNumber ?? 0;
-                                SoftwareVersionNumber = gaugeInformation?.SoftwareVersionNumber ?? 0;
-                                GaugeVariant = gaugeInformation?.GaugeVariant;
-                                BatteryLevel = gaugeInformation?.BatteryLevel ?? 0;
-                                GaugeId = gaugeInformation?.GaugeId ?? 0;
-                                ProbeType = gaugeInformation?.ProbeType ?? ProbeType.None;
                             }
                             else
                             {
@@ -141,51 +146,39 @@ namespace Cygnus.TMLink.API.Models
             }
         }
 
-        public async Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans)
-        {
-            return await _protobufChannel.GetRecord(new TMLinkTransferMonitor(i => IsDataTransferInProgress = i, transferRequest), withAScans);
-        }
+        public async Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans) => await _protobufChannel.GetRecord(new TMLinkTransferMonitor(i => IsDataTransferInProgress = i, transferRequest), withAScans, _platform.SupportsWiderAScans);
 
-        public async Task DeleteAllRecords()
-        {
-            await _protobufChannel.DeleteAllRecords();
-        }
+        public async Task DeleteAllRecords() => await _protobufChannel.DeleteAllRecords();
 
-        public async Task DeleteRecord(IFileTransferRequest deleteRequest)
-        {
-            await _protobufChannel.DeleteRecord(new TMLinkTransferMonitor(i => IsDataTransferInProgress = i, deleteRequest));
-        }
+        public async Task DeleteAllTemplates() => await _protobufChannel.DeleteAllTemplates();
 
-        public async Task NewRecord(BlankRecord record)
-        {
-            await _protobufChannel.NewRecord(record);
-        }
+        public async Task DeleteRecord(IFileTransferRequest deleteRequest) => await _protobufChannel.DeleteRecord(new TMLinkTransferMonitor(i => IsDataTransferInProgress = i, deleteRequest));
 
-        public async Task<List<GaugeRecordSummary>?> GetRecordList()
-        {
-            return await _protobufChannel.GetRecordList();
-        }
+        public async Task NewRecord(BlankRecord record) => await _protobufChannel.NewRecord(record);
 
-        public void SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver)
-        {
-            _protobufChannel.AddObserver(liveMeasurementObserver);
-        }
+        public async Task NewTemplate(BlankTemplate template) => await _protobufChannel.NewTemplate(template);
 
-        public void UnsubscribeFromLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver)
-        {
-            _protobufChannel.RemoveObserver(liveMeasurementObserver);
-        }
+        public async Task<List<GaugeRecordSummary>?> GetRecordList() => await _protobufChannel.GetRecordList();
 
-        public async Task CancelRecordTransfer()
-        {
-            await _protobufChannel.CancelRecordTransfer();
-        }
+        public async Task SendMaterialList(List<Material> materialList) => await _protobufChannel.SendMaterialList(materialList);
+
+        public async Task SendCommentList(string[] commentsList) => await _protobufChannel.SendCommentList(commentsList);
+
+        public async Task SetGaugeTime(DateTime gaugeTime) => await _protobufChannel.GetGaugeInformation(gaugeTime);
+        // When we send a get gauge information command with the current time, a side-effect is that the gauge time is updated.
+
+        public void SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver) => _protobufChannel.AddObserver(liveMeasurementObserver);
+
+        public void UnsubscribeFromLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver) => _protobufChannel.RemoveObserver(liveMeasurementObserver);
+
+        public async Task CancelRecordTransfer() => await _protobufChannel.CancelRecordTransfer();
 
         public async Task Disconnect()
         {
-            if (_device?.IsConnected == true)
+            var device = _device;
+            if (device != null && device.IsConnected)
             {
-                _device?.Disconnect();
+                device.Disconnect();
             }
             else
             {
@@ -217,28 +210,22 @@ namespace Cygnus.TMLink.API.Models
             _connectionService.GaugeIsDisconnected(DeviceIdentifier);
         }
 
-        private async Task InitializeProtobufChannel()
+        private async Task InitializeProtobufChannel(ITMLinkDevice device)
         {
-            if (_device == null)
-            {
-                _logger.LogWarning("Cannot get protobuf version for gauge {DeviceIdentifier} because device is null", DeviceIdentifier);
-                return;
-            }
-
             byte protobufVersion = 0;
             try
             {
-                var genericCharacteristics = await _device.GetCharacteristics(Constants.GenericAccessServiceId);
+                var genericCharacteristics = await device.GetCharacteristics(Constants.GenericAccessServiceId);
                 if (genericCharacteristics != null)
                 {
                     var deviceNameCharacteristic = genericCharacteristics.FirstOrDefault(c => c.Uuid.Equals(Constants.DeviceNameCharacteristicId, StringComparison.InvariantCultureIgnoreCase));
                     Name = deviceNameCharacteristic != null
                         ? System.Text.Encoding.UTF8.GetString((await deviceNameCharacteristic.ReadValue()) ?? [])
-                        : _device.Name;
+                        : device.Name;
                     _logger.LogInformation("Device name {Name}", Name);
                 }
 
-                var characteristics = await _device.GetCharacteristics(Constants.DeviceInformationServiceId);
+                var characteristics = await device.GetCharacteristics(Constants.DeviceInformationServiceId);
                 if (characteristics == null)
                 {
                     _logger.LogWarning("Cannot get protobuf version for gauge {DeviceIdentifier} because service is null", DeviceIdentifier);
@@ -318,7 +305,11 @@ namespace Cygnus.TMLink.API.Models
             GaugeFeatures.SendsFrozenMeasurements |
             GaugeFeatures.SendsOnlyValidMeasurements |
             GaugeFeatures.CanSendBScanList |
-            GaugeFeatures.CanSendRecordList;
+            GaugeFeatures.CanSendRecordList |
+            GaugeFeatures.CanSendTemplates |
+            GaugeFeatures.CanSendCommentList |
+            GaugeFeatures.CanSendMaterialTable |
+            GaugeFeatures.CanSetDateTime;
 
         protected virtual void Dispose(bool disposing)
         {
@@ -350,22 +341,11 @@ namespace Cygnus.TMLink.API.Models
 
         public ErrorCode DoProbeZero() => throw new NotSupportedException();
 
-        public void SendCommentList(string[] commentsList) => throw new NotSupportedException();
-
-        public void SendMaterialList(List<Material> materialList) => throw new NotSupportedException();
-
         public ErrorCode SendVelocity(uint velocity, MeasurementUnits units) => throw new NotSupportedException();
 
         public ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units, MeasurementResolution resolution) => throw new NotSupportedException();
 
         public ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution) => throw new NotSupportedException();
-
-        public ErrorCode SetGaugeTime(DateTime gaugeTime) 
-        {
-            // When the gauge is connected it sends a get gauge information command with the current time,
-            // a side-effect of which is that the gauge time is automatically updated, so we don't need to set the time on the gauge.
-            return ErrorCode.Success; 
-        }
         #endregion
     }
 }

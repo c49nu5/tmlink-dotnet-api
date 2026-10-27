@@ -1,4 +1,6 @@
-﻿using Cygnus.TMLink.API.Models;
+﻿using Cygnus.Interfaces;
+using Cygnus.Models;
+using Cygnus.TMLink.API.Models;
 using Moq;
 using Shouldly;
 
@@ -13,7 +15,7 @@ internal class WhenDeleteRecordIsCalled
         var sut = testBed.CreateSUT();
 
         // Act
-        var act = sut.DeleteRecord(Mock.Of<Cygnus.Interfaces.IFileTransferRequest>());
+        var act = sut.DeleteRecord(Mock.Of<IFileTransferRequest>());
 
         // Assert
         await act.ShouldThrowAsync<NotImplementedException>();
@@ -25,7 +27,7 @@ internal class WhenDeleteRecordIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
-        Cygnus.Interfaces.IFileTransferRequest deleteRequest = Mock.Of<Cygnus.Interfaces.IFileTransferRequest>();
+        IFileTransferRequest deleteRequest = Mock.Of<IFileTransferRequest>();
         testBed.Protobuf1Channel.Setup(p => p.DeleteRecord(It.IsAny<TMLinkTransferMonitor>())).Returns(Task.CompletedTask);
 
         // Act
@@ -33,5 +35,33 @@ internal class WhenDeleteRecordIsCalled
 
         // Assert
         testBed.Protobuf1Channel.Verify(p => p.DeleteRecord(It.IsAny<TMLinkTransferMonitor>()), Times.Once);
+    }
+
+    [Test]
+    [TestCase(FileTransferState.Complete, false)]
+    [TestCase(FileTransferState.Deleting, true)]
+    [TestCase(FileTransferState.Error, false)]
+    [TestCase(FileTransferState.FileList, false)]
+    [TestCase(FileTransferState.Idle, false)]
+    [TestCase(FileTransferState.Pending, false)]
+    [TestCase(FileTransferState.Receiving, true)]
+    [TestCase(FileTransferState.Sending, true)]
+    public async Task AndDeleteProgresses_ShouldSetIsDataTransferInProgress(FileTransferState status, bool inProgress)
+    {
+        // Arrange
+        var testBed = new TestBed();
+        var sut = await testBed.CreateConnectedSUT();
+        testBed.Observer.Setup(o => o.OnPropertiesUpdated(sut));
+        IFileTransferRequest deleteRequest = Mock.Of<IFileTransferRequest>();
+        IFileTransferRequest monitor = null;
+        testBed.Protobuf1Channel.Setup(p => p.DeleteRecord(It.IsAny<TMLinkTransferMonitor>())).Callback<IFileTransferRequest>(m => monitor = m).Returns(Task.CompletedTask);
+        sut.IsDataTransferInProgress = !inProgress;
+        await sut.DeleteRecord(deleteRequest);
+
+        // Act
+        monitor.Status = status;
+
+        // Assert
+        sut.IsDataTransferInProgress.ShouldBe(inProgress);
     }
 }

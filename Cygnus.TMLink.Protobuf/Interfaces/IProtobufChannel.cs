@@ -18,11 +18,15 @@ namespace Cygnus.TMLink.Protobuf.Interfaces
         Task Disconnect();
 
         Task DeleteAllRecords();
+        Task DeleteAllTemplates();
         Task DeleteRecord(IFileTransferRequest deleteRequest);
-        Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans);
+        Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans, bool withWiderAScans);
         Task<List<GaugeRecordSummary>?> GetRecordList();
         Task NewRecord(BlankRecord record);
-        Task<GaugeInformation?> GetGaugeInformation();
+        Task NewTemplate(BlankTemplate template);
+        Task<GaugeInformation?> GetGaugeInformation(DateTime dateTime);
+        Task SendCommentList(string[] comments);
+        Task SendMaterialList(List<Material> materialList);
 
         /// <summary>
         /// Cancel any record transfer currently in progress

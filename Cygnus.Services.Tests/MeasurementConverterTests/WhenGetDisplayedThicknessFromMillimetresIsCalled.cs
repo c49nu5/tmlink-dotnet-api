@@ -17,8 +17,12 @@ internal class WhenGetDisplayedThicknessFromMillimetresIsCalled
     [TestCase("0.066in", 1.652342, MeasurementUnits.Imperial, MeasurementResolution.Medium)]
     [TestCase("10.044in", 255.12342, MeasurementUnits.Imperial, MeasurementResolution.High)]
     [TestCase("0.065in", 1.65234, MeasurementUnits.Imperial, MeasurementResolution.High)]
+    [TestCase("", 0.0001, MeasurementUnits.Metric, MeasurementResolution.High)]
+    [TestCase("", 0.0001, MeasurementUnits.Imperial, MeasurementResolution.Low)]
     [TestCase("", 0, MeasurementUnits.Metric, MeasurementResolution.High)]
     [TestCase("" , 0, MeasurementUnits.Imperial, MeasurementResolution.Low)]
+    [TestCase("", -1, MeasurementUnits.Metric, MeasurementResolution.High)]
+    [TestCase("", -1, MeasurementUnits.Imperial, MeasurementResolution.Low)]
     public void CorrectValueShouldBeReturned(string displayedThickness, double mm, MeasurementUnits units, MeasurementResolution resolution)
     {
         // Arrange

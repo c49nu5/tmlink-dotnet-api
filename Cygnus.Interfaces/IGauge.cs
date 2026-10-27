@@ -20,7 +20,8 @@ namespace Cygnus.Interfaces
         bool IsDataTransferInProgress { get; }
 
         int MaxMaterialCount { get; }
-        int MinCommentCount { get; }
+        int MaxCommentCount { get; }
+        int MaxUserFieldCount { get; }
 
         // Shared methods for all gauge types
 
@@ -34,7 +35,12 @@ namespace Cygnus.Interfaces
         Task<GaugeRecord?> GetRecord(IFileTransferRequest transferRequest, bool withAScans);
         Task CancelRecordTransfer();
         Task DeleteAllRecords();
+        Task DeleteAllTemplates();
+        Task NewTemplate(BlankTemplate template);
         Task DeleteRecord(IFileTransferRequest deleteRequest);
+        Task SendCommentList(string[] commentsList);
+        Task SendMaterialList(List<Material> materialList);
+        Task SetGaugeTime(DateTime gaugeTime);
 
         void SubscribeToLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver);
         void UnsubscribeFromLiveUpdates(ILiveMeasurementObserver liveMeasurementObserver);
@@ -46,11 +52,8 @@ namespace Cygnus.Interfaces
 
         // Cyglink specific methods
         ErrorCode DoProbeZero();
-        void SendCommentList(string[] commentsList);
-        void SendMaterialList(List<Material> materialList);
         ErrorCode SendVelocity(uint velocity, MeasurementUnits units);
         ErrorCode SendMeasurementSetup(IMeasurementSettingsUpdate measurementSettingsUpdate, MeasurementUnits units, MeasurementResolution resolution);
         ErrorCode SendMeasurementSetup(MeasurementUnits units, MeasurementResolution resolution);
-        ErrorCode SetGaugeTime(DateTime gaugeTime);
     }
 }

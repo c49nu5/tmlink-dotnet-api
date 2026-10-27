@@ -7,7 +7,7 @@ using Cygnus.Models;
 using Shouldly;
 
 namespace Cygnus.Services.Test.MeasurementConverterTests;
-internal class WhenGetIncreaseForUpdateIsCalled
+internal class WhenGetThicknessIncrementIsCalled
 {
     [Test]
     [TestCase(MeasurementUnits.Metric, MeasurementResolution.Low, .1)]
@@ -28,7 +28,7 @@ internal class WhenGetIncreaseForUpdateIsCalled
         testBed.MeasurementSettingsService.Setup(m => m.Resolution).Returns(resolution);
 
         // Act
-        var result = sut.GetThicknessIncrement();
+        var result = sut.ThicknessIncrement;
 
         // Assert
         result.ShouldBe(expected);

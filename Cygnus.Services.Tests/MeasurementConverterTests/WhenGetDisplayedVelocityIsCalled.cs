@@ -42,4 +42,26 @@ internal class WhenGetDisplayedVelocityIsCalled
         // Assert
         displayedVelocity.ShouldBe(expectedVelocity);
     }
+
+    [Test]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, 8547u, "0.8547in/µs")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, 4124u, "4124m/s")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, 3365u, "8547m/s")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, 10475u, "0.4124in/µs")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, 0u, "")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, 0u, "")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, 0u, "")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, 0u, "")]
+    public void WithUnitsIncluded_WithDifferingMeasurementUnits_CorrectValueShouldBeReturned(MeasurementUnits displayUnits, MeasurementUnits measurementUnits, uint velocity, string expectedVelocity)
+    {
+        // Arrange
+        var testBed = new TestBed();
+        var sut = testBed.CreateSUT(displayUnits);
+
+        // Act
+        var displayedVelocity = sut.GetDisplayedVelocity(velocity, measurementUnits, true);
+
+        // Assert
+        displayedVelocity.ShouldBe(expectedVelocity);
+    }
 }

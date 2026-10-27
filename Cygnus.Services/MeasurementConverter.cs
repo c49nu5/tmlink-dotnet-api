@@ -90,7 +90,7 @@ internal partial class MeasurementConverter : IMeasurementConverter
             return GetThicknessTimeFromDisplayedThickness(thickness, velocity, measurementUnits);
         }
 
-        return Convert.ToUInt32(thickness);
+        return 0u;
     }
 
     public uint GetThicknessTimeFromDisplayedThickness(double thickness, uint velocity, MeasurementUnits measurementUnits)
@@ -145,7 +145,7 @@ internal partial class MeasurementConverter : IMeasurementConverter
         return GetDisplayedVelocity(adjustedVelocity, includeUnits);
     }
 
-    public double GetDisplayedVelocity(double velocity, MeasurementUnits measurementUnits)
+    public double GetDisplayedVelocityValue(double velocity, MeasurementUnits measurementUnits)
     {
         double displayedVelocity = GetMeasuredVelocityAdjustedForMeasurementUnits(velocity, measurementUnits, _settingsService.Units);
         displayedVelocity = _settingsService.Units == MeasurementUnits.Metric ? displayedVelocity : displayedVelocity / 1E4;
@@ -162,20 +162,9 @@ internal partial class MeasurementConverter : IMeasurementConverter
         return 0;
     }
 
-    public double GetMinVelocity()
-    {
-        return _settingsService.Units == MeasurementUnits.Metric ? Models.Constants.Velocities.MinimumMetric : Models.Constants.Velocities.MinimumImperial;
-    }
+    public double MinVelocity => _settingsService.Units == MeasurementUnits.Metric ? Models.Constants.Velocities.MinimumMetric : Models.Constants.Velocities.MinimumImperial;
 
-    public double GetMaxVelocity()
-    {
-        return _settingsService.Units == MeasurementUnits.Metric ? Models.Constants.Velocities.MaximumMetric : Models.Constants.Velocities.MaximumImperial;
-    }
-
-    public uint GetVelocityForMaterialList(double velocity, MeasurementUnits Units)
-    {
-        return Convert.ToUInt32(Units == MeasurementUnits.Metric ? velocity : velocity / 1e4);
-    }
+    public double MaxVelocity => _settingsService.Units == MeasurementUnits.Metric ? Models.Constants.Velocities.MaximumMetric : Models.Constants.Velocities.MaximumImperial;
 
     public uint GetMeasuredVelocityAdjustedForDisplayUnits(uint measurementVelocity, MeasurementUnits measurementUnits)
     {
@@ -188,33 +177,7 @@ internal partial class MeasurementConverter : IMeasurementConverter
 
     public string GetDisplayedThickness(double thickness, bool includeUnits = true)
     {
-        if (!double.IsNormal(thickness))
-        {
-            return string.Empty;
-        }
-
-        double roundedThickness;
-        if (_settingsService.Units == MeasurementUnits.Metric)
-        {
-            roundedThickness = _settingsService.Resolution switch
-            {
-                MeasurementResolution.Low => Math.Round(thickness, 1),
-                MeasurementResolution.Medium => Math.Round(thickness / 0.05, MidpointRounding.AwayFromZero) * 0.05,
-                _ => Math.Round(thickness, 2),
-            };
-        }
-        else
-        {
-            double multiple = _settingsService.Resolution switch
-            {
-                MeasurementResolution.Low => 0.005,
-                MeasurementResolution.Medium => 0.002,
-                _ => 0.001,
-            };
-
-            roundedThickness = Math.Round(thickness / multiple, MidpointRounding.AwayFromZero) * multiple;
-        }
-
+        double roundedThickness = GetRoundedThickness(thickness);
         if (roundedThickness > 0)
         {
             if (includeUnits)
@@ -229,6 +192,7 @@ internal partial class MeasurementConverter : IMeasurementConverter
 
         return string.Empty;
     }
+
     public double GetRoundedThickness(double thickness)
     {
         if (!double.IsNormal(thickness))
@@ -292,11 +256,6 @@ internal partial class MeasurementConverter : IMeasurementConverter
         return displayedThicknessValue;
     }
 
-    public double GetDisplayedThicknessValue(double thickness, MeasurementUnits measurementUnits)
-    {
-        return ConvertThickness(thickness, measurementUnits, _settingsService.Units);
-    }
-
     /// <summary>
     /// The thickness format string ensures that thicknesses are presented consistently with the correct number of decimal places for the display resolution
     /// </summary>
@@ -357,7 +316,7 @@ internal partial class MeasurementConverter : IMeasurementConverter
         }
 
         displayedVelocity = Math.Round(displayedVelocity, decimalPlaces);
-        return Math.Clamp(displayedVelocity, GetMinVelocity(), GetMaxVelocity());
+        return Math.Clamp(displayedVelocity, MinVelocity, MaxVelocity);
     }
 
 
@@ -380,26 +339,14 @@ internal partial class MeasurementConverter : IMeasurementConverter
         return thickness;
     }
 
-    public double ConvertThickness(double thickness, MeasurementUnits sourceUnits)
-    {
-        if (sourceUnits == MeasurementUnits.Metric && _settingsService.Units == MeasurementUnits.Imperial)
-        {
-            thickness /= 25.4;
-        }
-        else if (sourceUnits != MeasurementUnits.Metric && _settingsService.Units == MeasurementUnits.Metric)
-        {
-            thickness *= 25.4;
-        }
-
-        return thickness;
-    }
+    public double ConvertThickness(double thickness, MeasurementUnits sourceUnits) => ConvertThickness(thickness, sourceUnits, _settingsService.Units);
 
     public uint GetTargetVelocityForThicknessTime(double targetThickness, uint calibrationThicknessTime)
     {
         uint velocity = (uint)(targetThickness * GetDivisorForUnits(_settingsService.Units) / calibrationThicknessTime);
         velocity = _settingsService.Units == MeasurementUnits.Metric ?
-           (uint)Math.Clamp(velocity, GetMinVelocity(), GetMaxVelocity()) :
-           (uint)Math.Clamp(velocity, GetMinVelocity() * 1e4, GetMaxVelocity() * 1e4);
+           (uint)Math.Clamp(velocity, MinVelocity, MaxVelocity) :
+           (uint)Math.Clamp(velocity, MinVelocity * 1e4, MaxVelocity * 1e4);
         return velocity;
     }
 
@@ -408,31 +355,32 @@ internal partial class MeasurementConverter : IMeasurementConverter
         return (double)(measurementUnits == MeasurementUnits.Imperial ? 2e7 : 2e6);
     }
 
-    public double GetThicknessIncrement()
+    public double ThicknessIncrement
     {
-        if (_settingsService.Units == MeasurementUnits.Metric)
+        get
         {
-            return _settingsService.Resolution switch
+            if (_settingsService.Units == MeasurementUnits.Metric)
             {
-                MeasurementResolution.Low => 0.1,
-                MeasurementResolution.Medium => 0.05,
-                MeasurementResolution.High => 0.01,
-                _ => 0.05,
-            };
-        }
-        else
-        {
-            return _settingsService.Resolution switch
+                return _settingsService.Resolution switch
+                {
+                    MeasurementResolution.Low => 0.1,
+                    MeasurementResolution.High => 0.01,
+                    _ => 0.05,
+                };
+            }
+            else
             {
-                MeasurementResolution.Low => 0.005,
-                MeasurementResolution.Medium => 0.002,
-                MeasurementResolution.High => 0.001,
-                _ => 0.002,
-            };
+                return _settingsService.Resolution switch
+                {
+                    MeasurementResolution.Low => 0.005,
+                    MeasurementResolution.High => 0.001,
+                    _ => 0.002,
+                };
+            }
         }
     }
 
-    public double GetVelocityIncrement() => _settingsService.Units == MeasurementUnits.Metric ? 1 : 0.0001;
+    public double VelocityIncrement => _settingsService.Units == MeasurementUnits.Metric ? 1 : 0.0001;
 
     public double? GetWastage(string displayedThickness, string displayedReference, string displayedMinimum, string? parentReference, string? parentMinimum)
     {
@@ -486,7 +434,7 @@ internal partial class MeasurementConverter : IMeasurementConverter
         return false;
     }
 
-    public double GetMaximumThickness => _settingsService.Units == MeasurementUnits.Metric ? Models.Constants.Measurements.MaxMeasurementThicknessMetric : Models.Constants.Measurements.MaxMeasurementThicknessImperial;
+    public double MaximumThickness => _settingsService.Units == MeasurementUnits.Metric ? Models.Constants.Measurements.MaxMeasurementThicknessMetric : Models.Constants.Measurements.MaxMeasurementThicknessImperial;
 
     public string ThicknessString => _settingsService.Units == MeasurementUnits.Metric ? "mm" : "in";
 

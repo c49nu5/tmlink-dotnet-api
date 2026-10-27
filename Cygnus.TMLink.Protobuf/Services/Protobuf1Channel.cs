@@ -73,17 +73,22 @@ namespace Cygnus.TMLink.Protobuf.Services
             _logger.LogInformation("Received record list from gauge {Device}: {RecordCount}", _device?.Name, recordList?.Items.Count);
 
             return recordList?.Items
-                .Select(i => new GaugeRecordSummary(
-                    default,
-                    i.Name,
-                    default,
-                    i.recordType == V1.RecordType.Linear ? Models.RecordType.Linear : Models.RecordType.Grid2D,
-                    i.fileSize,
-                    i.Created,
-                    i.Updated,
-                    i.Key,
-                    i.numPointsRequired,
-                    i.numPointsTaken))
+                .Select(i =>
+                {
+                    Models.RecordType recordType = i.recordType == V1.RecordType.Linear ? Models.RecordType.Linear : Models.RecordType.Grid2D;
+                    GaugeRecordSummary gaugeRecordSummary = new(
+                                        default,
+                                        i.Name,
+                                        default,
+                                        recordType,
+                                        i.fileSize,
+                                        i.Created,
+                                        i.Updated,
+                                        i.Key,
+                                        i.numPointsRequired,
+                                        i.numPointsTaken);
+                    return gaugeRecordSummary;
+                })
                 .ToList() ?? [];
         }
 
@@ -93,7 +98,7 @@ namespace Cygnus.TMLink.Protobuf.Services
             {
                 commandType = V1.CommandType.GetRecord,
                 Name = transferRequest.Name,
-                Timestamp = DateTime.Now
+                Timestamp = DateTime.Now,
             };
 
             var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command, _recordTransferCts?.Token);
@@ -122,6 +127,9 @@ namespace Cygnus.TMLink.Protobuf.Services
                 gaugeRecord.Updated = record.Updated;
                 gaugeRecord.NumberPointsRequired = record.numPointsRequired;
                 gaugeRecord.NumberOfPointsTaken = record.numPointsTaken;
+                gaugeRecord.TemplateName = string.IsNullOrWhiteSpace(record.templateName) ? null : record.templateName;
+                gaugeRecord.UserFields = [.. record.userFieldValues?.Items?.Select(v => new UserFieldValue { Name = v.ufName, Type = ConvertFieldType(v.ufType), Value = v.ufValue }) ?? []];
+                gaugeRecord.Comments = [.. record.commentList.Comments];
 
                 return gaugeRecord;
             }
@@ -130,12 +138,13 @@ namespace Cygnus.TMLink.Protobuf.Services
             return null;
         }
 
-        protected override async Task<GaugeMeasurement?> GetMeasurementPoint(string recordName, bool withAscans = false)
+        protected override async Task<GaugeMeasurement?> GetMeasurementPoint(string recordName, Dictionary<byte, string> comments, bool withAscans, bool withWiderAScans)
         {
             Command command = new()
             {
                 commandType = withAscans ? V1.CommandType.GetRecordPointAScan : V1.CommandType.GetRecordPoint,
-                Name = recordName
+                Name = recordName,
+                aScanSize = withWiderAScans ? V1.AScanSize.U640 : V1.AScanSize.U320
             };
 
             var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command, _recordTransferCts?.Token);
@@ -161,7 +170,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                     AScan = GetAScan(measurement.Ascan, measurement.Velocity, uom),
                     EchoPoints = [.. GetEchoPoints(measurement.Ascan, measurement.Velocity, uom)],
                     HasAScan = measurement.Ascan?.ascanPoints?.Length > 0,
-                    ThicknessTime = GetThicknessTime(measurement.Thickness, measurement.Velocity, uom)
+                    ThicknessTime = GetThicknessTime(measurement.Thickness, measurement.Velocity, uom),
+                    Comments = measurement.commentByte > 0 ? string.Join(",", GetCommentStrings(comments, measurement.commentByte)) : null
                 };
             }
 
@@ -203,12 +213,13 @@ namespace Cygnus.TMLink.Protobuf.Services
             return null;
         }
 
-        protected override async Task<GaugeMeasurement?> GetBScanPoint(string recordName, bool withAscans = false)
+        protected override async Task<GaugeMeasurement?> GetBScanPoint(string recordName, bool withAscans, bool withWiderAScans)
         {
             Command command = new()
             {
                 commandType = withAscans ? V1.CommandType.GetBScanPointAScan : V1.CommandType.GetBScanPoint,
-                Name = recordName
+                Name = recordName,
+                aScanSize = withWiderAScans ? V1.AScanSize.U640 : V1.AScanSize.U320
             };
 
             var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command, _recordTransferCts?.Token);
@@ -289,6 +300,16 @@ namespace Cygnus.TMLink.Protobuf.Services
             await _protobufCommandHandler.SendCommand(command);
         }
 
+        public override async Task DeleteAllTemplates()
+        {
+            Command command = new()
+            {
+                commandType = V1.CommandType.DeleteAllTemplates,
+            };
+
+            await _protobufCommandHandler.SendCommand(command);
+        }
+
         public override async Task NewRecord(BlankRecord record)
         {
             if (record.Type != Models.RecordType.Linear && record.Type != Models.RecordType.Grid2D)
@@ -304,7 +325,9 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Uom = (Uom)record.Units,
                 numColsX = record.Type == Models.RecordType.Grid2D ? record.ColumnCount : (uint)record.MeasurementPoints.Length,
                 numRowsY = record.Type == Models.RecordType.Grid2D ? record.RowCount : 1,
-                gridPattern = (V1.GridPattern)record.GridPattern                
+                gridPattern = (V1.GridPattern)record.GridPattern,
+                minThickness = record.MinimumThickness,
+                refThickness = record.ReferenceThickness
             };
 
             Command command = new()
@@ -319,16 +342,17 @@ namespace Cygnus.TMLink.Protobuf.Services
             const int batchSize = 10;
             for (var i = 0; i < record.MeasurementPoints.Length; i = i + batchSize)
             {
-                Command.AddRecordPoints addRecordPoints = new() { Name = record.Name };
+                Command.AddPoints addRecordPoints = new() { Name = record.Name };
                 var p = 0;
                 foreach (var point in record.MeasurementPoints.Skip(i).Take(batchSize))
                 {
+                    uint index = (uint)(i + p);
                     addRecordPoints.Mpoints.Add(
-                        new Command.AddRecordPoints.MPoint
+                        new Command.AddPoints.MPoint
                         {
                             Key = point.Key,
                             Name = point.Name,
-                            colNumX = record.Type == Models.RecordType.Linear ? (uint)(i + p) : point.ColNumX,
+                            colNumX = record.Type == Models.RecordType.Linear ? index : point.ColNumX,
                             rowNumY = record.Type == Models.RecordType.Linear ? 0u : point.RowNumY,
                             Method = (V1.Method)point.Method,
                             minThickness = point.ThicknessMinLimit,
@@ -340,11 +364,67 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Command pointsCommand = new()
                 {
                     commandType = V1.CommandType.AddRecordPoints,
-                    addRecordPoints = addRecordPoints
+                    addPoints = addRecordPoints
                 };
 
                 await _protobufCommandHandler.SendCommand(pointsCommand);
             }
+
+            await AddUserFields(record.UserFields, record.Name, V1.CommandType.AddRecordUserField);
+        }
+
+        public override async Task NewTemplate(BlankTemplate template)
+        {
+            Command.NewTemplate newTemplate = new()
+            {
+                Key = template.Key,
+                Name = template.Name,
+                Uom = (Uom)template.Units,
+                Velocity = template.Velocity,
+                numMPoints = (uint)template.MeasurementPoints.Length,
+                minThickness = template.MinimumThickness,
+                refThickness = template.ReferenceThickness
+            };
+
+            Command command = new()
+            {
+                commandType = V1.CommandType.NewTemplate,
+                newTemplate = newTemplate,
+                Timestamp = DateTime.Now,
+            };
+
+            await _protobufCommandHandler.SendCommand(command);
+
+            const int batchSize = 10;
+            for (var i = 0; i < template.MeasurementPoints.Length; i = i + batchSize)
+            {
+                Command.AddPoints addTemplatePoints = new() { Name = template.Name };
+                var p = 0;
+                foreach (var point in template.MeasurementPoints.Skip(i).Take(batchSize))
+                {
+                    uint index = (uint)(i + p);
+                    addTemplatePoints.Mpoints.Add(
+                        new Command.AddPoints.MPoint
+                        {
+                            colNumX = index,
+                            Key = point.Key,
+                            Name = point.Name,
+                            minThickness = point.ThicknessMinLimit,
+                            maxThickness = point.ThicknessMaxLimit
+                        });
+                    p++;
+                }
+
+                Command pointsCommand = new()
+                {
+                    commandType = V1.CommandType.AddTemplatePoints,
+                    addPoints = addTemplatePoints
+                };
+
+                await _protobufCommandHandler.SendCommand(pointsCommand);
+            }
+
+            await AddUserFields(template.UserFields, template.Name, V1.CommandType.AddTemplateUserField);
         }
 
         public override async Task<bool> CancelRecordTransfer()
@@ -362,6 +442,76 @@ namespace Cygnus.TMLink.Protobuf.Services
             }            
 
             return false;
+        }
+
+        public override async Task<GaugeInformation?> GetGaugeInformation(DateTime dateTime)
+        {
+            Command command = new()
+            {
+                commandType = V1.CommandType.GetGaugeInfo,
+                Timestamp = dateTime
+            };
+
+            var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command);
+            var gaugeInfo = message?.gaugeInfo;
+            if (gaugeInfo == null)
+            {
+                _logger.LogError("No gauge info returned for device {Device}", _device?.Name);
+                return null;
+            }
+            else
+            {
+                _logger.LogInformation("Updated gauge info for {Device}: Serial Number {SerialNumber}", _device?.Name, gaugeInfo.serialNumber);
+                return new GaugeInformation
+                {
+                    SerialNumber = gaugeInfo.serialNumber,
+                    GaugeId = gaugeInfo.gaugeUD,
+                    SoftwareVersionNumber = gaugeInfo.versionNumber,
+                    BatteryLevel = gaugeInfo.batteryLevel,
+                    GaugeVariant = (Models.GaugeVariant)gaugeInfo.gaugeVariant,
+                };
+            }
+        }
+        
+        public override async Task SendCommentList(string[] comments)
+        {
+            if (comments.Any())
+            {
+                CommentList commentList = new();
+                commentList.Comments.AddRange(comments);
+                Command pointsCommand = new()
+                {
+                    commandType = V1.CommandType.SetCommentList,
+                    commentList = commentList
+                };
+
+                await _protobufCommandHandler.SendCommand(pointsCommand);
+            }
+        }
+
+        public override async Task SendMaterialList(List<Material> materials)
+        {
+            if (materials.Any())
+            {
+                Command.MaterialList materialList = new();                
+                    materialList.materialLists.AddRange(
+                        materials.Select(m =>
+                            new Command.MaterialList.Material
+                            {
+                                Name = m.Name,
+                                Velocity = m.Velocity,
+                                Uom = (Uom)m.MeasurementUnits
+                            })
+                    );
+
+                Command pointsCommand = new()
+                {
+                    commandType = V1.CommandType.SetMaterialList,
+                    materialList = materialList
+                };
+
+                await _protobufCommandHandler.SendCommand(pointsCommand);
+            }
         }
 
         protected override void ProcessLiveMeasurement(byte[] value)
@@ -438,6 +588,34 @@ namespace Cygnus.TMLink.Protobuf.Services
 
                     OnLiveMeasurementReceived(liveMeasurement);
                 }
+            }
+        }
+
+        private async Task AddUserFields(UserField[] userFields, string parentName, V1.CommandType addUserFieldCommand)
+        {
+            for (uint i = 0; i < userFields.Length && i <= 7; i++)
+            {
+                var currentField = userFields[i];
+                Command.AddUserField addUserField = new()
+                {
+                    Name = parentName,
+                    Index = i,
+                    ufName = currentField.Name,
+                    ufType = ConvertFieldType(currentField.Type),
+                };
+
+                if (currentField.Type == Models.UserFieldType.List && currentField.List != null)
+                {
+                    currentField.List.ForEach(l => addUserField.ufLists.Add(l));
+                }
+
+                Command userFieldCommand = new()
+                {
+                    commandType = addUserFieldCommand,
+                    addUserField = addUserField
+                };
+
+                await _protobufCommandHandler.SendCommand(userFieldCommand);
             }
         }
 
@@ -536,32 +714,43 @@ namespace Cygnus.TMLink.Protobuf.Services
             };
         }
 
-        public override async Task<GaugeInformation?> GetGaugeInformation()
+        private Models.UserFieldType ConvertFieldType(V1.UserFieldType ufType)
         {
-            Command command = new()
+            return ufType switch
             {
-                commandType = V1.CommandType.GetGaugeInfo,
-                Timestamp = DateTime.Now
+                V1.UserFieldType.DateDMY => Models.UserFieldType.DateDMY,
+                V1.UserFieldType.DateMDY => Models.UserFieldType.DateMDY,
+                V1.UserFieldType.List => Models.UserFieldType.List,
+                V1.UserFieldType.Number => Models.UserFieldType.Number,
+                V1.UserFieldType.Text => Models.UserFieldType.Text,
+                V1.UserFieldType.YesNo => Models.UserFieldType.YesNo,
+                _ => Models.UserFieldType.NotUsed,
             };
+        }
 
-            var message = await _protobufCommandHandler.SendCommandWithResponse<Message>(command);
-            var gaugeInfo = message?.gaugeInfo;
-            if (gaugeInfo == null)
+        private V1.UserFieldType ConvertFieldType(Models.UserFieldType type)
+        {
+            return type switch
             {
-                _logger.LogError("No gauge info returned for device {Device}", _device?.Name);
-                return null;
-            }
-            else
+                Models.UserFieldType.DateDMY => V1.UserFieldType.DateDMY,
+                Models.UserFieldType.DateMDY => V1.UserFieldType.DateMDY,
+                Models.UserFieldType.List => V1.UserFieldType.List,
+                Models.UserFieldType.Number => V1.UserFieldType.Number,
+                Models.UserFieldType.Text => V1.UserFieldType.Text,
+                Models.UserFieldType.YesNo => V1.UserFieldType.YesNo,
+                _ => V1.UserFieldType.NotUsed,
+            };
+        }
+
+        private IEnumerable<string> GetCommentStrings(Dictionary<byte, string> comments, uint commentBits)
+        {
+            for (byte commentByte = 1; commentByte > 0; commentByte <<= 1)
             {
-                _logger.LogInformation("Updated gauge info for {Device}: Serial Number {SerialNumber}", _device?.Name, gaugeInfo.serialNumber);
-                return new GaugeInformation
+                if ((commentByte & commentBits) > 0
+                    && comments.TryGetValue(commentByte, out string comment))
                 {
-                    SerialNumber = gaugeInfo.serialNumber,
-                    GaugeId = gaugeInfo.gaugeUD,
-                    SoftwareVersionNumber = gaugeInfo.versionNumber,
-                    BatteryLevel = gaugeInfo.batteryLevel,
-                    GaugeVariant = (Models.GaugeVariant)(gaugeInfo.gaugeVariant),
-                };
+                    yield return comment;
+                }
             }
         }
     }

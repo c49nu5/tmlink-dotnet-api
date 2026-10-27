@@ -10,5 +10,8 @@
         public uint RowCount { get; set; }
         public BlankPoint[] MeasurementPoints { get; set; } = [];
         public GridType GridPattern { get; set; }
+        public UserField[] UserFields { get; set; } = [];
+        public uint MinimumThickness { get; set; }
+        public uint ReferenceThickness { get; set; }
     }
 }

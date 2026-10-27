@@ -25,6 +25,12 @@
         public uint NumberOfPointsTaken;
 
         public ProtectionState ProtectionState = ProtectionState.Open;
+
+        public string? TemplateName;
+
+        public UserFieldValue[] UserFields = [];
+
+        public string[] Comments = [];
     }
 
     public record GaugeLinearRecord : GaugeRecord
@@ -40,8 +46,6 @@
         public string Notes = string.Empty;
 
         public RecordCreator Creator = RecordCreator.Gauge;
-
-        public string[] Comments = [];
     }
 
     public record GaugeGridRecord : GaugeLinearRecord

@@ -15,10 +15,42 @@ internal class WhenGetGaugeInformationIsCalled
         testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo))).ReturnsAsync(new V1.Message { gaugeInfo = protobufInfo });
 
         // Act
-        var gaugeInfo = await sut.GetGaugeInformation();
+        var gaugeInfo = await sut.GetGaugeInformation(DateTime.Now);
 
         // Assert
         testBed.ProtobufCommandHandler.Verify(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo)), Times.Once());
+    }
+
+    [Test]
+    public async Task AndCommandHandlerReturnsNoGaugeInfo_ShouldReturnNull()
+    {
+        // Arrange
+        var testBed = new TestBed();
+        var sut = await testBed.CreateConnectedSUT(true);
+        V1.Message.GaugeInfo protobufInfo = new();
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo))).ReturnsAsync(new V1.Message { });
+
+        // Act
+        var gaugeInfo = await sut.GetGaugeInformation(DateTime.Now);
+
+        // Assert
+        gaugeInfo.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task AndCommandHandlerReturnsNull_ShouldReturnNull()
+    {
+        // Arrange
+        var testBed = new TestBed();
+        var sut = await testBed.CreateConnectedSUT(true);
+        V1.Message.GaugeInfo protobufInfo = new();
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo))).ReturnsAsync((V1.Message)null);
+
+        // Act
+        var gaugeInfo = await sut.GetGaugeInformation(DateTime.Now);
+
+        // Assert
+        gaugeInfo.ShouldBeNull();
     }
 
     [Test]
@@ -31,7 +63,7 @@ internal class WhenGetGaugeInformationIsCalled
         testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo))).ReturnsAsync(new V1.Message { gaugeInfo = protobufInfo });
 
         // Act
-        var gaugeInfo = await sut.GetGaugeInformation();
+        var gaugeInfo = await sut.GetGaugeInformation(DateTime.Now);
 
         // Assert
         gaugeInfo?.BatteryLevel.ShouldBe(batteryLevel);
@@ -47,7 +79,7 @@ internal class WhenGetGaugeInformationIsCalled
         testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo))).ReturnsAsync(new V1.Message { gaugeInfo = protobufInfo });
 
         // Act
-        var gaugeInfo = await sut.GetGaugeInformation();
+        var gaugeInfo = await sut.GetGaugeInformation(DateTime.Now);
 
         // Assert
         gaugeInfo?.GaugeId.ShouldBe(gaugeUD);
@@ -63,7 +95,7 @@ internal class WhenGetGaugeInformationIsCalled
         testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo))).ReturnsAsync(new V1.Message { gaugeInfo = protobufInfo });
 
         // Act
-        var gaugeInfo = await sut.GetGaugeInformation();
+        var gaugeInfo = await sut.GetGaugeInformation(DateTime.UtcNow);
 
         // Assert
         ((int)gaugeInfo?.GaugeVariant.Value).ShouldBe((int)gaugeVariant);
@@ -79,7 +111,7 @@ internal class WhenGetGaugeInformationIsCalled
         testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo))).ReturnsAsync(new V1.Message { gaugeInfo = protobufInfo });
 
         // Act
-        var gaugeInfo = await sut.GetGaugeInformation();
+        var gaugeInfo = await sut.GetGaugeInformation(DateTime.Now);
 
         // Assert
         gaugeInfo?.SerialNumber.ShouldBe(serialNumber);
@@ -95,7 +127,7 @@ internal class WhenGetGaugeInformationIsCalled
         testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo))).ReturnsAsync(new V1.Message { gaugeInfo = protobufInfo });
 
         // Act
-        var gaugeInfo = await sut.GetGaugeInformation();
+        var gaugeInfo = await sut.GetGaugeInformation(DateTime.Now);
 
         // Assert
         gaugeInfo?.SoftwareVersionNumber.ShouldBe(versionNumber);

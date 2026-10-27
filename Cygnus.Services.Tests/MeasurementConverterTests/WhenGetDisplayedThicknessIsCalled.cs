@@ -40,6 +40,8 @@ internal class WhenGetDisplayedThicknessIsCalled
     [TestCase(MeasurementUnits.Metric, MeasurementResolution.High, 5.3784, "5.38")]
     [TestCase(MeasurementUnits.Metric, MeasurementResolution.High, 5.3824, "5.38")]
     [TestCase(MeasurementUnits.Metric, MeasurementResolution.High, 5.3924, "5.39")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementResolution.Low, 0.0001, "")]
+    [TestCase(MeasurementUnits.Metric, MeasurementResolution.Low, 0.00001, "")]
     [TestCase(MeasurementUnits.Imperial, MeasurementResolution.Low, 0, "")]
     [TestCase(MeasurementUnits.Imperial, MeasurementResolution.Medium, double.NegativeInfinity, "")]
     [TestCase(MeasurementUnits.Imperial, MeasurementResolution.High, double.PositiveInfinity, "")]
@@ -138,6 +140,84 @@ internal class WhenGetDisplayedThicknessIsCalled
     }
 
     [Test]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 12190u, 200u, "0.120in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 12220u, 200u, "0.120in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 12370u, 200u, "0.125in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 126800u, 20u, "0.125in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 131900u, 20u, "0.130in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 135900u, 20u, "0.135in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Medium, 1219u, 2000u, "0.122in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Medium, 1222u, 2000u, "0.122in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Medium, 1239u, 2000u, "0.124in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Medium, 1269u, 2000u, "0.126in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Medium, 1319u, 2000u, "0.132in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Medium, 1359u, 2000u, "0.136in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.High, 1233u, 2000u, "0.123in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.High, 12350u, 200u, "0.124in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.High, 123600u, 20u, "0.124in")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Low, 5602u, 200u, "1.4mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Low, 5720u, 200u, "1.5mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Low, 5799u, 200u, "1.5mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Low, 5957u, 200u, "1.5mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Medium, 20914u, 200u, "5.30mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Medium, 20954u, 200u, "5.30mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Medium, 20977u, 200u, "5.35mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Medium, 21033u, 200u, "5.35mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Medium, 21151u, 200u, "5.35mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.High, 20914u, 200u, "5.31mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.High, 20954u, 200u, "5.32mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.High, 21151u, 200u, "5.37mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.High, 21174u, 200u, "5.38mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.High, 21190u, 200u, "5.38mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.High, 21229u, 200u, "5.39mm")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 0u, 5430u, "")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Low, 0u, 2054u, "")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Low, 30962u, 200u, "0.120in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Low, 31038u, 200u, "0.120in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Low, 31419u, 200u, "0.125in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Low, 322070u, 20u, "0.125in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Low, 335020u, 20u, "0.130in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Low, 345180u, 20u, "0.135in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Medium, 3096u, 2000u, "0.122in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Medium, 3103u, 2000u, "0.122in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Medium, 3147u, 2000u, "0.124in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Medium, 3223u, 2000u, "0.126in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Medium, 3350u, 2000u, "0.132in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Medium, 3451u, 2000u, "0.136in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.High, 3131u, 2000u, "0.123in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.High, 31369u, 200u, "0.124in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.High, 31394u, 200u, "0.124in")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Low, 14231u, 200u, "1.4mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Low, 14531u, 200u, "1.5mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Low, 14731u, 200u, "1.5mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Low, 15131u, 200u, "1.5mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Medium, 53124u, 200u, "5.30mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Medium, 53224u, 200u, "5.30mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Medium, 53284u, 200u, "5.35mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Medium, 53424u, 200u, "5.35mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Medium, 53724u, 200u, "5.35mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.High, 53124u, 200u, "5.31mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.High, 53224u, 200u, "5.32mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.High, 53724u, 200u, "5.37mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.High, 53784u, 200u, "5.38mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.High, 53824u, 200u, "5.38mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.High, 53924u, 200u, "5.39mm")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Low, 0u, 7654u, "")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Low, 0u, 6540u, "")]
+    public void WithDifferingMeasurementUnits_AndUnitsDisplayed_CorrectValueShouldBeReturned(MeasurementUnits measurementUnits, MeasurementUnits units, MeasurementResolution resolution, uint thickness, uint velocity, string expectedThickness)
+    {
+        // Arrange
+        var testBed = new TestBed();
+        var sut = testBed.CreateSUT(units, resolution);
+
+        // Act
+        var displayedThickness = sut.GetDisplayedThickness(thickness, velocity, measurementUnits, true);
+
+        // Assert
+        displayedThickness.ShouldBe(expectedThickness);
+    }
+
+    [Test]
     [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 0.12190, "0.120")]
     [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 0.12220, "0.120")]
     [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 0.12370, "0.125")]
@@ -180,6 +260,54 @@ internal class WhenGetDisplayedThicknessIsCalled
         var testBed = new TestBed();
         var sut = testBed.CreateSUT(units, resolution);
         
+        // Act
+        var displayedThickness = sut.GetDisplayedThickness(thickness, measurementUnits, false);
+
+        // Assert
+        displayedThickness.ShouldBe(expectedThickness);
+    }
+
+
+    [Test]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 121u, "0.120")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 122u, "0.120")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 123u, "0.125")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 126u, "0.125")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 131u, "0.130")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Low, 135u, "0.135")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Medium, 121u, "0.122")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.Medium, 122u, "0.122")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Imperial, MeasurementResolution.High, 123u, "0.123")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Low, 56u, "1.4")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Low, 58u, "1.5")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Medium, 209u, "5.30")]
+    [TestCase(MeasurementUnits.Imperial, MeasurementUnits.Metric, MeasurementResolution.Medium, 210u, "5.35")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Low, 3096u, "0.120")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Low, 3103u, "0.120")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Low, 3141u, "0.125")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Low, 3220u, "0.125")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Medium, 3096u, "0.122")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Medium, 3223u, "0.126")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Medium, 3350u, "0.132")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.High, 3137u, "0.124")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.High, 3139u, "0.124")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Low, 1423u, "1.4")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Low, 1473u, "1.5")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Low, 1513u, "1.5")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Medium, 5312u, "5.30")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Medium, 5322u, "5.30")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Medium, 5372u, "5.35")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.High, 5312u, "5.31")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.High, 5322u, "5.32")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.High, 5392u, "5.39")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Imperial, MeasurementResolution.Low, 0u, "")]
+    [TestCase(MeasurementUnits.Metric, MeasurementUnits.Metric, MeasurementResolution.Low, 0u, "")]
+    public void WithUintFromTMLink_WithMeasurementThicknessAndMeasurementUnits_CorrectValueShouldBeReturned(MeasurementUnits measurementUnits, MeasurementUnits units, MeasurementResolution resolution, uint thickness, string expectedThickness)
+    {
+        // Arrange
+        var testBed = new TestBed();
+        var sut = testBed.CreateSUT(units, resolution);
+
         // Act
         var displayedThickness = sut.GetDisplayedThickness(thickness, measurementUnits, false);
 
