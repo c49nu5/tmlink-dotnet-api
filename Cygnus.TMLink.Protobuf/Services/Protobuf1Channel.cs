@@ -325,7 +325,9 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Uom = (Uom)record.Units,
                 numColsX = record.Type == Models.RecordType.Grid2D ? record.ColumnCount : (uint)record.MeasurementPoints.Length,
                 numRowsY = record.Type == Models.RecordType.Grid2D ? record.RowCount : 1,
-                gridPattern = (V1.GridPattern)record.GridPattern                
+                gridPattern = (V1.GridPattern)record.GridPattern,
+                minThickness = record.MinimumThickness,
+                refThickness = record.ReferenceThickness
             };
 
             Command command = new()
@@ -348,7 +350,6 @@ namespace Cygnus.TMLink.Protobuf.Services
                     addRecordPoints.Mpoints.Add(
                         new Command.AddPoints.MPoint
                         {
-                            Index = index,
                             Key = point.Key,
                             Name = point.Name,
                             colNumX = record.Type == Models.RecordType.Linear ? index : point.ColNumX,
@@ -380,7 +381,9 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Name = template.Name,
                 Uom = (Uom)template.Units,
                 Velocity = template.Velocity,
-                numMPoints = (uint)template.MeasurementPoints.Length
+                numMPoints = (uint)template.MeasurementPoints.Length,
+                minThickness = template.MinimumThickness,
+                refThickness = template.ReferenceThickness
             };
 
             Command command = new()
@@ -403,7 +406,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                     addTemplatePoints.Mpoints.Add(
                         new Command.AddPoints.MPoint
                         {
-                            Index = index,
+                            colNumX = index,
                             Key = point.Key,
                             Name = point.Name,
                             minThickness = point.ThicknessMinLimit,

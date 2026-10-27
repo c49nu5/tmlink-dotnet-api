@@ -22,6 +22,38 @@ internal class WhenGetGaugeInformationIsCalled
     }
 
     [Test]
+    public async Task AndCommandHandlerReturnsNoGaugeInfo_ShouldReturnNull()
+    {
+        // Arrange
+        var testBed = new TestBed();
+        var sut = await testBed.CreateConnectedSUT(true);
+        V1.Message.GaugeInfo protobufInfo = new();
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo))).ReturnsAsync(new V1.Message { });
+
+        // Act
+        var gaugeInfo = await sut.GetGaugeInformation(DateTime.Now);
+
+        // Assert
+        gaugeInfo.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task AndCommandHandlerReturnsNull_ShouldReturnNull()
+    {
+        // Arrange
+        var testBed = new TestBed();
+        var sut = await testBed.CreateConnectedSUT(true);
+        V1.Message.GaugeInfo protobufInfo = new();
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo))).ReturnsAsync((V1.Message)null);
+
+        // Act
+        var gaugeInfo = await sut.GetGaugeInformation(DateTime.Now);
+
+        // Assert
+        gaugeInfo.ShouldBeNull();
+    }
+
+    [Test]
     public async Task ReturnReturnGaugeInfo_WithExpectedBatteryLevel([Random(0u, 100u, 1)] uint batteryLevel)
     {
         // Arrange

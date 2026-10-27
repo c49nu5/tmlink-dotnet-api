@@ -8,6 +8,20 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
     internal class WhenConnectIsCalled
     {
         [Test]
+        public async Task AndDeviceHasNotBeenSet_ReturnsFalse()
+        {
+            // Arrange
+            var tb = new TestBed();
+            var sut = tb.CreateSUT(true);
+            
+            // Act
+            var result = await sut.Connect();
+
+            // Assert
+            result.ShouldBeFalse();
+        }
+
+        [Test]
         public async Task WhenWithProtobufChannelFactoryReturningNull_ReturnsFalse()
         {
             // Arrange

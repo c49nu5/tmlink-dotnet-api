@@ -11,6 +11,8 @@ internal class WhenGetWastageIsCalled
     [TestCase("10", "", "", "", "", null)]
     [TestCase("", "14", "4", "15", "5", null)]
     [TestCase("10", "5", "5", "", "", 0)]
+    [TestCase("10", "", "5", null, "4", null)]
+    [TestCase("10", "10", "", "15", null, null)]
 
     public void CorrectValueShouldBeReturned(string displayedThickness, string displayedRef, string displayedMin, string parentRef, string parentMin, double? expected)
     {

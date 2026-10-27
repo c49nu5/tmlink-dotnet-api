@@ -264,8 +264,8 @@ message Command
     google.protobuf.Timestamp timestamp   = 2;          // Sets Gauge date-time when non-zero is sent.
     string name                           = 3;          // Optional name of a Record, Template or BScan. (30 chars max).
     NewRecord newRecord                   = 4;          // Optional for command NewRecord.
-    AddPoints addPoints                   = 5;          // Optional for commands AddRecordPoints and AddTemplatePoints.
-	AScanSize aScanSize                   = 6;			// Optional for commands GetRecordPoint, GetBScanPoint (default is U640).
+    AddPoints addPoints                   = 5;          // Optional for commands AddRecordPointAScans and AddTemplatePoints.
+	AScanSize aScanSize                   = 6;			// Optional for commands GetRecordPointAScan and GetBScanPointAScan (default is U640).
 	NewTemplate newTemplate               = 7;          // Optional for command NewTemplate.
 	AddUserField addUserField             = 8;          // Optional for commands AddRecordUserFields and AddTemplateUserFields.
 	CommentList commentList               = 9;          // Optional for command SetCommentList.
@@ -283,6 +283,8 @@ message Command
         UOM uom                           = 5;          // Units of Measurement.
         uint32 numColsX                   = 6;          // Linear or Grid X Dimension 1..N.
         uint32 numRowsY                   = 7;          // Grid Y coordinate 1..N.
+		uint32 minThickness               = 8;          // Minimum thickness warning (in UoM) or zero if not required.
+        uint32 refThickness               = 9;          // Reference thickness (in UoM) or zero if not required.
     }
 	
     // ------------------------------------------------------------------------------------------------
@@ -294,6 +296,8 @@ message Command
         UOM uom                           = 3;          // Units of Measurement.
 		uint32 velocity                   = 4;          // Velocity of sound in UOM or zero if not required.
         uint32 numMPoints                 = 5;          // Number of measurement points 1..N
+		uint32 minThickness               = 6;          // Minimum thickness warning (in UoM) or zero if not required.
+        uint32 refThickness               = 7;          // Reference thickness (in UoM) or zero if not required.
     }
     	
 	// ------------------------------------------------------------------------------------------------
@@ -311,11 +315,10 @@ message Command
             string name                  = 1;           // point name (30 chars max).
             uint32 key                   = 2;           // TML Key or ID number.
             Method method                = 3;           // Method; Spot or Scan [Records only].
-            uint32 colNumX               = 4;           // Linear or Grid X Coordinate, 0 based [Records only].
+            uint32 colNumX               = 4;           // Linear or Grid X Coordinate, 0 based [Templates & Records].
             uint32 rowNumY               = 5;           // Grid Y coordinate, 0 based[Records only].
             uint32 minThickness          = 6;           // Minimum thickness warning (in UoM) or zero if not required.
             uint32 maxThickness          = 7;           // Maximum thickness warning (in UoM) or zero if not required.
-			uint32 index                 = 8;           // Point index, zero based [Templates Only].
         }
     }
 	
@@ -333,15 +336,15 @@ message Command
 		
 	// ------------------------------------------------------------------------------------------------
     // Used to send a list of Material Name and Velocity-of-Sound pairs to the gauge.
-	// If more than 8 Materials are sent, the message will be discarded and a NAK response returned.
+	// If more than 20 Materials are sent, the message will be discarded and a NAK response returned.
 	message MaterialList
 	{
-		repeated Material materialList   = 1;          // Array of 1..8 Materials.
+		repeated Material materialList   = 1;          // Array of 1..20 Material items.
 		
 		// ---------------------------------------------------------------
         message Material
 		{
-			string name                  = 1;          // Material name (32 chars max).
+			string name                  = 1;          // Material name (16 chars max).
 			uint32 velocity              = 2;          // Velocity in m/s or in/us*1e4
 			UOM uom                      = 3;          // Units of Measurement.
 		}
@@ -454,7 +457,7 @@ message Message
 		AScan ascan                           = 14;         // optional AScan Data.
 		uint32 commentByte                    = 15;         // Byte with selected 1 to 8 Comments.
     }
-        
+		 
     // ------------------------------------------------------------------------------------------------
     // Contains a list of BScan found on the gauge.
     message BScanList
@@ -580,8 +583,8 @@ enum CommandType
     Non = 0;        
     GetGaugeInfo             = 1;     // request info about the Gauge (serial, model, variant, battery level etc).
     CancelRecordTransfer     = 2;     // send to cancel a Record or BScan transfer from the gauge.
-    GetRecordList            = 3;     // requests a list of Records on the gauge.
-    GetRecord                = 4;     // requests a Record from the gauge.
+    GetRecordList            = 3;     // request a list of Records on the gauge.
+    GetRecord                = 4;     // request a Record from the gauge.
     GetRecordPoint           = 5;     // request a Record's measurement point (No AScan data).
     GetRecordPointAScan      = 6;     // request a Record's measurement point (With AScan data).
     DeleteRecord             = 7;     // request a Record is deleted from the gauge.

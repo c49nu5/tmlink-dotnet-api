@@ -1,4 +1,5 @@
-﻿using Cygnus.Models;
+﻿using Cygnus.Interfaces;
+using Cygnus.Models;
 using Cygnus.TMLink.API.Models;
 using Moq;
 using Shouldly;
@@ -14,7 +15,7 @@ internal class WhenGetRecordIsCalled
         var sut = testBed.CreateSUT();
 
         // Act
-        var act = sut.GetRecord(Mock.Of<Cygnus.Interfaces.IFileTransferRequest>(), true);
+        var act = sut.GetRecord(Mock.Of<IFileTransferRequest>(), true);
 
         // Assert
         await act.ShouldThrowAsync<NotImplementedException>();
@@ -26,7 +27,7 @@ internal class WhenGetRecordIsCalled
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT(withWiderAScans);
-        Cygnus.Interfaces.IFileTransferRequest transferRequest = Mock.Of<Cygnus.Interfaces.IFileTransferRequest>();
+        IFileTransferRequest transferRequest = Mock.Of<IFileTransferRequest>();
         testBed.Protobuf1Channel.Setup(p => p.GetRecord(It.IsAny<TMLinkTransferMonitor>(), withAScans, withWiderAScans)).ReturnsAsync(new GaugeRecord());
 
         // Act
@@ -37,12 +38,40 @@ internal class WhenGetRecordIsCalled
     }
 
     [Test]
+    [TestCase(FileTransferState.Complete, false)]
+    [TestCase(FileTransferState.Deleting, true)]
+    [TestCase(FileTransferState.Error, false)]
+    [TestCase(FileTransferState.FileList, false)]
+    [TestCase(FileTransferState.Idle, false)]
+    [TestCase(FileTransferState.Pending, false)]
+    [TestCase(FileTransferState.Receiving, true)]
+    [TestCase(FileTransferState.Sending, true)]
+    public async Task AndTransferProgresses_ShouldSetIsDataTransferInProgress(FileTransferState status, bool inProgress)
+    {
+        // Arrange
+        var testBed = new TestBed();
+        var sut = await testBed.CreateConnectedSUT();
+        testBed.Observer.Setup(o => o.OnPropertiesUpdated(sut));
+        IFileTransferRequest transferRequest = Mock.Of<IFileTransferRequest>();
+        IFileTransferRequest monitor = null;
+        testBed.Protobuf1Channel.Setup(p => p.GetRecord(It.IsAny<TMLinkTransferMonitor>(), false, false)).Callback<IFileTransferRequest, bool, bool>((m,a,b) => monitor = m).ReturnsAsync(new GaugeRecord());
+        sut.IsDataTransferInProgress = !inProgress;
+        await sut.GetRecord(transferRequest, false);
+
+        // Act
+        monitor.Status = status;
+
+        // Assert
+        sut.IsDataTransferInProgress.ShouldBe(inProgress);
+    }
+
+    [Test]
     public async Task AndGaugeIsConnected_ShouldReturnRecordFromProtobuf1Channel()
     {
         // Arrange
         var testBed = new TestBed();
         var sut = await testBed.CreateConnectedSUT();
-        Cygnus.Interfaces.IFileTransferRequest transferRequest = Mock.Of<Cygnus.Interfaces.IFileTransferRequest>();
+        IFileTransferRequest transferRequest = Mock.Of<IFileTransferRequest>();
         GaugeRecord expected = new();
         testBed.Protobuf1Channel.Setup(p => p.GetRecord(It.IsAny<TMLinkTransferMonitor>(), false, false)).ReturnsAsync(expected);
 

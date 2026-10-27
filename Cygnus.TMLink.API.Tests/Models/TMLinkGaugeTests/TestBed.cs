@@ -51,7 +51,7 @@ namespace Cygnus.TMLink.API.Tests.Models.TMLinkGaugeTests
         internal async Task<TMLinkGauge> CreateConnectedSUT(bool withWiderAScans = false)
         {
             var sut = CreateSUT(true, withWiderAScans);
-            var device = ConnectedDevice = CreateDevice(true);
+            var device = ConnectedDevice = CreateDevice(true, true);
             Protobuf1Channel.Setup(p => p.Connect(device.Object, sut)).ReturnsAsync(true);
             Protobuf1Channel.Setup(p => p.GetGaugeInformation(It.IsAny<DateTime>())).ReturnsAsync(new Cygnus.Models.GaugeInformation { SerialNumber = (uint)Random.Shared.Next(23132, 41232) });
             Protobuf1Channel.Setup(p => p.AddObserver(sut));
