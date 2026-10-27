@@ -5,8 +5,14 @@ namespace Cygnus.Interfaces;
 public interface IMeasurementConverter
 {
     string ChartLabelFormatString { get; }
-    int ThicknessDecimalPlaces { get; }
     string ThicknessFormatString { get; }
+    int ThicknessDecimalPlaces { get; }
+    double MaximumThickness { get; }
+    double ThicknessIncrement { get; }
+    double VelocityIncrement { get; }
+    double MinVelocity { get; }
+    double MaxVelocity { get; }
+
     string GetDisplayedThickness(double thickness, bool includeUnits = true);
     double GetRoundedThickness(double thickness);
     string GetDisplayedThickness(uint thickness, MeasurementUnits measurementUnits, bool includeUnits = true);
@@ -30,15 +36,10 @@ public interface IMeasurementConverter
     double ConvertThickness(double thickness, MeasurementUnits sourceUnits, MeasurementUnits destinationUnits);
     double ConvertThickness(double thickness, MeasurementUnits sourceUnits);
     double GetThicknessFromDisplayedValue(double thickness, MeasurementUnits sourceUnits);
-    double GetThicknessIncrement();
     double? GetWastage(string displayedThickness, string displayedReference, string displayedMinimum, string? parentReference, string? parentMinimum);
     string GetRelayThickness(uint thicknessTime, uint velocity, MeasurementUnits units);
     string GetRelayVelocity(uint velocity, MeasurementUnits units);
     double GetThicknessFromDisplayedThickness(string value, MeasurementUnits measurementUnits);
-    double GetVelocityIncrement();
     uint ConvertVelocity(CalibratedVelocity calibratedVelocity, MeasurementUnits destinationUnits);
     uint GetTargetVelocityForThicknessTime(double targetThickness, uint calibrationThicknessTime);
-    double GetMinVelocity();
-    double GetMaxVelocity();
-    double MaximumThickness { get; }
 }

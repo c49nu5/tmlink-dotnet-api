@@ -28,7 +28,7 @@ internal class WhenGetThicknessIncrementIsCalled
         testBed.MeasurementSettingsService.Setup(m => m.Resolution).Returns(resolution);
 
         // Act
-        var result = sut.GetThicknessIncrement();
+        var result = sut.ThicknessIncrement;
 
         // Assert
         result.ShouldBe(expected);
