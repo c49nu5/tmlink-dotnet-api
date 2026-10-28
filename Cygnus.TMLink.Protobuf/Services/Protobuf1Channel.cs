@@ -469,6 +469,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                     SoftwareVersionNumber = gaugeInfo.versionNumber,
                     BatteryLevel = gaugeInfo.batteryLevel,
                     GaugeVariant = (Models.GaugeVariant)gaugeInfo.gaugeVariant,
+                    GaugeType = GaugeType.M5EX
                 };
             }
         }
