@@ -296,6 +296,7 @@ namespace Cygnus.TMLink.API.Models
             GaugeFeatures.CanCancelRecordTransfer |
             GaugeFeatures.CanDeleteBScans |
             GaugeFeatures.CanDeleteRecords |
+            GaugeFeatures.CanDeleteTemplates |
             GaugeFeatures.HasAScanCapability |
             GaugeFeatures.HasBScanCapability |
             GaugeFeatures.HasDeepCoat |
