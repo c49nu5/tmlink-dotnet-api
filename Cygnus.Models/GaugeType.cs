@@ -16,6 +16,7 @@ public enum GaugeType
     M5ROVASCAN = 12,
     M1FMD = 13,
     M5UW = 14,
-    M6SG = 21,
-    M5ROV063 = 22
+    M5ROVMINI = 15,
+    M5ROV5K = 16,
+    M6SG = 17
 }
