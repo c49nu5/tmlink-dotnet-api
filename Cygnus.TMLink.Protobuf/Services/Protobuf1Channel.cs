@@ -469,11 +469,11 @@ namespace Cygnus.TMLink.Protobuf.Services
                     SoftwareVersionNumber = gaugeInfo.versionNumber,
                     BatteryLevel = gaugeInfo.batteryLevel,
                     GaugeVariant = (Models.GaugeVariant)gaugeInfo.gaugeVariant,
-                    GaugeType = GaugeType.M5EX
+                    GaugeType = ConvertGaugeType(gaugeInfo.gaugeType)
                 };
             }
         }
-        
+
         public override async Task SendCommentList(string[] comments)
         {
             if (comments.Any())
@@ -652,6 +652,15 @@ namespace Cygnus.TMLink.Protobuf.Services
                 UTMode.Me => MeasureMode.MultipleEcho,
                 UTMode.Gt => MeasureMode.Manual,
                 _ => MeasureMode.Auto,
+            };
+        }
+
+        private Models.GaugeType ConvertGaugeType(V1.GaugeType gaugeType)
+        {
+            return gaugeType switch
+            {
+                V1.GaugeType.M6sg => Models.GaugeType.M6SG,
+                _ => Models.GaugeType.M5EX,
             };
         }
 
