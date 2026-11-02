@@ -368,7 +368,7 @@ message Message
     BScanList bscanList                   = 6;          // An optional BScan List.
     BScan bscan                           = 7;          // An optional BScan.
     BScanPoint bscanPoint                 = 8;          // An optional BScanPoint.
-
+	
 	
     // ------------------------------------------------------------------------------------------------
     // Contains info about the Gauge.
@@ -379,6 +379,7 @@ message Message
         uint32 versionNumber              = 3;          // Version number as Major.Minor.Build [U8,U8,U16]
         uint32 batteryLevel               = 4;          // Battery level in percent.
         GaugeVariant gaugeVariant         = 5;          // Gauge variant enum.
+        GaugeType gaugeType               = 6;          // Gauge Type enum.
     }
     
     // ------------------------------------------------------------------------------------------------
@@ -421,7 +422,7 @@ message Message
 		uint32 numRows                        = 12;         // Number of rows when a Grid Record.
 		string templateName                   = 13;         // Name of the template (30 chars max).
 		CommentList commentList               = 14;         // The complete Comment List.
-		UserFieldValues userFieldValues        = 15;         // Optional UserField values.
+		UserFieldValues userFieldValues       = 15;         // Optional UserField values.
 		
 		// ------------------------------------------------------------------------------------------------
 		message UserFieldValues
@@ -457,7 +458,7 @@ message Message
 		AScan ascan                           = 14;         // optional AScan Data.
 		uint32 commentByte                    = 15;         // Byte with selected 1 to 8 Comments.
     }
-		 
+		    
     // ------------------------------------------------------------------------------------------------
     // Contains a list of BScan found on the gauge.
     message BScanList
@@ -763,6 +764,13 @@ enum UserFieldType
     DateMDY    = 4;     // Date in MM-DD-YYYY format.
 	List       = 5;     // A List of Items.
 	YesNo      = 6;     // Bool or Yes/No type.
+}
+
+enum GaugeType
+{
+	NON = 0;
+	M5EX = 5;           // Mk5 Cygnus 1 Ex.
+	M6SG = 17;          // Mk6 Surface Gauge.
 }
 
 // =====================================================================================================

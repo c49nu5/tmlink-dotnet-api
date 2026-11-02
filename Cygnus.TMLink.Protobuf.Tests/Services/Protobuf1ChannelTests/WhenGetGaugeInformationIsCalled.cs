@@ -102,6 +102,25 @@ internal class WhenGetGaugeInformationIsCalled
     }
 
     [Test]
+    [TestCase(V1.GaugeType.Non, Models.GaugeType.M5EX)]
+    [TestCase(V1.GaugeType.M5ex, Models.GaugeType.M5EX)]
+    [TestCase(V1.GaugeType.M6sg, Models.GaugeType.M6SG)]
+    public async Task ReturnReturnGaugeInfo_WithExpectedGaugeType(V1.GaugeType gaugeType, Models.GaugeType expectedGaugeType)
+    {
+        // Arrange
+        var testBed = new TestBed();
+        var sut = await testBed.CreateConnectedSUT(true);
+        V1.Message.GaugeInfo protobufInfo = new V1.Message.GaugeInfo { gaugeType = gaugeType };
+        testBed.ProtobufCommandHandler.Setup(c => c.SendCommandWithResponse<V1.Message>(It.Is<ICommand>(m => m.CommandType == CommandType.GetGaugeInfo))).ReturnsAsync(new V1.Message { gaugeInfo = protobufInfo });
+
+        // Act
+        var gaugeInfo = await sut.GetGaugeInformation(DateTime.UtcNow);
+
+        // Assert
+        gaugeInfo?.GaugeType.ShouldBe(expectedGaugeType);
+    }
+
+    [Test]
     public async Task ReturnReturnGaugeInfo_WithExpectedSerialNumber([Random(0u, UInt32.MaxValue, 1)] uint serialNumber)
     {
         // Arrange
