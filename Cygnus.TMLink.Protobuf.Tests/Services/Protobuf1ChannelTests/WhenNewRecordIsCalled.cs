@@ -122,7 +122,7 @@ internal class WhenNewRecordIsCalled
                     Key = (uint)Random.Shared.Next(1, 1000),
                     Method = recordType == RecordType.BScan ? Method.Spot : Method.Scan,
                     Name = index++.ToString(),
-                    ThicknessMaxLimit = (uint)(Random.Shared.NextDouble() * 100),
+                    ThicknessRefLimit = (uint)(Random.Shared.NextDouble() * 100),
                     ThicknessMinLimit = (uint)(Random.Shared.NextDouble() * 100),
                 }).ToArray(),
             UserFields = Enumerable.Range(0, userFieldCount)

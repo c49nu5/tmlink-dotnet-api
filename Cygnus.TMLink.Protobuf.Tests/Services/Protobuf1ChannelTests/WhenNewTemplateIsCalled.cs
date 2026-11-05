@@ -118,7 +118,7 @@ internal class WhenNewTemplateIsCalled
                     RowNumY = (uint)(Random.Shared.NextDouble() * 100),
                     Key = (uint)Random.Shared.Next(1, 1000),
                     Name = index++.ToString(),
-                    ThicknessMaxLimit = (uint)(Random.Shared.NextDouble() * 100),
+                    ThicknessRefLimit = (uint)(Random.Shared.NextDouble() * 100),
                     ThicknessMinLimit = (uint)(Random.Shared.NextDouble() * 100),
                 }).ToArray(),
             UserFields = Enumerable.Range(0, userFieldCount)

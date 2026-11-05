@@ -326,8 +326,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                 numColsX = record.Type == Models.RecordType.Grid2D ? record.ColumnCount : (uint)record.MeasurementPoints.Length,
                 numRowsY = record.Type == Models.RecordType.Grid2D ? record.RowCount : 1,
                 gridPattern = (V1.GridPattern)record.GridPattern,
-                minThickness = record.MinimumThickness,
-                refThickness = record.ReferenceThickness
+                minThickness = record.ThicknessMinLimit,
+                refThickness = record.ThicknessRefLimit
             };
 
             Command command = new()
@@ -356,7 +356,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                             rowNumY = record.Type == Models.RecordType.Linear ? 0u : point.RowNumY,
                             Method = (V1.Method)point.Method,
                             minThickness = point.ThicknessMinLimit,
-                            maxThickness = point.ThicknessMaxLimit
+                            maxThickness = point.ThicknessRefLimit
                         });
                     p++;
                 }
@@ -382,8 +382,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                 Uom = (Uom)template.Units,
                 Velocity = template.Velocity,
                 numMPoints = (uint)template.MeasurementPoints.Length,
-                minThickness = template.MinimumThickness,
-                refThickness = template.ReferenceThickness
+                minThickness = template.ThicknessMinLimit,
+                refThickness = template.ThicknessRefLimit
             };
 
             Command command = new()
@@ -410,7 +410,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                             Key = point.Key,
                             Name = point.Name,
                             minThickness = point.ThicknessMinLimit,
-                            maxThickness = point.ThicknessMaxLimit
+                            maxThickness = point.ThicknessRefLimit
                         });
                     p++;
                 }

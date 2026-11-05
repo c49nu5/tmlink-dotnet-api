@@ -8,10 +8,10 @@
         public MeasurementUnits Units { get; set; }
         public uint ColumnCount { get; set; }
         public uint RowCount { get; set; }
-        public BlankPoint[] MeasurementPoints { get; set; } = [];
         public GridType GridPattern { get; set; }
+        public uint ThicknessMinLimit { get; set; }
+        public uint ThicknessRefLimit { get; set; }
+        public BlankPoint[] MeasurementPoints { get; set; } = [];
         public UserField[] UserFields { get; set; } = [];
-        public uint MinimumThickness { get; set; }
-        public uint ReferenceThickness { get; set; }
     }
 }
