@@ -257,7 +257,7 @@ namespace Cygnus.TMLink.Protobuf.Services
         private Dictionary<byte, string> GetCommentList(string[] comments)
         {
             int index = 0;
-            return comments.ToDictionary(c => (byte)(2 ^ index++), c => c);
+            return comments.ToDictionary(c => (byte)Math.Pow(2, index++), c => c);
         }
 
         protected virtual void Dispose(bool disposing)

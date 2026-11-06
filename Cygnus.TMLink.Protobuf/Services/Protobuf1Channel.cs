@@ -129,7 +129,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                 gaugeRecord.NumberOfPointsTaken = record.numPointsTaken;
                 gaugeRecord.TemplateName = string.IsNullOrWhiteSpace(record.templateName) ? null : record.templateName;
                 gaugeRecord.UserFields = [.. record.userFieldValues?.Items?.Select(v => new UserFieldValue { Name = v.ufName, Type = ConvertFieldType(v.ufType), Value = v.ufValue }) ?? []];
-                gaugeRecord.Comments = [.. record.commentList.Comments];
+                gaugeRecord.Comments = [.. record.commentList?.Comments ?? []];
 
                 return gaugeRecord;
             }
