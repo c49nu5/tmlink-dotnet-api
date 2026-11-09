@@ -171,6 +171,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                     EchoPoints = [.. GetEchoPoints(measurement.Ascan, measurement.Velocity, uom)],
                     HasAScan = measurement.Ascan?.ascanPoints?.Length > 0,
                     ThicknessTime = GetThicknessTime(measurement.Thickness, measurement.Velocity, uom),
+                    ThicknessMinLimit = measurement.minThicknessLimit,
+                    ThicknessRefLimit = measurement.refThicknessLimit,
                     Comments = measurement.commentByte > 0 ? string.Join(",", GetCommentStrings(comments, measurement.commentByte)) : null
                 };
             }
@@ -356,7 +358,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                             rowNumY = record.Type == Models.RecordType.Linear ? 0u : point.RowNumY,
                             Method = (V1.Method)point.Method,
                             minThickness = point.ThicknessMinLimit,
-                            maxThickness = point.ThicknessRefLimit
+                            refThickness = point.ThicknessRefLimit
                         });
                     p++;
                 }
@@ -410,7 +412,7 @@ namespace Cygnus.TMLink.Protobuf.Services
                             Key = point.Key,
                             Name = point.Name,
                             minThickness = point.ThicknessMinLimit,
-                            maxThickness = point.ThicknessRefLimit
+                            refThickness = point.ThicknessRefLimit
                         });
                     p++;
                 }

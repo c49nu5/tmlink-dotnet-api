@@ -10,8 +10,8 @@ public record GaugeMeasurement
     public DateTimeOffset? Time;
     public MeasureMode Mode;
     public uint Velocity;
-    public double ReferenceThickness;
-    public double MinimumThickness;
+    public uint ThicknessRefLimit;
+    public uint ThicknessMinLimit;
     public ProbeType Probe;
     public string? Comments;
     public MeasurementSource Source;

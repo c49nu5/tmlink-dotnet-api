@@ -1,9 +1,9 @@
-syntax = "proto3";                            
-package Cygnus.V1;    
+syntax = "proto3"; 
 
 /** C# namespace for generated classes. */
 option csharp_namespace = "Cygnus.TMLink.Protobuf.V1";
 
+package Cygnus.V1;    
 import "google/protobuf/timestamp.proto";
 
 // =====================================================================================================
@@ -318,7 +318,7 @@ message Command
             uint32 colNumX               = 4;           // Linear or Grid X Coordinate, 0 based [Templates & Records].
             uint32 rowNumY               = 5;           // Grid Y coordinate, 0 based[Records only].
             uint32 minThickness          = 6;           // Minimum thickness warning (in UoM) or zero if not required.
-            uint32 maxThickness          = 7;           // Maximum thickness warning (in UoM) or zero if not required.
+			uint32 refThickness          = 7;           // Reference or (Maximum) thickness warning (in UoM) or zero if not required.
         }
     }
 	
@@ -457,10 +457,12 @@ message Message
         uint32 rowNumY                        = 13;         // Grid Y coordinate, 0 based.
 		AScan ascan                           = 14;         // optional AScan Data.
 		uint32 commentByte                    = 15;         // Byte with selected 1 to 8 Comments.
+		uint32 minThicknessLimit              = 16;         // Minimum thickness limit (in UoM) or zero if not used.
+        uint32 refThicknessLimit              = 17;         // Reference (or Maximum) thickness limit (in UoM) or zero if not used.
     }
 		    
     // ------------------------------------------------------------------------------------------------
-    // Contains a list of BScan found on the gauge.
+    // Contains a list of BScans found on the gauge.
     message BScanList
     {
         repeated Item items                   = 1;          // Array of 0..N record items.
