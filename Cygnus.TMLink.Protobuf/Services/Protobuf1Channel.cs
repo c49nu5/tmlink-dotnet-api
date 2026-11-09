@@ -171,8 +171,8 @@ namespace Cygnus.TMLink.Protobuf.Services
                     EchoPoints = [.. GetEchoPoints(measurement.Ascan, measurement.Velocity, uom)],
                     HasAScan = measurement.Ascan?.ascanPoints?.Length > 0,
                     ThicknessTime = GetThicknessTime(measurement.Thickness, measurement.Velocity, uom),
-                    ThicknessMinLimit = measurement.minThicknessLimit,
-                    ThicknessRefLimit = measurement.refThicknessLimit,
+                    ThicknessMinLimit = ConvertMicrometres(measurement.minThicknessLimit, uom),
+                    ThicknessRefLimit = ConvertMicrometres(measurement.refThicknessLimit, uom),
                     Comments = measurement.commentByte > 0 ? string.Join(",", GetCommentStrings(comments, measurement.commentByte)) : null
                 };
             }
@@ -764,6 +764,16 @@ namespace Cygnus.TMLink.Protobuf.Services
                     yield return comment;
                 }
             }
+        }
+
+        private static double ConvertMicrometres(uint thicknessInMicrometres, MeasurementUnits units)
+        {
+            if (units == MeasurementUnits.Imperial)
+            {
+                return thicknessInMicrometres / 25400.0;
+            }
+
+            return thicknessInMicrometres / 1000.0;
         }
     }
 }
